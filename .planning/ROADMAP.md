@@ -32,7 +32,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 **Plans**: 4 plans
 
 Plans:
-- [ ] 01-01-PLAN.md — Project bootstrap + Prisma schema + database + utilities
+- [x] 01-01-PLAN.md — Project bootstrap + Prisma schema + database + utilities
 - [ ] 01-02-PLAN.md — FTS5 full-text search + A2A state machine + SSE event bus
 - [ ] 01-03-PLAN.md — Task workspace creation + planning desks + company DNA template
 - [ ] 01-04-PLAN.md — Worker loop + instrumentation.ts bootstrap
