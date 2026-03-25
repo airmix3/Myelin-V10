@@ -136,20 +136,77 @@ Which phases cover which requirements. Updated during roadmap creation.
 
 | Requirement | Phase | Status |
 |-------------|-------|--------|
-| FOUND-01 through FOUND-11 | Phase 1 | Pending |
-| AGENT-01 through AGENT-06 | Phase 2 | Pending |
-| TOOL-01 through TOOL-14 | Phase 2 | Pending |
-| UI-01 through UI-10 | Phase 3 | Pending |
-| TAMIR-01 through TAMIR-08 | Phase 4 | Pending |
-| DELIV-01 through DELIV-08 | Phase 5 | Pending |
-| GSKILL-01 through GSKILL-03 | Phase 2 | Pending |
-| INT-01 through INT-05 | Phase 6 | Pending |
+| FOUND-01 | Phase 1 | Pending |
+| FOUND-02 | Phase 1 | Pending |
+| FOUND-03 | Phase 1 | Pending |
+| FOUND-04 | Phase 1 | Pending |
+| FOUND-05 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Pending |
+| FOUND-07 | Phase 1 | Pending |
+| FOUND-08 | Phase 1 | Pending |
+| FOUND-09 | Phase 1 | Pending |
+| FOUND-10 | Phase 1 | Pending |
+| FOUND-11 | Phase 1 | Pending |
+| AGENT-01 | Phase 2 | Pending |
+| AGENT-02 | Phase 2 | Pending |
+| AGENT-03 | Phase 2 | Pending |
+| AGENT-04 | Phase 2 | Pending |
+| AGENT-05 | Phase 2 | Pending |
+| AGENT-06 | Phase 2 | Pending |
+| TOOL-01 | Phase 2 | Pending |
+| TOOL-02 | Phase 2 | Pending |
+| TOOL-03 | Phase 2 | Pending |
+| TOOL-04 | Phase 2 | Pending |
+| TOOL-05 | Phase 2 | Pending |
+| TOOL-06 | Phase 2 | Pending |
+| TOOL-07 | Phase 2 | Pending |
+| TOOL-08 | Phase 2 | Pending |
+| TOOL-09 | Phase 2 | Pending |
+| TOOL-10 | Phase 2 | Pending |
+| TOOL-11 | Phase 2 | Pending |
+| TOOL-12 | Phase 2 | Pending |
+| TOOL-13 | Phase 2 | Pending |
+| TOOL-14 | Phase 2 | Pending |
+| GSKILL-01 | Phase 2 | Pending |
+| GSKILL-02 | Phase 2 | Pending |
+| GSKILL-03 | Phase 2 | Pending |
+| UI-01 | Phase 3 | Pending |
+| UI-02 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Pending |
+| UI-04 | Phase 3 | Pending |
+| UI-05 | Phase 3 | Pending |
+| UI-06 | Phase 3 | Pending |
+| UI-07 | Phase 3 | Pending |
+| UI-08 | Phase 3 | Pending |
+| UI-09 | Phase 3 | Pending |
+| UI-10 | Phase 3 | Pending |
+| TAMIR-01 | Phase 3 | Pending |
+| TAMIR-02 | Phase 3 | Pending |
+| TAMIR-03 | Phase 3 | Pending |
+| TAMIR-04 | Phase 3 | Pending |
+| TAMIR-05 | Phase 3 | Pending |
+| TAMIR-06 | Phase 3 | Pending |
+| TAMIR-07 | Phase 3 | Pending |
+| TAMIR-08 | Phase 3 | Pending |
+| DELIV-01 | Phase 4 | Pending |
+| DELIV-02 | Phase 4 | Pending |
+| DELIV-03 | Phase 4 | Pending |
+| DELIV-04 | Phase 4 | Pending |
+| DELIV-05 | Phase 4 | Pending |
+| DELIV-06 | Phase 4 | Pending |
+| DELIV-07 | Phase 4 | Pending |
+| DELIV-08 | Phase 4 | Pending |
+| INT-01 | Phase 4 | Pending |
+| INT-02 | Phase 4 | Pending |
+| INT-03 | Phase 4 | Pending |
+| INT-04 | Phase 4 | Pending |
+| INT-05 | Phase 4 | Pending |
 
 **Coverage:**
-- v1 requirements: 66 total
-- Mapped to phases: 66
-- Unmapped: 0 ✓
+- v1 requirements: 65 total
+- Mapped to phases: 65
+- Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after initial definition*
+*Last updated: 2026-03-25 after roadmap creation*
