@@ -1,0 +1,92 @@
+/**
+ * Next.js instrumentation hook -- runs once on server start.
+ * Stable in Next.js 14.2+ (no experimental flag needed).
+ *
+ * Responsibilities (per FOUND-06):
+ * 1. Initialize FTS5 safety net (recreates if missing)
+ * 2. Ensure planning desk directories exist (FOUND-11)
+ * 3. Copy company DNA template on first boot (FOUND-08)
+ * 4. Start worker loop (fire-and-forget, does not block startup)
+ */
+export async function register() {
+  if (process.env.NEXT_RUNTIME === 'nodejs') {
+    // Singleton guard -- prevent duplicate init on HMR
+    const g = globalThis as typeof globalThis & { __myelinInit?: boolean };
+    if (g.__myelinInit) return;
+    g.__myelinInit = true;
+
+    // Dynamic imports to keep edge runtime clean
+    const { initFTS5 } = await import('./lib/fts');
+    const { startWorkerLoop } = await import('./lib/worker');
+    const { ensurePlanningDesks } = await import('./lib/workspace');
+    const { sqlite } = await import('./lib/db');
+    const { generateId } = await import('./lib/id');
+    const { logger } = await import('./lib/logger');
+    const fs = await import('fs');
+    const path = await import('path');
+
+    const log = logger.child({ module: 'instrumentation' });
+
+    log.info('Myelin v10 server initialization starting');
+
+    // 1. Initialize FTS5 safety net (sync, fast)
+    try {
+      initFTS5();
+      log.info('FTS5 initialized');
+    } catch (err) {
+      log.error({ err }, 'FTS5 initialization failed');
+    }
+
+    // 2. Ensure planning desk directories (FOUND-11)
+    try {
+      ensurePlanningDesks();
+      log.info('Planning desks ensured');
+    } catch (err) {
+      log.error({ err }, 'Planning desk creation failed');
+    }
+
+    // 3. Copy company DNA on first boot (FOUND-08)
+    try {
+      const vaultDir = path.resolve(process.cwd(), 'data', 'vault');
+      const dnaTarget = path.join(vaultDir, 'company-dna.md');
+      const dnaTemplate = path.resolve(process.cwd(), 'config', 'company-dna.template.md');
+
+      if (!fs.existsSync(dnaTarget) && fs.existsSync(dnaTemplate)) {
+        fs.mkdirSync(vaultDir, { recursive: true });
+        fs.copyFileSync(dnaTemplate, dnaTarget);
+        log.info('Company DNA template copied to vault');
+
+        // Read the template content and index in documents table + FTS5
+        const content = fs.readFileSync(dnaTarget, 'utf-8');
+
+        // Parse frontmatter with gray-matter
+        const matter = await import('gray-matter');
+        const parsed = matter.default(content);
+
+        const docId = generateId('doc');
+        sqlite.prepare(`
+          INSERT INTO documents (id, title, content, source, department, filedBy, filePath, createdAt, updatedAt)
+          VALUES (?, ?, ?, 'vault', 'global', 'system', ?, datetime('now'), datetime('now'))
+        `).run(docId, parsed.data.title || 'Myelin Company DNA', parsed.content, dnaTarget);
+
+        log.info({ docId }, 'Company DNA indexed in documents table + FTS5');
+      } else if (fs.existsSync(dnaTarget)) {
+        log.debug('Company DNA already exists in vault, skipping copy');
+      } else {
+        log.warn('Company DNA template not found at config/company-dna.template.md');
+      }
+    } catch (err) {
+      log.error({ err }, 'Company DNA copy/index failed');
+    }
+
+    // 4. Start worker loop (fire-and-forget, does not block startup)
+    try {
+      startWorkerLoop();
+      log.info('Worker loop started');
+    } catch (err) {
+      log.error({ err }, 'Worker loop start failed');
+    }
+
+    log.info('Myelin v10 server initialization complete');
+  }
+}
