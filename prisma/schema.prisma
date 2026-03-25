@@ -1,0 +1,177 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Employee {
+  id          String   @id
+  name        String
+  role        String                // executive | temp
+  department  String                // tech | marketing | operations | global
+  agentId     String?  @unique      // e.g., "cto", "cmo", "coo", "tamir"
+  status      String   @default("active")  // active | terminated
+  budgetLimit Float    @default(10.0)
+  budgetSpent Float    @default(0.0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  tasks       Task[]   @relation("creator")
+  taskRuns    TaskRun[]
+
+  @@map("employees")
+}
+
+model Task {
+  id                 String   @id
+  title              String
+  description        String?
+  department         String
+  state              String   @default("submitted")  // submitted|working|input-required|completed|failed|canceled
+  metadata           String?                         // JSON string for extensible data (inputType, etc.)
+  planningAgentId    String?
+  executorAgentId    String?
+  supervisorAgentId  String?
+  currentActorId     String?
+  contextId          String?                         // groups related chat turns
+  chatFilePath       String?                         // path to JSONL chat file
+  planMarkdown       String?                         // the approved plan
+  reviewFeedback     String?
+  reviewRound        Int      @default(0)
+  createdById        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  completedAt        DateTime?
+
+  creator            Employee?     @relation("creator", fields: [createdById], references: [id])
+  taskRuns           TaskRun[]
+  deliverables       Deliverable[]
+  costEvents         CostEvent[]
+  hireRequests       HireRequest[]
+
+  @@map("tasks")
+}
+
+model TaskRun {
+  id            String   @id
+  taskId        String
+  employeeId    String
+  status        String   @default("queued")  // queued|executing|completed|failed
+  claimedAt     DateTime?
+  heartbeatAt   DateTime?
+  completedAt   DateTime?
+  failedAt      DateTime?
+  failureReason String?
+  sessionId     String?                      // SDK session ID for resume
+  workspaceCwd  String?                      // absolute path to desk directory
+  createdAt     DateTime @default(now())
+
+  task          Task     @relation(fields: [taskId], references: [id])
+  employee      Employee @relation(fields: [employeeId], references: [id])
+
+  @@map("task_runs")
+}
+
+model Deliverable {
+  id            String   @id
+  taskId        String
+  title         String
+  type          String?                      // video|document|code|analysis|report
+  status        String   @default("in-progress")  // in-progress|completed|reviewed
+  department    String
+  creatorId     String?
+  workspacePath String?                      // absolute path to workspace directory
+  manifestPath  String?                      // path to deliverable_manifest.json
+  primaryFile   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  task          Task     @relation(fields: [taskId], references: [id])
+
+  @@map("deliverables")
+}
+
+model HireRequest {
+  id            String   @id
+  taskId        String
+  requestedBy   String                       // agent ID of dept head
+  employeeName  String
+  employeeRole  String
+  justification String?
+  status        String   @default("pending")  // pending|approved|rejected
+  createdAt     DateTime @default(now())
+  resolvedAt    DateTime?
+
+  task          Task     @relation(fields: [taskId], references: [id])
+
+  @@map("hire_requests")
+}
+
+model CostEvent {
+  id          String   @id
+  taskId      String
+  agentId     String
+  inputTokens Int      @default(0)
+  outputTokens Int     @default(0)
+  costUsd     Float    @default(0.0)
+  model       String?
+  createdAt   DateTime @default(now())
+
+  task        Task     @relation(fields: [taskId], references: [id])
+
+  @@map("cost_events")
+}
+
+model Skill {
+  id          String   @id
+  name        String
+  department  String
+  description String?
+  status      String   @default("pending")   // pending|approved|active|dismissed
+  filePath    String?                        // path to SKILL.md
+  proposedBy  String?                        // agent ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("skills")
+}
+
+model McpServer {
+  id          String   @id
+  name        String   @unique
+  description String?
+  url         String?
+  status      String   @default("active")
+  toolCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("mcp_servers")
+}
+
+model Document {
+  id          String   @id
+  title       String
+  content     String
+  source      String                         // vault|knowledge|deliverable
+  department  String?
+  filedBy     String?                        // agent ID
+  filePath    String?                        // filesystem path to original
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("documents")
+}
+
+model ActivityLog {
+  id          String   @id
+  taskId      String?
+  agentId     String?
+  actionType  String                         // SDK_SESSION_INIT|SDK_ASSISTANT|SDK_TOOL_PROGRESS|SDK_TOOL_SUMMARY|SDK_RESULT_SUCCESS|SDK_RESULT_ERROR|TASK_TRANSITION|WORKER_CLAIM|etc.
+  description String?
+  metadata    String?                        // JSON string
+  createdAt   DateTime @default(now())
+
+  @@map("activity_log")
+}
