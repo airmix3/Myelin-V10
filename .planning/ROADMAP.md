@@ -29,12 +29,13 @@ Decimal phases appear between their surrounding integers in numeric order.
   3. Task state transitions enforce valid A2A state graph — invalid transitions are rejected atomically
   4. Worker loop polls task_runs table, respects concurrency cap, heartbeats every 15s, and marks stale runs as failed on startup
   5. SSE endpoint at /api/sse streams events to connected clients and cleans up on disconnect
-**Plans**: TBD
+**Plans**: 4 plans
 
 Plans:
-- [ ] 01-01: TBD
-- [ ] 01-02: TBD
-- [ ] 01-03: TBD
+- [ ] 01-01-PLAN.md — Project bootstrap + Prisma schema + database + utilities
+- [ ] 01-02-PLAN.md — FTS5 full-text search + A2A state machine + SSE event bus
+- [ ] 01-03-PLAN.md — Task workspace creation + planning desks + company DNA template
+- [ ] 01-04-PLAN.md — Worker loop + instrumentation.ts bootstrap
 
 ### Phase 2: Agent Execution Layer
 **Goal**: Agents actually execute tasks — SDK query() runs in isolated workspaces with MCP tools, cost tracking, session resume, and role-based access control
@@ -97,7 +98,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Infrastructure | 0/3 | Not started | - |
+| 1. Foundation Infrastructure | 0/4 | Planned | - |
 | 2. Agent Execution Layer | 0/3 | Not started | - |
 | 3. Cortex UI + Tamir Interface | 0/3 | Not started | - |
 | 4. Deliverable Workspace + Integration | 0/3 | Not started | - |
