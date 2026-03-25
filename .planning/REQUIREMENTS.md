@@ -14,8 +14,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **FOUND-03**: FTS5 virtual table (`documents_fts`) + sync triggers created via raw SQL in migration + safety-net init in `instrumentation.ts` (Prisma cannot express FTS5)
 - [x] **FOUND-04**: Task state machine with 6 standard A2A states only (submitted, working, input-required, completed, failed, canceled) — `transitionTask()` enforces valid transitions via WHERE-on-current-state atomic SQL
 - [x] **FOUND-05**: Single shared SSE event bus (`src/lib/events.ts`) using Node.js EventEmitter — all emitters and subscribers import from this one module
-- [ ] **FOUND-06**: `instrumentation.ts` bootstrap: fire-and-forget worker loop + FTS5 init under `NEXT_RUNTIME === 'nodejs'` guard with singleton flag (must not block server startup or duplicate on HMR)
-- [ ] **FOUND-07**: Worker loop: polls `task_runs` table, claims with optimistic lock, enforces concurrency cap (max 3 concurrent SDK subprocesses), heartbeat every 15s, marks stale `executing` runs as failed on startup
+- [x] **FOUND-06**: `instrumentation.ts` bootstrap: fire-and-forget worker loop + FTS5 init under `NEXT_RUNTIME === 'nodejs'` guard with singleton flag (must not block server startup or duplicate on HMR)
+- [x] **FOUND-07**: Worker loop: polls `task_runs` table, claims with optimistic lock, enforces concurrency cap (max 3 concurrent SDK subprocesses), heartbeat every 15s, marks stale `executing` runs as failed on startup
 - [x] **FOUND-08**: Company DNA template at `config/company-dna.template.md`; copied to `data/vault/company-dna.md` + indexed in FTS5 on first boot
 - [x] **FOUND-09**: ID generation utility: `generateId(prefix)` → `${prefix}_${randomBytes(4).hex}` (e.g., `task_a1b2c3d4`)
 - [x] **FOUND-10**: `createTaskWorkspace()`: creates `desk/` + `deliverables/` directories, symlinks active dept + global skills into `desk/.claude/skills/`, writes `desk/CLAUDE.md` with plan + constraints, creates stub `deliverable_manifest.json` in `deliverables/`
@@ -141,8 +141,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-03 | Phase 1 | Complete |
 | FOUND-04 | Phase 1 | Complete |
 | FOUND-05 | Phase 1 | Complete |
-| FOUND-06 | Phase 1 | Pending |
-| FOUND-07 | Phase 1 | Pending |
+| FOUND-06 | Phase 1 | Complete |
+| FOUND-07 | Phase 1 | Complete |
 | FOUND-08 | Phase 1 | Complete |
 | FOUND-09 | Phase 1 | Complete |
 | FOUND-10 | Phase 1 | Complete |
