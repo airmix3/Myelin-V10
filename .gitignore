@@ -1,0 +1,35 @@
+# Dependencies
+node_modules/
+
+# Next.js
+.next/
+out/
+
+# Database
+data/myelin.db
+data/myelin.db-wal
+data/myelin.db-shm
+
+# Runtime data directories
+data/workspaces/
+data/agents/
+data/departments/*/knowledge/
+data/departments/*/planning-desk/chat/
+
+# Environment
+.env.local
+.env.production.local
+.env.development.local
+
+# IDE
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
