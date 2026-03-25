@@ -14,7 +14,18 @@ Agents actually execute real business tasks end-to-end — write and run real co
 
 ### Validated
 
-(None yet — ship to validate)
+#### Phase 1: Foundation Infrastructure
+
+- [x] Next.js 14 App Router project initialized with TypeScript strict mode and pnpm — *Validated in Phase 1*
+- [x] Prisma 7 + SQLite (WAL mode) + better-sqlite3 dual-access adapter — all 10 tables created — *Validated in Phase 1*
+- [x] FTS5 virtual table + sync triggers (INSERT/DELETE/UPDATE) + BM25 search — *Validated in Phase 1*
+- [x] Task state machine: 6 A2A states, atomic transitions, activity logging — *Validated in Phase 1*
+- [x] SSE event bus singleton + `/api/sse` streaming endpoint with abort cleanup — *Validated in Phase 1*
+- [x] Worker loop: 2s polling, optimistic locking, max 3 concurrent, 15s heartbeat, stale recovery on startup — *Validated in Phase 1*
+- [x] `instrumentation.ts` startup hook: FTS5 init, planning desks, DNA first-boot copy, worker start — *Validated in Phase 1*
+- [x] Company DNA template at `config/company-dna.template.md` — production-quality, no placeholders — *Validated in Phase 1*
+- [x] `generateId(prefix)` utility using `randomBytes(4).toString('hex')` — *Validated in Phase 1*
+- [x] `createTaskWorkspace()` + `ensurePlanningDesks()` with dept structure and symlinks — *Validated in Phase 1*
 
 ### Active
 
@@ -157,4 +168,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-25 after initialization*
+*Last updated: 2026-03-26 after Phase 1: Foundation Infrastructure*
