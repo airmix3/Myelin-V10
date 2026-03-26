@@ -57,26 +57,26 @@ Agents actually execute real business tasks end-to-end — write and run real co
 - [ ] Deliverable manifest (`deliverable_manifest.json`) created at workspace approval, updated by promote_to_deliverable
 
 #### Cortex UI (6 Core Pages)
-- [ ] Global CSS design system from `public/cortex.css`: CSS variables, badges, buttons, cards, chat bubbles, tabs, gallery cards, build log entries, markdown render styles
-- [ ] `app/layout.tsx` with sidebar (5 nav items: Dashboard, Tamir, Deliverables, Org Context, Vault)
-- [ ] SSE endpoint (`/api/sse`) streaming task:transition, task:buildlog, task:heartbeat, hire:requested events
-- [ ] Dashboard page: stats row, live agent status panel, recent activity timeline
-- [ ] Deliverables gallery page: card grid, in-progress tasks at top with amber border, dept filter + search
-- [ ] Org Context page: dept tabs, left column (agent memory, knowledge library, tools/skills gallery), right column (employee cards with past tasks accordion)
-- [ ] Vault page: FTS5 search, document list, expandable markdown content
-- [ ] Agent Profile stub page (`/agents/[id]`): read-only card.json + MEMORY.md + task history
-- [ ] Skill approval UI in Org Context: Approve / Submit to CEO / Dismiss buttons
+- [x] Global CSS design system from `public/cortex.css`: CSS variables, badges, buttons, cards, chat bubbles, tabs, gallery cards, build log entries, markdown render styles — *Validated in Phase 3*
+- [x] `app/layout.tsx` with sidebar (5 nav items: Dashboard, Tamir, Deliverables, Org Context, Vault) — *Validated in Phase 3*
+- [x] SSE endpoint (`/api/sse`) streaming task:transition, task:buildlog, task:heartbeat, hire:requested events — *Validated in Phase 3*
+- [x] Dashboard page: stats row, live agent status panel, recent activity timeline — *Validated in Phase 3*
+- [x] Deliverables gallery page: card grid, in-progress tasks at top with amber border, dept filter + search — *Validated in Phase 3*
+- [x] Org Context page: dept tabs, left column (agent memory, knowledge library, tools/skills gallery), right column (employee cards with past tasks accordion) — *Validated in Phase 3*
+- [x] Vault page: FTS5 search, document list, expandable markdown content — *Validated in Phase 3*
+- [x] Agent Profile stub page (`/agents/[id]`): read-only card.json + MEMORY.md + task history — *Validated in Phase 3*
+- [x] Skill approval UI in Org Context: Approve / Submit to CEO / Dismiss buttons — *Validated in Phase 3*
 
 #### Tamir Interface (Plan Mode)
-- [ ] `/tamir` page: full-width chat evolving to 40/60 split pane when plan is ready
-- [ ] `POST /api/tamir/route`: Tamir LLM routing with structured output, creates A2A Task, returns taskId + routing buttons
-- [ ] `POST /api/tasks/[taskId]/message`: routes to current planning actor, SDK structured output for turn type, saves to chat JSONL, transitions task state
-- [ ] Canvas split pane: typewriter plan rendering (40-70ms/line), raw markdown edit mode, Save/Edit toggle
-- [ ] Configuration panel: autonomy slider (Minimal/Balanced/High/Full), max budget input, constraints text
-- [ ] Tool + skill gallery: VS Code extension card layout, live 300ms debounce search, source toggles (Company / MCP Registry / Glama / ClawHub), CEO hint text per selection
-- [ ] `PUT /api/tasks/[taskId]/config` and `PUT /api/tasks/[taskId]/artifact`
-- [ ] `POST /api/tasks/[taskId]/approve`: creates task execution desk (separate from planning desk), injects CEO hints into CLAUDE.md + extraSystemPrompt, creates deliverable record, enqueues task_run, redirects to /deliverables/[id]
-- [ ] Chat history stored as filesystem JSONL; `GET /api/tasks/[taskId]/chat` reads from correct JSONL file
+- [x] `/tamir` page: full-width chat evolving to 40/60 split pane when plan is ready — *Validated in Phase 3*
+- [x] `POST /api/tamir/route`: Tamir LLM routing with structured output, creates A2A Task, returns taskId + routing buttons — *Validated in Phase 3*
+- [x] `POST /api/tasks/[taskId]/message`: routes to current planning actor, SDK structured output for turn type, saves to chat JSONL, transitions task state — *Validated in Phase 3*
+- [x] Canvas split pane: typewriter plan rendering (40-70ms/line), raw markdown edit mode, Save/Edit toggle — *Validated in Phase 3*
+- [x] Configuration panel: autonomy slider (Minimal/Balanced/High/Full), max budget input, constraints text — *Validated in Phase 3*
+- [x] Tool + skill gallery: VS Code extension card layout, live 300ms debounce search, source toggles (Company / MCP Registry / Glama / ClawHub), CEO hint text per selection — *Validated in Phase 3*
+- [x] `PUT /api/tasks/[taskId]/config` and `PUT /api/tasks/[taskId]/artifact` — *Validated in Phase 3*
+- [x] `POST /api/tasks/[taskId]/approve`: creates task execution desk (separate from planning desk), injects CEO hints into CLAUDE.md + extraSystemPrompt, creates deliverable record, enqueues task_run, redirects to /deliverables/[id] — *Validated in Phase 3*
+- [x] Chat history stored as filesystem JSONL; `GET /api/tasks/[taskId]/chat` reads from correct JSONL file — *Validated in Phase 3*
 
 #### Deliverable Workspace
 - [ ] `/deliverables/[id]` split-pane: 400px chat left, tabbed workspace right
@@ -168,4 +168,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after Phase 2: Agent Execution Layer — invokeAgent(), 14 MCP tools, 4 executive agents, RBAC, hire flow, structured output schemas complete*
+*Last updated: 2026-03-26 after Phase 3: Cortex UI + Tamir Interface — 6 Cortex pages, full Tamir planning flow (route→chat→canvas→configure→approve), all Tamir backend APIs complete*
