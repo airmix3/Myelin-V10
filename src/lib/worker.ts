@@ -5,11 +5,12 @@ import { eventBus } from '@/lib/events';
 import { logger } from '@/lib/logger';
 import { orchestrator } from '@/lib/orchestrator';
 import { transitionTask } from '@/lib/state-machine';
-
-const POLL_INTERVAL_MS = 2000;         // D-09: 2 second fixed interval
-const HEARTBEAT_INTERVAL_MS = 15000;   // FOUND-07: heartbeat every 15s
-const STALE_THRESHOLD_S = 120;         // D-11: 2 minutes = 120 seconds
-const MAX_CONCURRENT = 3;              // FOUND-07: max 3 concurrent SDK subprocesses
+import {
+  WORKER_POLL_INTERVAL_MS,
+  WORKER_HEARTBEAT_INTERVAL_MS,
+  WORKER_STALE_THRESHOLD_S,
+  WORKER_MAX_CONCURRENT,
+} from '@/lib/config';
 
 const log = logger.child({ module: 'worker' });
 
@@ -56,7 +57,7 @@ function markHeartbeatStaleRuns(): void {
     SET status = 'failed', failedAt = datetime('now'), failureReason = 'heartbeat_timeout'
     WHERE status = 'executing'
     AND heartbeatAt < datetime('now', '-' || ? || ' seconds')
-  `).run(STALE_THRESHOLD_S);
+  `).run(WORKER_STALE_THRESHOLD_S);
 
   if (result.changes > 0) {
     log.warn({ count: result.changes }, 'Marked heartbeat-stale runs as failed');
@@ -106,7 +107,7 @@ function startHeartbeat(runId: string): void {
     } catch (err) {
       log.error({ err, runId }, 'Heartbeat failed');
     }
-  }, HEARTBEAT_INTERVAL_MS);
+  }, WORKER_HEARTBEAT_INTERVAL_MS);
 
   activeRuns.set(runId, interval);
 }
@@ -256,7 +257,7 @@ async function poll(): Promise<void> {
 
     // Check concurrency
     const activeCount = getActiveRunCount();
-    if (activeCount >= MAX_CONCURRENT) {
+    if (activeCount >= WORKER_MAX_CONCURRENT) {
       log.debug({ activeCount }, 'At concurrency cap, skipping claim');
       return;
     }
@@ -281,10 +282,10 @@ async function poll(): Promise<void> {
  */
 export function startWorkerLoop(): void {
   log.info({
-    pollInterval: POLL_INTERVAL_MS,
-    maxConcurrent: MAX_CONCURRENT,
-    heartbeatInterval: HEARTBEAT_INTERVAL_MS,
-    staleThreshold: STALE_THRESHOLD_S,
+    pollInterval: WORKER_POLL_INTERVAL_MS,
+    maxConcurrent: WORKER_MAX_CONCURRENT,
+    heartbeatInterval: WORKER_HEARTBEAT_INTERVAL_MS,
+    staleThreshold: WORKER_STALE_THRESHOLD_S,
   }, 'Starting worker loop');
 
   // Recover stale runs from previous crash (D-12)
@@ -293,5 +294,5 @@ export function startWorkerLoop(): void {
   // Start polling -- D-09: fixed 2s interval, D-10: no backoff
   setInterval(() => {
     poll().catch((err) => log.error({ err }, 'Poll iteration failed'));
-  }, POLL_INTERVAL_MS);
+  }, WORKER_POLL_INTERVAL_MS);
 }
