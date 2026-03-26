@@ -92,7 +92,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01-PLAN.md — Backend wiring: review tools supervisor enqueue, budget handling, deliverable chat + file serve APIs
+- [x] 04-01-PLAN.md — Backend wiring: review tools supervisor enqueue, budget handling, deliverable chat + file serve APIs
 - [x] 04-02-PLAN.md — CSS additions + sidebar Settings nav + settings page + system reset API
 - [ ] 04-03-PLAN.md — Deliverable workspace page: split-pane, chat, all 4 tabs, approval cards, file browser
 - [ ] 04-04-PLAN.md — EEG test fixture + acceptance scenario runbooks + end-to-end verification checkpoint

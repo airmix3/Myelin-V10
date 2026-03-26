@@ -74,13 +74,13 @@ Requirements for initial release. Each maps to roadmap phases.
 ### Deliverable Workspace
 
 - [x] **DELIV-01**: `/deliverables/[id]` split-pane: 400px chat left, tabbed workspace right (Deliverable | Agent Log | Build Log | Files(N)); metadata bar above tabs (ID, creator, dept, type, created, task description)
-- [ ] **DELIV-02**: Chat panel: load + render planning JSONL history with correct avatars; "--- plan approved --- task executing ---" divider; agent greeting; continued chat via `POST /api/deliverables/[id]/chat` routing to currentActorId
+- [x] **DELIV-02**: Chat panel: load + render planning JSONL history with correct avatars; "--- plan approved --- task executing ---" divider; agent greeting; continued chat via `POST /api/deliverables/[id]/chat` routing to currentActorId
 - [ ] **DELIV-03**: Deliverable tab: renders primaryFile from `deliverable_manifest.json` (markdown via marked.js, image, video with controls, PDF iframe); clear empty state when no primary file
 - [x] **DELIV-04**: Build Log tab: live partial SDK events via SSE (`includePartialMessages:true`); expandable entries (chevron, type badge, agent, description, timestamp, metadata JSON); periodic heartbeat liveness entries
-- [ ] **DELIV-05**: Files tab: two sections (Deliverables prominent, Desk/Working Files collapsible default); card grid (icon, filename, size); inline preview on click (image/video/PDF/markdown/code); `GET /api/deliverables/[id]/file?path=...` with path traversal prevention (path.resolve + startsWith workspace root)
+- [x] **DELIV-05**: Files tab: two sections (Deliverables prominent, Desk/Working Files collapsible default); card grid (icon, filename, size); inline preview on click (image/video/PDF/markdown/code); `GET /api/deliverables/[id]/file?path=...` with path traversal prevention (path.resolve + startsWith workspace root)
 - [x] **DELIV-06**: Agent Log tab: durable SDK activity rows from activity_log table (SDK_SESSION_INIT, SDK_ASSISTANT, SDK_TOOL_PROGRESS, SDK_TOOL_SUMMARY, SDK_RESULT_SUCCESS, SDK_RESULT_ERROR); expandable metadata; action type badge colors from Doc 12
-- [ ] **DELIV-07**: Supervisor review flow: when executor calls submit_for_review (currentActorId → supervisor), system triggers supervisor agent invocation; supervisor calls approve_deliverable → task:completed or request_changes → currentActorId back to executor
-- [ ] **DELIV-08**: Skill extraction trigger: after supervisor approves deliverable, supervisor agent performs extraction pass using skill-extractor global skill; proposes reusable patterns via propose_skill tool
+- [x] **DELIV-07**: Supervisor review flow: when executor calls submit_for_review (currentActorId → supervisor), system triggers supervisor agent invocation; supervisor calls approve_deliverable → task:completed or request_changes → currentActorId back to executor
+- [x] **DELIV-08**: Skill extraction trigger: after supervisor approves deliverable, supervisor agent performs extraction pass using skill-extractor global skill; proposes reusable patterns via propose_skill tool
 
 ### Global Skills (Ship with System)
 
@@ -90,8 +90,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Integration & Acceptance Tests
 
-- [ ] **INT-01**: LLM error handling: exponential backoff on 503 (2s/4s/8s + jitter), agent empty response retry once with nudge, tool execution failures logged + returned to agent
-- [ ] **INT-02**: Budget enforcement: SDK `maxBudgetUsd` on every `query()` call; on budget exceeded task → `input-required` with metadata.inputType=budget_increase; CEO can increase and resume
+- [x] **INT-01**: LLM error handling: exponential backoff on 503 (2s/4s/8s + jitter), agent empty response retry once with nudge, tool execution failures logged + returned to agent
+- [x] **INT-02**: Budget enforcement: SDK `maxBudgetUsd` on every `query()` call; on budget exceeded task → `input-required` with metadata.inputType=budget_increase; CEO can increase and resume
 - [x] **INT-03**: System reset: clears task_runs, cost_events, activity_log, hire_requests, deliverables, tasks; deletes non-vault documents; resets employee spent budgets; terminates temp employees; preserves vault docs + DNA + skills + permanent employees
 - [ ] **INT-04**: Acceptance Scenario A passes: AI-generated brand video for X — routes to CMO, agent discovers AI video tools via web search, produces video deliverable, skill extracted and approved, skill auto-triggers on second similar request
 - [ ] **INT-05**: Acceptance Scenario B passes: EEG SVM classifier — routes to CTO, temp data scientist hired, real Python code executes in desk, real metrics and plots produced, CTO review gate works, all files viewable in workspace
@@ -189,15 +189,15 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TAMIR-07 | Phase 3 | Complete |
 | TAMIR-08 | Phase 3 | Complete |
 | DELIV-01 | Phase 4 | Complete |
-| DELIV-02 | Phase 4 | Pending |
+| DELIV-02 | Phase 4 | Complete |
 | DELIV-03 | Phase 4 | Pending |
 | DELIV-04 | Phase 4 | Complete |
-| DELIV-05 | Phase 4 | Pending |
+| DELIV-05 | Phase 4 | Complete |
 | DELIV-06 | Phase 4 | Complete |
-| DELIV-07 | Phase 4 | Pending |
-| DELIV-08 | Phase 4 | Pending |
-| INT-01 | Phase 4 | Pending |
-| INT-02 | Phase 4 | Pending |
+| DELIV-07 | Phase 4 | Complete |
+| DELIV-08 | Phase 4 | Complete |
+| INT-01 | Phase 4 | Complete |
+| INT-02 | Phase 4 | Complete |
 | INT-03 | Phase 4 | Complete |
 | INT-04 | Phase 4 | Pending |
 | INT-05 | Phase 4 | Pending |
