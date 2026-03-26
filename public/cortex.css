@@ -797,3 +797,277 @@ input[type="checkbox"] {
 .empty-state p {
   font-size: 12px;
 }
+
+/* === Phase 4: Deliverable Workspace === */
+
+/* Workspace split-pane override (400px fixed chat, flex workspace) */
+.ws-split-chat {
+  width: 400px;
+  min-width: 400px;
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+}
+
+.ws-split-workspace {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+/* Metadata bar */
+.metadata-bar {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 16px;
+  font-size: 10px;
+  color: var(--text-dim);
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-2);
+  flex-wrap: wrap;
+}
+
+.metadata-bar strong {
+  color: var(--text);
+}
+
+/* Chat divider */
+.chat-divider {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 0;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
+.chat-divider::before,
+.chat-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+
+/* Participant bar */
+.participants {
+  display: flex;
+  gap: 4px;
+  padding: 8px 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.participants .avatar {
+  width: 28px;
+  height: 28px;
+  font-size: 10px;
+  margin-left: -4px;
+}
+
+.participants .avatar:first-child {
+  margin-left: 0;
+}
+
+/* Approval card (amber variant of log-entry) */
+.approval-card {
+  border: 1px solid var(--amber);
+  border-left: 3px solid var(--amber);
+  border-radius: var(--radius);
+  margin-bottom: 8px;
+  background: rgba(255,179,71,0.08);
+}
+
+.approval-card-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px;
+  font-size: 12px;
+}
+
+.approval-card-body {
+  padding: 8px;
+  border-top: 1px solid rgba(255,179,71,0.2);
+  font-size: 12px;
+}
+
+.approval-card-actions {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+/* File cards grid */
+.file-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  gap: 8px;
+  padding: 16px;
+}
+
+.file-card {
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 8px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.file-card:hover {
+  border-color: var(--accent);
+  background: rgba(233,69,96,0.04);
+}
+
+.file-card-icon {
+  font-size: 24px;
+  margin-bottom: 4px;
+}
+
+.file-card-name {
+  font-size: 12px;
+  font-weight: bold;
+  color: var(--text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.file-card-size {
+  font-size: 10px;
+  color: var(--text-dim);
+  margin-top: 2px;
+}
+
+/* File preview panel */
+.file-preview {
+  border-top: 1px solid var(--border);
+  padding: 16px;
+  background: var(--bg-2);
+  position: relative;
+}
+
+.file-preview-close {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  font-size: 14px;
+  font-family: var(--font);
+}
+
+/* Collapsible section */
+.collapsible-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 16px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.collapsible-header:hover {
+  color: var(--text);
+}
+
+/* Danger zone (settings page) */
+.danger-zone {
+  border: 1px solid var(--red);
+  border-radius: var(--radius);
+  padding: 16px;
+}
+
+.danger-zone h3 {
+  color: var(--red);
+  font-size: 12px;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  margin-bottom: 8px;
+}
+
+.btn-danger {
+  background: var(--red);
+  border: none;
+  color: white;
+  padding: 8px 16px;
+  border-radius: var(--radius);
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 12px;
+  font-weight: bold;
+}
+
+.btn-danger:hover {
+  opacity: 0.85;
+}
+
+/* Confirm modal */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+
+.modal {
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+}
+
+.modal h3 {
+  font-size: 16px;
+  margin-bottom: 16px;
+}
+
+.modal p {
+  font-size: 12px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+
+.modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+}
+
+/* Tab content area */
+.tab-content {
+  flex: 1;
+  overflow-y: auto;
+}
+
+/* Retry log entry (amber inline, non-interactive) */
+.log-entry-retry {
+  border-left: 3px solid var(--amber);
+  background: rgba(255,179,71,0.04);
+}
+
+/* Heartbeat log entry (dim, collapsed by default) */
+.log-entry-heartbeat {
+  opacity: 0.6;
+}
+
+/* Agent log action type badges (extend log-type-* system) */
+.log-type-session  { background: rgba(100,150,255,0.15); color: #6496ff; }
+.log-type-assistant { background: rgba(233,69,96,0.15); color: var(--accent); }
+.log-type-progress { background: rgba(255,179,71,0.15); color: var(--amber); }
+.log-type-summary  { background: rgba(100,200,100,0.15); color: #64c864; }
+.log-type-success  { background: rgba(0,214,143,0.25); color: var(--green); }
+.log-type-error    { background: rgba(233,69,96,0.25); color: var(--red); }
