@@ -10,6 +10,7 @@ import * as lockfile from 'proper-lockfile';
 import { sqlite } from '@/lib/db';
 import { transitionTask } from '@/lib/state-machine';
 import { eventBus } from '@/lib/events';
+import { generateId } from '@/lib/id';
 import type { ToolContext } from '../tool-context';
 
 interface TaskRow {
@@ -43,6 +44,16 @@ async function appendToInbox(entry: Record<string, unknown>): Promise<void> {
 }
 
 export function createReviewTools(ctx: ToolContext) {
+  // Helper: find employee record by agentId
+  function findEmployeeByAgentId(agentId: string): { id: string } | undefined {
+    return sqlite.prepare('SELECT id FROM employees WHERE agentId = ?').get(agentId) as { id: string } | undefined;
+  }
+
+  // Helper: find latest task_run for session/workspace resume
+  function findLatestRun(taskId: string): { sessionId: string | null; workspaceCwd: string | null } | undefined {
+    return sqlite.prepare('SELECT sessionId, workspaceCwd FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1').get(taskId) as { sessionId: string | null; workspaceCwd: string | null } | undefined;
+  }
+
   const submitForReview = tool(
     'submit_for_review',
     'Submit your work for supervisor review.',
@@ -72,6 +83,16 @@ export function createReviewTools(ctx: ToolContext) {
         reviewerAgentId: task.supervisorAgentId,
       });
 
+      // Enqueue supervisor task_run so worker picks up the review
+      const supervisorEmployee = findEmployeeByAgentId(task.supervisorAgentId);
+      if (supervisorEmployee) {
+        const prevRun = findLatestRun(ctx.taskId);
+        sqlite.prepare(`
+          INSERT INTO task_runs (id, taskId, employeeId, status, sessionId, workspaceCwd, createdAt)
+          VALUES (?, ?, ?, 'queued', NULL, ?, datetime('now'))
+        `).run(generateId('run'), ctx.taskId, supervisorEmployee.id, prevRun?.workspaceCwd ?? null);
+      }
+
       return { content: [{ type: 'text' as const, text: `Work submitted for review by ${task.supervisorAgentId}.` }] };
     },
   );
@@ -100,6 +121,22 @@ export function createReviewTools(ctx: ToolContext) {
       const result = transitionTask(ctx.taskId, 'working', 'completed');
       if (!result.success) {
         return { content: [{ type: 'text' as const, text: `Error: Failed to transition task: ${result.error}` }] };
+      }
+
+      // Enqueue skill extraction task_run for supervisor (DELIV-08)
+      const taskForExtraction = sqlite.prepare(
+        'SELECT supervisorAgentId FROM tasks WHERE id = ?'
+      ).get(ctx.taskId) as { supervisorAgentId: string | null } | undefined;
+
+      if (taskForExtraction?.supervisorAgentId) {
+        const supervisorEmployee = findEmployeeByAgentId(taskForExtraction.supervisorAgentId);
+        if (supervisorEmployee) {
+          const prevRun = findLatestRun(ctx.taskId);
+          sqlite.prepare(`
+            INSERT INTO task_runs (id, taskId, employeeId, status, sessionId, workspaceCwd, createdAt)
+            VALUES (?, ?, ?, 'queued', NULL, ?, datetime('now'))
+          `).run(generateId('run'), ctx.taskId, supervisorEmployee.id, prevRun?.workspaceCwd ?? null);
+        }
       }
 
       // Notify Tamir inbox
@@ -140,6 +177,18 @@ export function createReviewTools(ctx: ToolContext) {
         action: 'changes_requested',
         feedback: args.feedback,
       });
+
+      // Enqueue executor task_run with session resume (D-02)
+      const executorEmployee = findEmployeeByAgentId(task.executorAgentId!);
+      if (executorEmployee) {
+        const prevExecutorRun = sqlite.prepare(
+          'SELECT sessionId, workspaceCwd FROM task_runs WHERE taskId = ? AND employeeId = ? ORDER BY createdAt DESC LIMIT 1'
+        ).get(ctx.taskId, executorEmployee.id) as { sessionId: string | null; workspaceCwd: string | null } | undefined;
+        sqlite.prepare(`
+          INSERT INTO task_runs (id, taskId, employeeId, status, sessionId, workspaceCwd, createdAt)
+          VALUES (?, ?, ?, 'queued', ?, ?, datetime('now'))
+        `).run(generateId('run'), ctx.taskId, executorEmployee.id, prevExecutorRun?.sessionId ?? null, prevExecutorRun?.workspaceCwd ?? null);
+      }
 
       return {
         content: [{
