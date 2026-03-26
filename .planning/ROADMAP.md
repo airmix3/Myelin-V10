@@ -47,13 +47,14 @@ Plans:
   3. Agent sessions resume correctly across restarts (session_id + absolute cwd stored and reused)
   4. Cost is tracked per invocation in cost_events table and budget limits are enforced via SDK maxBudgetUsd
   5. Four executive agent directories exist with soul.md + card.json + agent.ts, seeded to the database, and can be invoked through the orchestrator
-**Plans**: TBD
-**Note**: Research flagged this as the hardest phase. A validation spike (2-4 hours) running 2 concurrent agents with per-invocation MCP servers is recommended before full implementation to validate the SDK subprocess model.
+**Plans**: 5 plans
 
 Plans:
-- [ ] 02-01: TBD
-- [ ] 02-02: TBD
-- [ ] 02-03: TBD
+- [ ] 02-01-PLAN.md — A2A types + MCP server factory + core tools (memory, knowledge, deliverable) + access control
+- [ ] 02-02-PLAN.md — Agent identity (4 executives: soul.md, card.json, agent.ts) + DB seed + 3 global skills
+- [ ] 02-03-PLAN.md — invokeAgent() wrapper + orchestrator singleton + worker integration
+- [ ] 02-04-PLAN.md — Remaining MCP tools (review, vault, skills, inbox, hire) + server update
+- [ ] 02-05-PLAN.md — Hire approval API endpoints + structured output schemas
 
 ### Phase 3: Cortex UI + Tamir Interface
 **Goal**: The CEO can interact with the system through a complete web dashboard and submit tasks through Tamir's planning flow — route, plan, configure, and approve for execution
@@ -98,7 +99,7 @@ Phases execute in numeric order: 1 → 2 → 3 → 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
-| 1. Foundation Infrastructure | 0/4 | Planned | - |
-| 2. Agent Execution Layer | 0/3 | Not started | - |
+| 1. Foundation Infrastructure | 4/4 | Complete | - |
+| 2. Agent Execution Layer | 0/5 | Planned | - |
 | 3. Cortex UI + Tamir Interface | 0/3 | Not started | - |
 | 4. Deliverable Workspace + Integration | 0/3 | Not started | - |
