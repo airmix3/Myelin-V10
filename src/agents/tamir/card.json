@@ -1,0 +1,10 @@
+{
+  "agentId": "tamir",
+  "name": "Tamir",
+  "department": "global",
+  "role": "executive",
+  "description": "Chief of Staff. Routes tasks, manages planning flow, monitors system health.",
+  "tools": ["read_memory", "write_memory", "read_knowledge", "write_knowledge", "search_knowledge", "file_to_vault", "read_inbox", "get_dept_status"],
+  "skills": ["memory-management"],
+  "avatarColor": "#FF4444"
+}

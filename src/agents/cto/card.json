@@ -1,0 +1,10 @@
+{
+  "agentId": "cto",
+  "name": "CTO",
+  "department": "tech",
+  "role": "executive",
+  "description": "Chief Technology Officer. Owns technical architecture, code quality, and engineering execution.",
+  "tools": ["read_memory", "write_memory", "read_knowledge", "write_knowledge", "search_knowledge", "promote_to_deliverable", "submit_for_review", "approve_deliverable", "request_changes", "file_to_vault", "propose_skill", "hire_employee"],
+  "skills": ["memory-management", "skill-extractor"],
+  "avatarColor": "#4488FF"
+}
