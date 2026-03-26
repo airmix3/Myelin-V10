@@ -62,10 +62,10 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Tamir Interface (Plan Mode)
 
-- [ ] **TAMIR-01**: `/tamir` page: full-width chat initially; 40/60 split pane (chat left, canvas right) when plan is ready; agent avatars with dept colors (Tamir=red, CTO=blue, CMO=pink, COO=green)
+- [x] **TAMIR-01**: `/tamir` page: full-width chat initially; 40/60 split pane (chat left, canvas right) when plan is ready; agent avatars with dept colors (Tamir=red, CTO=blue, CMO=pink, COO=green)
 - [x] **TAMIR-02**: `POST /api/tamir/route`: Tamir LLM routing with SDK structured output (routing schema), creates A2A Task with explicit actor roles (planningAgentId, executorAgentId, supervisorAgentId, currentActorId), returns {taskId, contextId, department, tamir_response}; Tamir is DONE after this call
 - [x] **TAMIR-03**: `POST /api/tasks/[taskId]/message` (export maxDuration=120): routes to currentActorId, uses SDK structured output for turn type, appends to JSONL chat file, transitions task state; returns {state, agent_id, turn}
-- [ ] **TAMIR-04**: Canvas split pane: typewriter rendering (40-70ms/line via marked.js), raw markdown textarea edit mode, Save/Edit toggle; plan stored via `addArtifact()` when turn.type=plan_ready
+- [x] **TAMIR-04**: Canvas split pane: typewriter rendering (40-70ms/line via marked.js), raw markdown textarea edit mode, Save/Edit toggle; plan stored via `addArtifact()` when turn.type=plan_ready
 - [x] **TAMIR-05**: Configuration panel on canvas: autonomy slider (Minimal/Balanced/High/Full), max budget input (USD, default $10), constraints textarea; `PUT /api/tasks/[taskId]/config`
 - [x] **TAMIR-06**: `POST /api/tasks/[taskId]/approve`: creates NEW execution desk (separate from planning desk), injects selectedTools/selectedSkills into desk/CLAUDE.md under ## CEO Hints, creates Deliverable record, enqueues task_run row with status=queued, notifies Tamir inbox, redirects to /deliverables/{id}
 - [ ] **TAMIR-07**: Tool + skill gallery: VS Code extension card layout, 300ms debounce live search, source toggles (Company DB + MCP Registry mcphub.io + Glama for tools; Company DB + ClawHub for skills), cross-dept items grayed but selectable, CEO hint text input per selected item
@@ -180,10 +180,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-08 | Phase 3 | Complete |
 | UI-09 | Phase 3 | Pending |
 | UI-10 | Phase 3 | Complete |
-| TAMIR-01 | Phase 3 | Pending |
+| TAMIR-01 | Phase 3 | Complete |
 | TAMIR-02 | Phase 3 | Complete |
 | TAMIR-03 | Phase 3 | Complete |
-| TAMIR-04 | Phase 3 | Pending |
+| TAMIR-04 | Phase 3 | Complete |
 | TAMIR-05 | Phase 3 | Complete |
 | TAMIR-06 | Phase 3 | Complete |
 | TAMIR-07 | Phase 3 | Pending |

@@ -75,7 +75,7 @@ Plans:
 - [x] 03-02-PLAN.md — Dashboard + Deliverables gallery + Vault pages
 - [x] 03-03-PLAN.md — Org Context page + Agent Profile + skill approval + hire approval UI
 - [x] 03-04-PLAN.md — Tamir backend APIs (routing, planning messages, task CRUD, approve)
-- [ ] 03-05-PLAN.md — Tamir page with chat panel + plan canvas with typewriter
+- [x] 03-05-PLAN.md — Tamir page with chat panel + plan canvas with typewriter
 - [ ] 03-06-PLAN.md — Configuration panel + tool/skill gallery + approve flow integration
 
 ### Phase 4: Deliverable Workspace + Integration
@@ -105,5 +105,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation Infrastructure | 4/4 | Complete | - |
 | 2. Agent Execution Layer | 6/6 | Complete | - |
-| 3. Cortex UI + Tamir Interface | 0/6 | Planned | - |
+| 3. Cortex UI + Tamir Interface | 5/6 | In Progress|  |
 | 4. Deliverable Workspace + Integration | 0/3 | Not started | - |
