@@ -14,7 +14,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 
 - [ ] **Phase 1: Foundation Infrastructure** - Database, state machine, SSE bus, worker loop, and project bootstrap
 - [ ] **Phase 2: Agent Execution Layer** - SDK integration, MCP tool server, workspace isolation, agent identity, and global skills
-- [ ] **Phase 3: Cortex UI + Tamir Interface** - Six core pages, CSS design system, Tamir routing, planning flow, and tool gallery
+- [x] **Phase 3: Cortex UI + Tamir Interface** - Six core pages, CSS design system, Tamir routing, planning flow, and tool gallery (completed 2026-03-26)
 - [ ] **Phase 4: Deliverable Workspace + Integration** - Split-pane workspace, supervisor review, skill extraction, and acceptance scenarios
 
 ## Phase Details
@@ -76,7 +76,7 @@ Plans:
 - [x] 03-03-PLAN.md — Org Context page + Agent Profile + skill approval + hire approval UI
 - [x] 03-04-PLAN.md — Tamir backend APIs (routing, planning messages, task CRUD, approve)
 - [x] 03-05-PLAN.md — Tamir page with chat panel + plan canvas with typewriter
-- [ ] 03-06-PLAN.md — Configuration panel + tool/skill gallery + approve flow integration
+- [x] 03-06-PLAN.md — Configuration panel + tool/skill gallery + approve flow integration
 
 ### Phase 4: Deliverable Workspace + Integration
 **Goal**: The CEO can monitor executing tasks in real-time, review deliverables, and the full system passes end-to-end acceptance scenarios proving agents do real work
@@ -105,5 +105,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 |-------|----------------|--------|-----------|
 | 1. Foundation Infrastructure | 4/4 | Complete | - |
 | 2. Agent Execution Layer | 6/6 | Complete | - |
-| 3. Cortex UI + Tamir Interface | 5/6 | In Progress|  |
+| 3. Cortex UI + Tamir Interface | 6/6 | Complete   | 2026-03-26 |
 | 4. Deliverable Workspace + Integration | 0/3 | Not started | - |

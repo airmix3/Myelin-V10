@@ -68,7 +68,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TAMIR-04**: Canvas split pane: typewriter rendering (40-70ms/line via marked.js), raw markdown textarea edit mode, Save/Edit toggle; plan stored via `addArtifact()` when turn.type=plan_ready
 - [x] **TAMIR-05**: Configuration panel on canvas: autonomy slider (Minimal/Balanced/High/Full), max budget input (USD, default $10), constraints textarea; `PUT /api/tasks/[taskId]/config`
 - [x] **TAMIR-06**: `POST /api/tasks/[taskId]/approve`: creates NEW execution desk (separate from planning desk), injects selectedTools/selectedSkills into desk/CLAUDE.md under ## CEO Hints, creates Deliverable record, enqueues task_run row with status=queued, notifies Tamir inbox, redirects to /deliverables/{id}
-- [ ] **TAMIR-07**: Tool + skill gallery: VS Code extension card layout, 300ms debounce live search, source toggles (Company DB + MCP Registry mcphub.io + Glama for tools; Company DB + ClawHub for skills), cross-dept items grayed but selectable, CEO hint text input per selected item
+- [x] **TAMIR-07**: Tool + skill gallery: VS Code extension card layout, 300ms debounce live search, source toggles (Company DB + MCP Registry mcphub.io + Glama for tools; Company DB + ClawHub for skills), cross-dept items grayed but selectable, CEO hint text input per selected item
 - [x] **TAMIR-08**: `PUT /api/tasks/[taskId]/artifact` (update plan markdown), `GET /api/tasks/[taskId]` (full task state + derived lifecycle), `GET /api/tasks/[taskId]/chat` (load JSONL history), `POST /api/tasks/[taskId]/cancel`
 
 ### Deliverable Workspace
@@ -186,7 +186,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TAMIR-04 | Phase 3 | Complete |
 | TAMIR-05 | Phase 3 | Complete |
 | TAMIR-06 | Phase 3 | Complete |
-| TAMIR-07 | Phase 3 | Pending |
+| TAMIR-07 | Phase 3 | Complete |
 | TAMIR-08 | Phase 3 | Complete |
 | DELIV-01 | Phase 4 | Pending |
 | DELIV-02 | Phase 4 | Pending |
