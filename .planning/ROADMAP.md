@@ -53,7 +53,7 @@ Plans:
 - [x] 02-01-PLAN.md — A2A types + MCP server factory + core tools (memory, knowledge, deliverable) + access control
 - [x] 02-02-PLAN.md — Agent identity (4 executives: soul.md, card.json, agent.ts) + DB seed
 - [ ] 02-03-PLAN.md — invokeAgent() wrapper + orchestrator singleton + worker integration + concurrent isolation validation
-- [ ] 02-04-PLAN.md — Remaining MCP tools (review, vault, skills, inbox, hire) + server update
+- [x] 02-04-PLAN.md — Remaining MCP tools (review, vault, skills, inbox, hire) + server update
 - [ ] 02-05-PLAN.md — Hire approval API endpoints + structured output schemas
 - [x] 02-06-PLAN.md — 3 global skills (memory-management, skill-extractor, system-reset)
 

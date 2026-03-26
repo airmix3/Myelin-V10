@@ -38,14 +38,14 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **TOOL-04**: `promote_to_deliverable` — copies file from desk to `deliverables/`, creates/updates `deliverable_manifest.json`, indexes to FTS5 documents table
 - [x] **TOOL-05**: `read_knowledge` / `write_knowledge` — reads/writes `data/departments/{dept}/knowledge/*.md`; write_knowledge updates FTS5 index; concurrent write protection via proper-lockfile
 - [x] **TOOL-06**: `search_knowledge` — FTS5 BM25 search across vault + knowledge + task_deliverables; returns essence + file path (not full content); agent uses read_knowledge to load full file if needed
-- [ ] **TOOL-07**: `submit_for_review` — sets `currentActorId` to supervisorAgentId (task stays in `working` state; lifecycle derives to review)
-- [ ] **TOOL-08**: `approve_deliverable` (dept heads only) — sets `completedAt`, transitions task to `completed`, notifies Tamir inbox
-- [ ] **TOOL-09**: `request_changes` (dept heads only) — stores feedback in `reviewFeedback`, increments `reviewRound`, sets `currentActorId` back to executor
-- [ ] **TOOL-10**: `file_to_vault` (Tamir + dept heads) — copies file to `data/vault/`, upserts to documents table as source='vault', indexes FTS5
-- [ ] **TOOL-11**: `propose_skill` — creates `data/departments/{dept}/skills/{name}/SKILL.md` + supporting files with status:pending; upserts DB skill record; approval chain: dept head → CEO
-- [ ] **TOOL-12**: `read_inbox` (Tamir only) — reads and clears `data/agents/tamir/inbox.jsonl` with proper-lockfile; returns all pending notification events
-- [ ] **TOOL-13**: `get_dept_status` (Tamir only) — returns summary of active tasks per department
-- [ ] **TOOL-14**: `hire_employee` (dept heads only) — creates HireRequest record with taskId, transitions task to `input-required` with metadata.inputType=hire_approval
+- [x] **TOOL-07**: `submit_for_review` — sets `currentActorId` to supervisorAgentId (task stays in `working` state; lifecycle derives to review)
+- [x] **TOOL-08**: `approve_deliverable` (dept heads only) — sets `completedAt`, transitions task to `completed`, notifies Tamir inbox
+- [x] **TOOL-09**: `request_changes` (dept heads only) — stores feedback in `reviewFeedback`, increments `reviewRound`, sets `currentActorId` back to executor
+- [x] **TOOL-10**: `file_to_vault` (Tamir + dept heads) — copies file to `data/vault/`, upserts to documents table as source='vault', indexes FTS5
+- [x] **TOOL-11**: `propose_skill` — creates `data/departments/{dept}/skills/{name}/SKILL.md` + supporting files with status:pending; upserts DB skill record; approval chain: dept head → CEO
+- [x] **TOOL-12**: `read_inbox` (Tamir only) — reads and clears `data/agents/tamir/inbox.jsonl` with proper-lockfile; returns all pending notification events
+- [x] **TOOL-13**: `get_dept_status` (Tamir only) — returns summary of active tasks per department
+- [x] **TOOL-14**: `hire_employee` (dept heads only) — creates HireRequest record with taskId, transitions task to `input-required` with metadata.inputType=hire_approval
 
 ### Cortex UI
 
@@ -159,14 +159,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-04 | Phase 2 | Complete |
 | TOOL-05 | Phase 2 | Complete |
 | TOOL-06 | Phase 2 | Complete |
-| TOOL-07 | Phase 2 | Pending |
-| TOOL-08 | Phase 2 | Pending |
-| TOOL-09 | Phase 2 | Pending |
-| TOOL-10 | Phase 2 | Pending |
-| TOOL-11 | Phase 2 | Pending |
-| TOOL-12 | Phase 2 | Pending |
-| TOOL-13 | Phase 2 | Pending |
-| TOOL-14 | Phase 2 | Pending |
+| TOOL-07 | Phase 2 | Complete |
+| TOOL-08 | Phase 2 | Complete |
+| TOOL-09 | Phase 2 | Complete |
+| TOOL-10 | Phase 2 | Complete |
+| TOOL-11 | Phase 2 | Complete |
+| TOOL-12 | Phase 2 | Complete |
+| TOOL-13 | Phase 2 | Complete |
+| TOOL-14 | Phase 2 | Complete |
 | GSKILL-01 | Phase 2 | Complete |
 | GSKILL-02 | Phase 2 | Complete |
 | GSKILL-03 | Phase 2 | Complete |
