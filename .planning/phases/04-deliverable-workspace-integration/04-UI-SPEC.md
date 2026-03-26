@@ -41,7 +41,9 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Empty state vertical padding |
 | 3xl | 64px | Not used in this phase |
 
-Exceptions: Chat panel fixed width at 400px (per DELIV-01 spec). Sidebar fixed at 200px (existing).
+Exceptions:
+- Chat panel fixed width at 400px (per DELIV-01 spec). Sidebar fixed at 200px (existing).
+- 12px is used for gap/padding in chat dividers, file card padding, and modal bottom margin. This is a deliberate exception to the 8-point scale for dense UI elements where 8px is too tight and 16px is too loose.
 
 ---
 
@@ -49,27 +51,28 @@ Exceptions: Chat panel fixed width at 400px (per DELIV-01 spec). Sidebar fixed a
 
 | Role | Size | Weight | Line Height | CSS Reference |
 |------|------|--------|-------------|---------------|
-| Body | 13px | 400 (normal) | 1.5 | `body` in cortex.css |
-| Workspace chat | 12px | 400 (normal) | 1.5 | `.ws-bubble` class |
-| Label / Badge | 10px-11px | 700 (bold) | 1.4 | `.badge`, `.log-entry-header`, `.card-title` |
+| Body / Chat | 12px | 400 (normal) | 1.5 | `body`, `.ws-bubble` in cortex.css |
+| Label / Badge | 10px | 700 (bold) | 1.4 | `.badge`, `.log-entry-header`, `.card-title`, `.tab`, `.metadata-bar` |
 | Heading (h1) | 16px | 700 (bold) | 1.2 | `h1` in cortex.css |
 | Stat value | 24px | 700 (bold) | 1.2 | `.stat-value` (settings page system info) |
+
+4 sizes only: 10px, 12px, 16px, 24px. 2 weights only: 400 (normal), 700 (bold).
 
 **Phase-specific typography:**
 
 | Element | Size | Weight | Color | Extra |
 |---------|------|--------|-------|-------|
-| Metadata bar text | 11px | normal | `var(--text-dim)` | Pipe-separated values |
-| Metadata bar values | 11px | bold | `var(--text)` | -- |
-| Tab label | 11px | normal | `var(--text-dim)`, active: `var(--accent)` | `font-family: var(--font)` |
-| Log entry description | 11px | normal | `var(--text)` | Truncated to 200 chars |
-| Log entry timestamp | 11px | normal | `var(--text-dim)` | Right-aligned |
+| Metadata bar text | 10px | normal | `var(--text-dim)` | Pipe-separated values |
+| Metadata bar values | 10px | bold | `var(--text)` | -- |
+| Tab label | 10px | normal | `var(--text-dim)`, active: `var(--accent)` | `font-family: var(--font)` |
+| Log entry description | 10px | normal | `var(--text)` | Truncated to 200 chars |
+| Log entry timestamp | 10px | normal | `var(--text-dim)` | Right-aligned |
 | File card name | 12px | bold | `var(--text)` | -- |
 | File card size | 10px | normal | `var(--text-dim)` | -- |
 | Approval card body | 12px | normal | `var(--text)` | -- |
-| Chat divider | 11px | normal | `var(--text-dim)` | Centered, horizontal rules |
-| Danger zone heading | 13px | bold | `var(--red)` | Uppercase |
-| Settings section label | 11px | bold | `var(--accent)` | Uppercase, letter-spacing: 0.1em |
+| Chat divider | 10px | normal | `var(--text-dim)` | Centered, horizontal rules |
+| Danger zone heading | 12px | bold | `var(--red)` | Uppercase |
+| Settings section label | 10px | bold | `var(--accent)` | Uppercase, letter-spacing: 0.1em |
 
 ---
 
@@ -169,7 +172,7 @@ Accent reserved for:
   align-items: center;
   gap: 16px;
   padding: 8px 16px;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
   border-bottom: 1px solid var(--border);
   background: var(--bg-2);
@@ -186,7 +189,7 @@ Accent reserved for:
   align-items: center;
   gap: 12px;
   padding: 12px 0;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
 }
 
@@ -202,7 +205,7 @@ Accent reserved for:
 .participants {
   display: flex;
   gap: 4px;
-  padding: 8px 14px;
+  padding: 8px 16px;
   border-bottom: 1px solid var(--border);
 }
 
@@ -230,12 +233,12 @@ Accent reserved for:
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 10px 12px;
+  padding: 8px 12px;
   font-size: 12px;
 }
 
 .approval-card-body {
-  padding: 10px 12px;
+  padding: 8px 12px;
   border-top: 1px solid rgba(255,179,71,0.2);
   font-size: 12px;
 }
@@ -315,7 +318,7 @@ Accent reserved for:
   gap: 8px;
   padding: 8px 16px;
   cursor: pointer;
-  font-size: 11px;
+  font-size: 10px;
   color: var(--text-dim);
   text-transform: uppercase;
   letter-spacing: 0.05em;
@@ -334,7 +337,7 @@ Accent reserved for:
 
 .danger-zone h3 {
   color: var(--red);
-  font-size: 13px;
+  font-size: 12px;
   text-transform: uppercase;
   letter-spacing: 0.05em;
   margin-bottom: 8px;
@@ -426,9 +429,9 @@ Accent reserved for:
 
 | Element | Copy |
 |---------|------|
-| **Primary CTA (workspace)** | "Send" (chat input button) |
+| **Primary CTA (workspace)** | "Send Message" (chat input button) |
 | **Hire approval CTA** | "Approve Hire" |
-| **Hire reject CTA** | "Reject" |
+| **Hire reject CTA** | "Reject Hire" |
 | **Budget approval CTA** | "Approve Increase" |
 | **System reset CTA** | "Reset System" |
 
@@ -465,8 +468,8 @@ Accent reserved for:
 
 | Action | Confirmation Approach |
 |--------|----------------------|
-| System reset | Modal dialog: "Reset all system data?" Body: "This will delete all tasks, task runs, activity logs, and deliverables. Vault documents, company DNA, skills, and permanent employees are preserved. This cannot be undone." Buttons: "Cancel" (btn-cancel) / "Reset System" (btn-danger) |
-| Reject hire request | Inline in approval card, no modal. Single click on "Reject" button. |
+| System reset | Modal dialog: "Reset all system data?" Body: "This will delete all tasks, task runs, activity logs, and deliverables. Vault documents, company DNA, skills, and permanent employees are preserved. This cannot be undone." Buttons: "Keep Data" (btn-cancel) / "Reset System" (btn-danger) |
+| Reject hire request | Inline in approval card, no modal. Single click on "Reject Hire" button. |
 
 ### Chat Divider Copy
 
@@ -509,7 +512,7 @@ I'm [Name], reviewing the deliverables for this task. I'll check the quality and
 
 ### Approval Card Interactions
 
-- **Hire approval**: Amber card with role description. "Approve Hire" (btn-approve btn-sm) and "Reject" (btn-cancel btn-sm). Calls `POST /api/hire_requests/[id]/approve` or `POST /api/hire_requests/[id]/reject`.
+- **Hire approval**: Amber card with role description. "Approve Hire" (btn-approve btn-sm) and "Reject Hire" (btn-cancel btn-sm). Calls `POST /api/hire_requests/[id]/approve` or `POST /api/hire_requests/[id]/reject`.
 - **Budget increase**: Amber card with current budget display. Number input pre-filled with current max. "Approve Increase" (btn-approve btn-sm). Calls `POST /api/tasks/[id]/budget` with new amount.
 - Both cards disable buttons after click (prevent double-submit). Show "Processing..." while API resolves.
 
