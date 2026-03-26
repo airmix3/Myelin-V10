@@ -60,7 +60,7 @@ Plans:
 ### Phase 3: Cortex UI + Tamir Interface
 **Goal**: The CEO can interact with the system through a complete web dashboard and submit tasks through Tamir's planning flow — route, plan, configure, and approve for execution
 **Depends on**: Phase 2
-**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-09, UI-10, TAMIR-01, TAMIR-02, TAMIR-03, TAMIR-04, TAMIR-05, TAMIR-06, TAMIR-07, TAMIR-08
+**Requirements**: UI-01, UI-02, UI-03, UI-04, UI-05, UI-06, UI-07, UI-08, UI-10, TAMIR-01, TAMIR-02, TAMIR-03, TAMIR-04, TAMIR-05, TAMIR-06, TAMIR-07, TAMIR-08
 **Success Criteria** (what must be TRUE):
   1. All six core pages render with the custom CSS design system — Dashboard shows live agent status and activity, Deliverables shows card gallery, Org Context shows department tabs with agent/knowledge/skill panels, Vault shows FTS5 search results
   2. CEO can type a task request on the /tamir page and Tamir routes it to the correct department via LLM structured output
@@ -81,7 +81,7 @@ Plans:
 ### Phase 4: Deliverable Workspace + Integration
 **Goal**: The CEO can monitor executing tasks in real-time, review deliverables, and the full system passes end-to-end acceptance scenarios proving agents do real work
 **Depends on**: Phase 3
-**Requirements**: DELIV-01, DELIV-02, DELIV-03, DELIV-04, DELIV-05, DELIV-06, DELIV-07, DELIV-08, INT-01, INT-02, INT-03, INT-04, INT-05
+**Requirements**: UI-09, DELIV-01, DELIV-02, DELIV-03, DELIV-04, DELIV-05, DELIV-06, DELIV-07, DELIV-08, INT-01, INT-02, INT-03, INT-04, INT-05
 **Success Criteria** (what must be TRUE):
   1. /deliverables/[id] shows split-pane workspace with chat history (including planning phase), deliverable preview, live build log via SSE, agent activity log, and file browser with inline preview
   2. Supervisor review flow works end-to-end: executor submits for review, supervisor is auto-invoked, supervisor approves or requests changes, task transitions correctly
