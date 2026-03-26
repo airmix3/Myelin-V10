@@ -51,25 +51,25 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **UI-01**: Global CSS design system in `public/cortex.css`: all CSS variables from Doc 12 (--bg, --accent, --green, --amber, --border, --font), badge classes, button variants, card/panel styles, chat bubbles, build log entries, gallery cards, tabs — no Tailwind
 - [x] **UI-02**: App layout (`app/layout.tsx`) with sidebar: 5 nav items (Dashboard ▣, Tamir ◐, Deliverables ◎, Org Context ◆, Vault ⬡), active state, logo + "v10 — The Cortex"
-- [ ] **UI-03**: Dashboard page: stats row (active agents, active tasks, pending approvals, deliverables), live agent status panel (colored dots by last activity), recent activity timeline (last 10 from activity_log)
-- [ ] **UI-04**: Deliverables gallery: card grid with title/dept badge/type badge/status/creator/date/preview; in-progress tasks at top with amber left border; dept filter tabs + search input
-- [ ] **UI-05**: Org Context page: dept tabs (Tech/Marketing/Operations); left column (Agent Memory collapsible cards, Knowledge Library expandable cards, Tools + Skills gallery); right column (employee cards with avatar/status/memory preview/past tasks accordion)
-- [ ] **UI-06**: Vault page: FTS5 search input (300ms debounce), document list with title/dept/filed_by/date, click to expand full rendered markdown
-- [ ] **UI-07**: Agent Profile stub (`/agents/[id]`): read-only card.json + MEMORY.md + recent task list with deliverable links
-- [ ] **UI-08**: Skill approval UI in Org Context: Approve / Submit to CEO / Dismiss buttons; `POST /api/skills/{skillId}/approve`, `POST /api/skills/{skillId}/submit-to-ceo`, `POST /api/skills/{skillId}/dismiss`
+- [x] **UI-03**: Dashboard page: stats row (active agents, active tasks, pending approvals, deliverables), live agent status panel (colored dots by last activity), recent activity timeline (last 10 from activity_log)
+- [x] **UI-04**: Deliverables gallery: card grid with title/dept badge/type badge/status/creator/date/preview; in-progress tasks at top with amber left border; dept filter tabs + search input
+- [x] **UI-05**: Org Context page: dept tabs (Tech/Marketing/Operations); left column (Agent Memory collapsible cards, Knowledge Library expandable cards, Tools + Skills gallery); right column (employee cards with avatar/status/memory preview/past tasks accordion)
+- [x] **UI-06**: Vault page: FTS5 search input (300ms debounce), document list with title/dept/filed_by/date, click to expand full rendered markdown
+- [x] **UI-07**: Agent Profile stub (`/agents/[id]`): read-only card.json + MEMORY.md + recent task list with deliverable links
+- [x] **UI-08**: Skill approval UI in Org Context: Approve / Submit to CEO / Dismiss buttons; `POST /api/skills/{skillId}/approve`, `POST /api/skills/{skillId}/submit-to-ceo`, `POST /api/skills/{skillId}/dismiss`
 - [ ] **UI-09**: Hire request approval: approve button visible in deliverable workspace build log when task is `input-required` with metadata.inputType=hire_approval
 - [x] **UI-10**: SSE endpoint (`/api/sse`): streams task:transition, task:buildlog, task:heartbeat, task:review, hire:requested, agent:invoked events; removes listeners on stream cancel
 
 ### Tamir Interface (Plan Mode)
 
 - [ ] **TAMIR-01**: `/tamir` page: full-width chat initially; 40/60 split pane (chat left, canvas right) when plan is ready; agent avatars with dept colors (Tamir=red, CTO=blue, CMO=pink, COO=green)
-- [ ] **TAMIR-02**: `POST /api/tamir/route`: Tamir LLM routing with SDK structured output (routing schema), creates A2A Task with explicit actor roles (planningAgentId, executorAgentId, supervisorAgentId, currentActorId), returns {taskId, contextId, department, tamir_response}; Tamir is DONE after this call
-- [ ] **TAMIR-03**: `POST /api/tasks/[taskId]/message` (export maxDuration=120): routes to currentActorId, uses SDK structured output for turn type, appends to JSONL chat file, transitions task state; returns {state, agent_id, turn}
+- [x] **TAMIR-02**: `POST /api/tamir/route`: Tamir LLM routing with SDK structured output (routing schema), creates A2A Task with explicit actor roles (planningAgentId, executorAgentId, supervisorAgentId, currentActorId), returns {taskId, contextId, department, tamir_response}; Tamir is DONE after this call
+- [x] **TAMIR-03**: `POST /api/tasks/[taskId]/message` (export maxDuration=120): routes to currentActorId, uses SDK structured output for turn type, appends to JSONL chat file, transitions task state; returns {state, agent_id, turn}
 - [ ] **TAMIR-04**: Canvas split pane: typewriter rendering (40-70ms/line via marked.js), raw markdown textarea edit mode, Save/Edit toggle; plan stored via `addArtifact()` when turn.type=plan_ready
-- [ ] **TAMIR-05**: Configuration panel on canvas: autonomy slider (Minimal/Balanced/High/Full), max budget input (USD, default $10), constraints textarea; `PUT /api/tasks/[taskId]/config`
-- [ ] **TAMIR-06**: `POST /api/tasks/[taskId]/approve`: creates NEW execution desk (separate from planning desk), injects selectedTools/selectedSkills into desk/CLAUDE.md under ## CEO Hints, creates Deliverable record, enqueues task_run row with status=queued, notifies Tamir inbox, redirects to /deliverables/{id}
+- [x] **TAMIR-05**: Configuration panel on canvas: autonomy slider (Minimal/Balanced/High/Full), max budget input (USD, default $10), constraints textarea; `PUT /api/tasks/[taskId]/config`
+- [x] **TAMIR-06**: `POST /api/tasks/[taskId]/approve`: creates NEW execution desk (separate from planning desk), injects selectedTools/selectedSkills into desk/CLAUDE.md under ## CEO Hints, creates Deliverable record, enqueues task_run row with status=queued, notifies Tamir inbox, redirects to /deliverables/{id}
 - [ ] **TAMIR-07**: Tool + skill gallery: VS Code extension card layout, 300ms debounce live search, source toggles (Company DB + MCP Registry mcphub.io + Glama for tools; Company DB + ClawHub for skills), cross-dept items grayed but selectable, CEO hint text input per selected item
-- [ ] **TAMIR-08**: `PUT /api/tasks/[taskId]/artifact` (update plan markdown), `GET /api/tasks/[taskId]` (full task state + derived lifecycle), `GET /api/tasks/[taskId]/chat` (load JSONL history), `POST /api/tasks/[taskId]/cancel`
+- [x] **TAMIR-08**: `PUT /api/tasks/[taskId]/artifact` (update plan markdown), `GET /api/tasks/[taskId]` (full task state + derived lifecycle), `GET /api/tasks/[taskId]/chat` (load JSONL history), `POST /api/tasks/[taskId]/cancel`
 
 ### Deliverable Workspace
 
@@ -172,22 +172,22 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GSKILL-03 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Complete |
 | UI-02 | Phase 3 | Complete |
-| UI-03 | Phase 3 | Pending |
-| UI-04 | Phase 3 | Pending |
-| UI-05 | Phase 3 | Pending |
-| UI-06 | Phase 3 | Pending |
-| UI-07 | Phase 3 | Pending |
-| UI-08 | Phase 3 | Pending |
+| UI-03 | Phase 3 | Complete |
+| UI-04 | Phase 3 | Complete |
+| UI-05 | Phase 3 | Complete |
+| UI-06 | Phase 3 | Complete |
+| UI-07 | Phase 3 | Complete |
+| UI-08 | Phase 3 | Complete |
 | UI-09 | Phase 3 | Pending |
 | UI-10 | Phase 3 | Complete |
 | TAMIR-01 | Phase 3 | Pending |
-| TAMIR-02 | Phase 3 | Pending |
-| TAMIR-03 | Phase 3 | Pending |
+| TAMIR-02 | Phase 3 | Complete |
+| TAMIR-03 | Phase 3 | Complete |
 | TAMIR-04 | Phase 3 | Pending |
-| TAMIR-05 | Phase 3 | Pending |
-| TAMIR-06 | Phase 3 | Pending |
+| TAMIR-05 | Phase 3 | Complete |
+| TAMIR-06 | Phase 3 | Complete |
 | TAMIR-07 | Phase 3 | Pending |
-| TAMIR-08 | Phase 3 | Pending |
+| TAMIR-08 | Phase 3 | Complete |
 | DELIV-01 | Phase 4 | Pending |
 | DELIV-02 | Phase 4 | Pending |
 | DELIV-03 | Phase 4 | Pending |

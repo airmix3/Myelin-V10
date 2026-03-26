@@ -72,9 +72,9 @@ Plans:
 
 Plans:
 - [x] 03-01-PLAN.md — CSS design system + app layout with sidebar + SSE consumer hook
-- [ ] 03-02-PLAN.md — Dashboard + Deliverables gallery + Vault pages
-- [ ] 03-03-PLAN.md — Org Context page + Agent Profile + skill approval + hire approval UI
-- [ ] 03-04-PLAN.md — Tamir backend APIs (routing, planning messages, task CRUD, approve)
+- [x] 03-02-PLAN.md — Dashboard + Deliverables gallery + Vault pages
+- [x] 03-03-PLAN.md — Org Context page + Agent Profile + skill approval + hire approval UI
+- [x] 03-04-PLAN.md — Tamir backend APIs (routing, planning messages, task CRUD, approve)
 - [ ] 03-05-PLAN.md — Tamir page with chat panel + plan canvas with typewriter
 - [ ] 03-06-PLAN.md — Configuration panel + tool/skill gallery + approve flow integration
 
