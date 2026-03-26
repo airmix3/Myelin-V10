@@ -49,8 +49,8 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Cortex UI
 
-- [ ] **UI-01**: Global CSS design system in `public/cortex.css`: all CSS variables from Doc 12 (--bg, --accent, --green, --amber, --border, --font), badge classes, button variants, card/panel styles, chat bubbles, build log entries, gallery cards, tabs — no Tailwind
-- [ ] **UI-02**: App layout (`app/layout.tsx`) with sidebar: 5 nav items (Dashboard ▣, Tamir ◐, Deliverables ◎, Org Context ◆, Vault ⬡), active state, logo + "v10 — The Cortex"
+- [x] **UI-01**: Global CSS design system in `public/cortex.css`: all CSS variables from Doc 12 (--bg, --accent, --green, --amber, --border, --font), badge classes, button variants, card/panel styles, chat bubbles, build log entries, gallery cards, tabs — no Tailwind
+- [x] **UI-02**: App layout (`app/layout.tsx`) with sidebar: 5 nav items (Dashboard ▣, Tamir ◐, Deliverables ◎, Org Context ◆, Vault ⬡), active state, logo + "v10 — The Cortex"
 - [ ] **UI-03**: Dashboard page: stats row (active agents, active tasks, pending approvals, deliverables), live agent status panel (colored dots by last activity), recent activity timeline (last 10 from activity_log)
 - [ ] **UI-04**: Deliverables gallery: card grid with title/dept badge/type badge/status/creator/date/preview; in-progress tasks at top with amber left border; dept filter tabs + search input
 - [ ] **UI-05**: Org Context page: dept tabs (Tech/Marketing/Operations); left column (Agent Memory collapsible cards, Knowledge Library expandable cards, Tools + Skills gallery); right column (employee cards with avatar/status/memory preview/past tasks accordion)
@@ -58,7 +58,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **UI-07**: Agent Profile stub (`/agents/[id]`): read-only card.json + MEMORY.md + recent task list with deliverable links
 - [ ] **UI-08**: Skill approval UI in Org Context: Approve / Submit to CEO / Dismiss buttons; `POST /api/skills/{skillId}/approve`, `POST /api/skills/{skillId}/submit-to-ceo`, `POST /api/skills/{skillId}/dismiss`
 - [ ] **UI-09**: Hire request approval: approve button visible in deliverable workspace build log when task is `input-required` with metadata.inputType=hire_approval
-- [ ] **UI-10**: SSE endpoint (`/api/sse`): streams task:transition, task:buildlog, task:heartbeat, task:review, hire:requested, agent:invoked events; removes listeners on stream cancel
+- [x] **UI-10**: SSE endpoint (`/api/sse`): streams task:transition, task:buildlog, task:heartbeat, task:review, hire:requested, agent:invoked events; removes listeners on stream cancel
 
 ### Tamir Interface (Plan Mode)
 
@@ -170,8 +170,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | GSKILL-01 | Phase 2 | Complete |
 | GSKILL-02 | Phase 2 | Complete |
 | GSKILL-03 | Phase 2 | Complete |
-| UI-01 | Phase 3 | Pending |
-| UI-02 | Phase 3 | Pending |
+| UI-01 | Phase 3 | Complete |
+| UI-02 | Phase 3 | Complete |
 | UI-03 | Phase 3 | Pending |
 | UI-04 | Phase 3 | Pending |
 | UI-05 | Phase 3 | Pending |
@@ -179,7 +179,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | UI-07 | Phase 3 | Pending |
 | UI-08 | Phase 3 | Pending |
 | UI-09 | Phase 3 | Pending |
-| UI-10 | Phase 3 | Pending |
+| UI-10 | Phase 3 | Complete |
 | TAMIR-01 | Phase 3 | Pending |
 | TAMIR-02 | Phase 3 | Pending |
 | TAMIR-03 | Phase 3 | Pending |
