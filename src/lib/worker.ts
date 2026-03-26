@@ -1,4 +1,5 @@
 import path from 'path';
+import { appendFileSync } from 'fs';
 import { sqlite } from '@/lib/db';
 import { generateId } from '@/lib/id';
 import { eventBus } from '@/lib/events';
@@ -186,9 +187,15 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
     ].join('');
 
     // Transition task to working if it's in submitted state
+    // Skip if task is already in a terminal state (e.g., extraction run on completed task -- Pitfall 2)
     const currentState = task.state as string;
     if (currentState === 'submitted') {
       transitionTask(taskId, 'submitted', 'working');
+    } else if (currentState !== 'working' && currentState !== 'completed') {
+      // Task is in unexpected state -- skip execution
+      runLog.warn({ currentState, taskId }, 'Task not in executable state, skipping run');
+      sqlite.prepare("UPDATE task_runs SET status = 'failed', failedAt = datetime('now'), failureReason = 'task_not_executable' WHERE id = ?").run(runId);
+      return;
     }
 
     // Parse subagent definitions from task_run (set by hire approval)
@@ -237,9 +244,45 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       WHERE id = ?
     `).run(err instanceof Error ? err.message : 'unknown_error', runId);
 
-    // Transition task to failed if it was in working state
-    const task = sqlite.prepare('SELECT state FROM tasks WHERE id = ?').get(taskId) as { state: string } | undefined;
-    if (task && task.state === 'working') {
+    // Check for budget exceeded -- transition to input-required instead of failed (INT-02, D-07)
+    const errMsg = err instanceof Error ? err.message : '';
+    if (errMsg.toLowerCase().includes('budget')) {
+      const taskForBudget = sqlite.prepare('SELECT state, metadata, chatFilePath FROM tasks WHERE id = ?').get(taskId) as { state: string; metadata: string | null; chatFilePath: string | null } | undefined;
+      if (taskForBudget && taskForBudget.state === 'working') {
+        const existingMeta = taskForBudget.metadata ? JSON.parse(taskForBudget.metadata) : {};
+        sqlite.prepare('UPDATE tasks SET metadata = ? WHERE id = ?').run(
+          JSON.stringify({ ...existingMeta, inputType: 'budget_increase' }),
+          taskId
+        );
+        transitionTask(taskId, 'working', 'input-required', { inputType: 'budget_increase' });
+
+        // D-07 dual signal #1: Write system message to task JSONL chat file
+        if (taskForBudget.chatFilePath) {
+          appendFileSync(
+            taskForBudget.chatFilePath,
+            JSON.stringify({
+              role: 'system',
+              content: 'Budget limit reached. Approve an increase to resume.',
+              ts: new Date().toISOString(),
+            }) + '\n',
+            'utf-8'
+          );
+        }
+
+        // D-07 dual signal #2: Emit buildlog event for UI amber card
+        eventBus.emit('task:buildlog', {
+          taskId,
+          event: { type: 'budget_exceeded', agentId: employeeId, message: `Budget limit exceeded for task ${taskId}` },
+        });
+
+        runLog.info({ taskId }, 'Budget exceeded -- task moved to input-required');
+        return;  // Skip generic failure transition below
+      }
+    }
+
+    // For completed tasks (skill extraction runs per Pitfall 2), skip state transition
+    const taskForFailure = sqlite.prepare('SELECT state FROM tasks WHERE id = ?').get(taskId) as { state: string } | undefined;
+    if (taskForFailure && taskForFailure.state === 'working') {
       transitionTask(taskId, 'working', 'failed');
     }
   } finally {

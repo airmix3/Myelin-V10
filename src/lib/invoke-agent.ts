@@ -214,3 +214,34 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
   // Should not reach here -- query should always end with a result message
   throw new Error('Query ended without result message');
 }
+
+/**
+ * Wrapper around invokeAgent with INT-01 empty response nudge retry.
+ * If the agent returns an empty/whitespace-only result, retries once with a nudge prompt.
+ * Tool execution failures are handled natively by the Agent SDK tool loop --
+ * errors are returned to the agent as tool error results for self-correction.
+ * The SDK logs tool failures via stream events which we capture above in the tool_progress handler.
+ */
+export async function invokeAgentWithResilience(opts: InvokeAgentOptions): Promise<InvokeAgentResult> {
+  const log = logger.child({ module: 'invoke-agent-resilience', taskId: opts.taskId });
+
+  const result = await invokeAgent(opts);
+
+  // INT-01: Empty response nudge -- retry once if result is empty/whitespace
+  if (result.result !== undefined && result.result.trim() === '') {
+    log.warn({ taskId: opts.taskId }, 'Empty response detected, retrying with nudge');
+    const nudgeResult = await invokeAgent({
+      ...opts,
+      prompt: 'Your previous response was empty. Please provide a substantive response.',
+      sessionId: result.sessionId,  // Resume the same session
+    });
+    return {
+      sessionId: nudgeResult.sessionId,
+      totalCostUsd: result.totalCostUsd + nudgeResult.totalCostUsd,
+      result: nudgeResult.result,
+      structuredOutput: nudgeResult.structuredOutput,
+    };
+  }
+
+  return result;
+}
