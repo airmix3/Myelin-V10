@@ -1,7 +1,10 @@
+import path from 'path';
 import { sqlite } from '@/lib/db';
 import { generateId } from '@/lib/id';
 import { eventBus } from '@/lib/events';
 import { logger } from '@/lib/logger';
+import { orchestrator } from '@/lib/orchestrator';
+import { transitionTask } from '@/lib/state-machine';
 
 const POLL_INTERVAL_MS = 2000;         // D-09: 2 second fixed interval
 const HEARTBEAT_INTERVAL_MS = 15000;   // FOUND-07: heartbeat every 15s
@@ -120,15 +123,16 @@ function stopHeartbeat(runId: string): void {
 }
 
 /**
- * Execute a claimed run. In Phase 1, this is a placeholder -- actual SDK invocation
- * comes in Phase 2 (invokeAgent). For now, just mark as completed after a brief delay.
+ * Execute a claimed run. Invokes agent via orchestrator with real SDK query().
+ * Handles workspace resolution, task state transitions, cost tracking, and error recovery.
  */
 async function executeRun(run: Record<string, unknown>): Promise<void> {
   const runId = run.id as string;
   const taskId = run.taskId as string;
   const employeeId = run.employeeId as string;
 
-  log.info({ runId, taskId, employeeId }, 'Executing run (Phase 1 stub)');
+  const runLog = logger.child({ module: 'worker', runId, taskId, employeeId });
+  runLog.info('Executing run');
 
   startHeartbeat(runId);
 
@@ -142,10 +146,74 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
   `).run(generateId('log'), taskId, employeeId, `Run ${runId} claimed by worker`);
 
   try {
-    // Phase 1 stub: In Phase 2, this calls invokeAgent() which runs the SDK query().
-    // For now, we just mark the run as completed to prove the loop works.
-    // The actual implementation will be:
-    //   await invokeAgent({ taskId, runId, employeeId, ... });
+    // Look up the task for context
+    const task = sqlite.prepare('SELECT * FROM tasks WHERE id = ?').get(taskId) as Record<string, unknown> | undefined;
+    if (!task) throw new Error(`Task ${taskId} not found`);
+
+    // Look up the employee to get agentId
+    const employee = sqlite.prepare('SELECT * FROM employees WHERE id = ?').get(employeeId) as Record<string, unknown> | undefined;
+    if (!employee) throw new Error(`Employee ${employeeId} not found`);
+
+    const agentId = employee.agentId as string;
+
+    // Get workspace paths from the task run or task
+    const workspaceCwd = run.workspaceCwd as string | null;
+    let deskDir: string;
+    let delivDir: string;
+    let manifestPath: string;
+
+    if (workspaceCwd) {
+      // Resuming -- use stored workspace path
+      deskDir = workspaceCwd;
+      const baseDir = path.dirname(deskDir);
+      delivDir = path.join(baseDir, 'deliverables');
+      manifestPath = path.join(delivDir, 'deliverable_manifest.json');
+    } else {
+      // First run -- workspace should already be created by the approval flow
+      // Fall back to constructing from convention
+      const baseDir = path.resolve(process.cwd(), 'data', 'workspaces', taskId);
+      deskDir = path.join(baseDir, 'desk');
+      delivDir = path.join(baseDir, 'deliverables');
+      manifestPath = path.join(delivDir, 'deliverable_manifest.json');
+    }
+
+    // Build the prompt from task description + plan
+    const prompt = [
+      task.title as string,
+      task.description ? `\n\n${task.description}` : '',
+      task.planMarkdown ? `\n\n## Approved Plan\n\n${task.planMarkdown}` : '',
+    ].join('');
+
+    // Transition task to working if it's in submitted state
+    const currentState = task.state as string;
+    if (currentState === 'submitted') {
+      transitionTask(taskId, 'submitted', 'working');
+    }
+
+    // Parse subagent definitions from task_run (set by hire approval)
+    const agentsJson = run.agents as string | null;
+    const agents = agentsJson ? JSON.parse(agentsJson) : undefined;
+
+    // Invoke the agent via orchestrator
+    const result = await orchestrator.invoke({
+      taskId,
+      runId,
+      agentId,
+      prompt,
+      deskDir,
+      delivDir,
+      manifestPath,
+      sessionId: (run.sessionId as string) || undefined,
+      maxBudgetUsd: (employee.budgetLimit as number) ?? 10,
+      agents,
+    });
+
+    runLog.info({ sessionId: result.sessionId, costUsd: result.totalCostUsd }, 'Agent invocation completed');
+
+    // Update employee budget spent
+    sqlite.prepare(
+      'UPDATE employees SET budgetSpent = budgetSpent + ?, updatedAt = datetime(\'now\') WHERE id = ?'
+    ).run(result.totalCostUsd, employeeId);
 
     // Mark run completed
     sqlite.prepare(`
@@ -154,15 +222,25 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       WHERE id = ?
     `).run(runId);
 
-    log.info({ runId, taskId }, 'Run completed (Phase 1 stub)');
-  } catch (err) {
-    log.error({ err, runId, taskId }, 'Run execution failed');
+    // Emit completion event
+    eventBus.emit('agent:completed', { taskId, runId, agentId, costUsd: result.totalCostUsd });
 
+    runLog.info({ runId, taskId, costUsd: result.totalCostUsd }, 'Run completed');
+  } catch (err) {
+    runLog.error({ err, runId, taskId }, 'Run execution failed');
+
+    // Mark run failed
     sqlite.prepare(`
       UPDATE task_runs
       SET status = 'failed', failedAt = datetime('now'), failureReason = ?
       WHERE id = ?
     `).run(err instanceof Error ? err.message : 'unknown_error', runId);
+
+    // Transition task to failed if it was in working state
+    const task = sqlite.prepare('SELECT state FROM tasks WHERE id = ?').get(taskId) as { state: string } | undefined;
+    if (task && task.state === 'working') {
+      transitionTask(taskId, 'working', 'failed');
+    }
   } finally {
     stopHeartbeat(runId);
   }

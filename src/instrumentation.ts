@@ -79,7 +79,25 @@ export async function register() {
       log.error({ err }, 'Company DNA copy/index failed');
     }
 
-    // 4. Start worker loop (fire-and-forget, does not block startup)
+    // 4. Seed executive agents to DB (idempotent)
+    try {
+      const { seedAgents } = await import('./lib/seed-agents');
+      await seedAgents();
+      log.info('Executive agents seeded');
+    } catch (err) {
+      log.error({ err }, 'Agent seeding failed');
+    }
+
+    // 5. Initialize orchestrator with all agent configs
+    try {
+      const { initOrchestrator } = await import('./lib/orchestrator');
+      await initOrchestrator();
+      log.info('Orchestrator initialized with agent configs');
+    } catch (err) {
+      log.error({ err }, 'Orchestrator initialization failed');
+    }
+
+    // 6. Start worker loop (fire-and-forget, does not block startup)
     try {
       startWorkerLoop();
       log.info('Worker loop started');
