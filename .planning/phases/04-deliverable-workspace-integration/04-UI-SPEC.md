@@ -43,7 +43,6 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Chat panel fixed width at 400px (per DELIV-01 spec). Sidebar fixed at 200px (existing).
-- 12px is used for gap/padding in chat dividers, file card padding, and modal bottom margin. This is a deliberate exception to the 8-point scale for dense UI elements where 8px is too tight and 16px is too loose.
 
 ---
 
@@ -187,8 +186,8 @@ Accent reserved for:
 .chat-divider {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 12px 0;
+  gap: 8px;
+  padding: 8px 0;
   font-size: 10px;
   color: var(--text-dim);
 }
@@ -233,12 +232,12 @@ Accent reserved for:
   display: flex;
   align-items: center;
   gap: 8px;
-  padding: 8px 12px;
+  padding: 8px;
   font-size: 12px;
 }
 
 .approval-card-body {
-  padding: 8px 12px;
+  padding: 8px;
   border-top: 1px solid rgba(255,179,71,0.2);
   font-size: 12px;
 }
@@ -261,7 +260,7 @@ Accent reserved for:
   background: var(--bg);
   border: 1px solid var(--border);
   border-radius: var(--radius);
-  padding: 12px;
+  padding: 8px;
   cursor: pointer;
   text-align: center;
 }
@@ -381,7 +380,7 @@ Accent reserved for:
 
 .modal h3 {
   font-size: 16px;
-  margin-bottom: 12px;
+  margin-bottom: 16px;
 }
 
 .modal p {
