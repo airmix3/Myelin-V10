@@ -67,13 +67,16 @@ Plans:
   3. Planning conversation proceeds as multi-turn chat with the department head, plan appears on the canvas with typewriter rendering, and CEO can edit the plan
   4. CEO can configure autonomy level, max budget, constraints, select tools/skills with hints, and approve the plan — approval creates an execution desk, enqueues a task_run, and redirects to the deliverable page
   5. SSE-driven live updates flow to the dashboard (agent status, activity timeline) and Tamir page (task state changes)
-**Plans**: TBD
+**Plans**: 6 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 03-01: TBD
-- [ ] 03-02: TBD
-- [ ] 03-03: TBD
+- [ ] 03-01-PLAN.md — CSS design system + app layout with sidebar + SSE consumer hook
+- [ ] 03-02-PLAN.md — Dashboard + Deliverables gallery + Vault pages
+- [ ] 03-03-PLAN.md — Org Context page + Agent Profile + skill approval + hire approval UI
+- [ ] 03-04-PLAN.md — Tamir backend APIs (routing, planning messages, task CRUD, approve)
+- [ ] 03-05-PLAN.md — Tamir page with chat panel + plan canvas with typewriter
+- [ ] 03-06-PLAN.md — Configuration panel + tool/skill gallery + approve flow integration
 
 ### Phase 4: Deliverable Workspace + Integration
 **Goal**: The CEO can monitor executing tasks in real-time, review deliverables, and the full system passes end-to-end acceptance scenarios proving agents do real work
@@ -96,11 +99,11 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 → 2 → 3 → 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
 | 1. Foundation Infrastructure | 4/4 | Complete | - |
-| 2. Agent Execution Layer | 0/6 | Planned | - |
-| 3. Cortex UI + Tamir Interface | 0/3 | Not started | - |
+| 2. Agent Execution Layer | 6/6 | Complete | - |
+| 3. Cortex UI + Tamir Interface | 0/6 | Planned | - |
 | 4. Deliverable Workspace + Integration | 0/3 | Not started | - |
