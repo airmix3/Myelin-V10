@@ -25,7 +25,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [ ] **AGENT-01**: `invokeAgent()` wrapper around SDK `query()`: uses `systemPrompt: {type:'preset', preset:'claude_code', append:soul}` for CLAUDE.md auto-load, stores session_id AND absolute cwd in task record, streams partial messages for build log, logs cost to cost_events table
 - [ ] **AGENT-02**: Orchestrator singleton holding configs for all 4 agents; `invoke()` method exposes outputFormat, agents, maxBudgetUsd, cwd, sessionId options
-- [ ] **AGENT-03**: Self-contained agent directories (`src/agents/{tamir,cto,cmo,coo}/`): soul.md + card.json + agent.ts for each; 4 executive employees seeded to DB
+- [x] **AGENT-03**: Self-contained agent directories (`src/agents/{tamir,cto,cmo,coo}/`): soul.md + card.json + agent.ts for each; 4 executive employees seeded to DB
 - [ ] **AGENT-04**: SDK structured output (`outputFormat: {type:'json_schema',schema:...}`) for ALL turn routing — no regex, no freeform parsing; planning turn schema and routing result schema defined in `src/a2a/types.ts`
 - [x] **AGENT-05**: A2A TypeScript interfaces: AgentCard, A2ATask, A2AMessage, TaskState, TaskHandoff, TaskConfig, AgentTurnResult, RoutingResult
 - [ ] **AGENT-06**: Temp employee hire flow: `hire_employee` tool creates HireRequest, transitions task to `input-required` (metadata.inputType=hire_approval); on CEO approval, dept head re-invoked with employee as SDK AgentDefinition subagent; employee sandbox has read_knowledge, search_knowledge, promote_to_deliverable, propose_skill, submit_for_review only
@@ -149,7 +149,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | FOUND-11 | Phase 1 | Complete |
 | AGENT-01 | Phase 2 | Pending |
 | AGENT-02 | Phase 2 | Pending |
-| AGENT-03 | Phase 2 | Pending |
+| AGENT-03 | Phase 2 | Complete |
 | AGENT-04 | Phase 2 | Pending |
 | AGENT-05 | Phase 2 | Complete |
 | AGENT-06 | Phase 2 | Pending |
