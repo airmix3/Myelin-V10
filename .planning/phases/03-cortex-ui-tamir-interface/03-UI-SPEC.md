@@ -57,16 +57,10 @@ Source: Doc 12 CSS variables and component definitions.
 
 | Role | Size | Weight | Line Height | Color | Extra |
 |------|------|--------|-------------|-------|-------|
-| Body | 13px | 400 (normal) | 1.5 | `--text` (#e0e0e0) | Default for all text |
-| Chat message | 13px | 400 (normal) | 1.6 | `--text` | Slightly taller line-height than body |
-| Button / Nav | 12-13px | 400 (normal) | 1.5 | `--text` / `--text-dim` | Nav active: `--text` |
-| Card title | 11px | 700 (bold) | 1.2 | `--accent` (#e94560) | uppercase, letter-spacing: 0.1em |
-| Section subtitle | 13px | 700 (bold) | 1.2 | `--text-dim` (#a0a0b0) | uppercase, letter-spacing: 0.05em |
-| Badge | 10px | 700 (bold) | 1.2 | varies by type | uppercase, letter-spacing: 0.05em |
+| Label / Badge / Timestamp / Stat label | 11px | 400 or 700 | 1.2 | varies | Badges and card titles: 700, uppercase, letter-spacing 0.05-0.1em. Timestamps and stat labels: 400, `--text-dim`. |
+| Body / Chat / Nav / Button / Section subtitle | 13px | 400 or 700 | 1.5 (body/nav/button) / 1.6 (chat) | `--text` or `--text-dim` | Default text size. Section subtitles: 700, uppercase, letter-spacing 0.05em. Nav/button: 400. |
 | Page heading (h1) | 16px | 700 (bold) | 1.2 | `--text` | Single heading size |
 | Stat value | 24px | 700 (bold) | 1.2 | `--accent` | Dashboard stat numbers |
-| Stat label | 10px | 400 (normal) | 1.2 | `--text-dim` | uppercase |
-| Timestamp | 9px | 400 (normal) | 1.2 | `--text-dim` | Chat timestamps |
 
 Weights used: 400 (normal) and 700 (bold). No other weights.
 
@@ -187,7 +181,7 @@ Source: Doc 12 (all sections), D-02, D-03.
 | Tamir (initial) | "Send" | Send button next to chat input, submits task request |
 | Tamir (routing) | "Plan with [Agent Name]" | Routing buttons after Tamir routes, e.g. "Plan with CTO" |
 | Tamir (plan ready) | "Approve Plan" | Approves plan, creates execution desk, enqueues task_run |
-| Tamir (canvas edit) | "Save" / "Edit" | Toggle between markdown edit mode and rendered view |
+| Tamir (canvas edit) | "Save Plan" / "Edit Plan" | Toggle between edit and rendered view. "Edit Plan" enters markdown edit mode, "Save Plan" persists changes and returns to rendered view. |
 | Dashboard | none (read-only) | No primary CTA on dashboard |
 | Deliverables | none (navigation) | Card clicks navigate to deliverable detail |
 | Org Context (skills) | "Approve" / "Submit to CEO" / "Dismiss" | Skill approval buttons |
@@ -239,7 +233,7 @@ Source: REQUIREMENTS.md (UI-01 through UI-10, TAMIR-01 through TAMIR-08), CONTEX
 4. **Multi-turn planning chat:** Messages via POST `/api/tasks/[taskId]/message`. Each response uses `AGENT_TURN_SCHEMA` structured output (D-06). Chat stays full-width.
 5. **Plan ready signal:** When agent returns `turn_type === "plan_ready"`, canvas split pane slides in from right (40% chat / 60% canvas) per D-07.
 6. **Canvas renders plan:** Typewriter effect at 40-70ms/line via `marked.js` (D-08). Blinking cursor animation during render.
-7. **Edit mode:** CEO toggles Save/Edit button. Edit mode shows raw markdown textarea. Save persists via PUT `/api/tasks/[taskId]/artifact`.
+7. **Edit mode:** CEO toggles "Save Plan" / "Edit Plan" button. "Edit Plan" shows raw markdown textarea. "Save Plan" persists via PUT `/api/tasks/[taskId]/artifact`.
 8. **Configuration panel:** Below plan on canvas. Autonomy slider (Minimal/Balanced/High/Full), max budget input (USD, default $10), constraints textarea. Saved via PUT `/api/tasks/[taskId]/config`.
 9. **Tool/Skill gallery:** VS Code extension card layout. 300ms debounce search. Source toggles (Glama + Composio for tools, ClawHub for skills, Company DB for both). Stars descending sort (D-10). Cross-dept items at 0.5 opacity (D-12). CEO hint text input per selected item.
 10. **Approve:** POST `/api/tasks/[taskId]/approve`. Creates execution desk, enqueues task_run, redirects to `/deliverables/[id]`.
