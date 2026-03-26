@@ -1,10 +1,12 @@
 'use client';
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
+import { useRouter } from 'next/navigation';
 import ChatPanel, { ChatMessage, RoutingButton } from '@/components/ChatPanel';
 import CanvasPanel from '@/components/CanvasPanel';
 
 export default function TamirPage() {
+  const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [routingButtons, setRoutingButtons] = useState<RoutingButton[] | null>(null);
   const [taskId, setTaskId] = useState<string | null>(null);
@@ -13,6 +15,9 @@ export default function TamirPage() {
   const [planMarkdown, setPlanMarkdown] = useState<string | null>(null);
   const [chosenAgentId, setChosenAgentId] = useState<string | null>(null);
   const [isNewPlan, setIsNewPlan] = useState(true);
+  const [department, setDepartment] = useState<string>('');
+  const [cancelPending, setCancelPending] = useState(false);
+  const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Page rehydration (D-16, D-17)
   useEffect(() => {
@@ -47,6 +52,9 @@ export default function TamirPage() {
           }
           if (taskData.currentActorId) {
             setChosenAgentId(taskData.currentActorId);
+          }
+          if (taskData.department) {
+            setDepartment(taskData.department);
           }
         }
       } catch {
@@ -134,6 +142,7 @@ export default function TamirPage() {
 
         const data = await res.json();
         setTaskId(data.taskId);
+        setDepartment(data.department || '');
         localStorage.setItem('tamir_active_task', data.taskId);
 
         // Add Tamir's routing response
@@ -259,34 +268,83 @@ export default function TamirPage() {
 
   const handleApprove = useCallback(async () => {
     if (!taskId) return;
+    setIsLoading(true);
     try {
-      const res = await fetch(`/api/tasks/${taskId}/approve`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-      });
-      if (res.ok) {
-        const data = await res.json();
+      const res = await fetch(`/api/tasks/${taskId}/approve`, { method: 'POST' });
+      const data = await res.json();
+      if (data.redirect) {
         localStorage.removeItem('tamir_active_task');
-        // Redirect to deliverables page
-        if (data.deliverableId) {
-          window.location.href = `/deliverables/${data.deliverableId}`;
-        } else {
-          window.location.href = '/deliverables';
-        }
+        router.push(data.redirect);
       }
     } catch {
-      const errorMsg: ChatMessage = {
-        role: 'system',
+      setMessages((prev) => [...prev, {
+        role: 'system' as const,
         content: 'Failed to approve plan. Please try again.',
         ts: new Date().toISOString(),
-      };
-      setMessages((prev) => [...prev, errorMsg]);
+      }]);
+    } finally {
+      setIsLoading(false);
+    }
+  }, [taskId, router]);
+
+  // Cancel task with inline confirmation
+  const handleCancelClick = useCallback(() => {
+    if (cancelPending) {
+      // Confirm cancel
+      handleCancelConfirm();
+    } else {
+      setCancelPending(true);
+      // Revert after 3s
+      cancelTimerRef.current = setTimeout(() => {
+        setCancelPending(false);
+      }, 3000);
+    }
+  }, [cancelPending]);
+
+  const handleCancelConfirm = useCallback(async () => {
+    if (!taskId) return;
+    setCancelPending(false);
+    if (cancelTimerRef.current) clearTimeout(cancelTimerRef.current);
+    try {
+      await fetch(`/api/tasks/${taskId}/cancel`, { method: 'POST' });
+      localStorage.removeItem('tamir_active_task');
+      setTaskId(null);
+      setShowCanvas(false);
+      setPlanMarkdown(null);
+      setRoutingButtons(null);
+      setDepartment('');
+      setMessages((prev) => [...prev, {
+        role: 'system' as const,
+        content: 'Task canceled.',
+        ts: new Date().toISOString(),
+      }]);
+    } catch {
+      setMessages((prev) => [...prev, {
+        role: 'system' as const,
+        content: 'Failed to cancel task.',
+        ts: new Date().toISOString(),
+      }]);
     }
   }, [taskId]);
 
   return (
     <div>
-      <h1>Tamir</h1>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <h1>Tamir</h1>
+        {taskId && (
+          <button
+            className={`btn btn-sm ${cancelPending ? 'btn-cancel' : ''}`}
+            onClick={handleCancelClick}
+            style={{
+              fontSize: '11px',
+              color: cancelPending ? 'var(--accent-red, #e94560)' : 'var(--text-dim)',
+              borderColor: cancelPending ? 'var(--accent-red, #e94560)' : undefined,
+            }}
+          >
+            {cancelPending ? 'Confirm Cancel' : 'Cancel Task'}
+          </button>
+        )}
+      </div>
       {!showCanvas ? (
         /* Full-width chat (initial state per D-07) */
         <div style={{ height: 'calc(100vh - 48px)' }}>
@@ -317,6 +375,7 @@ export default function TamirPage() {
               <CanvasPanel
                 planMarkdown={planMarkdown}
                 taskId={taskId}
+                department={department}
                 isNewPlan={isNewPlan}
                 onApprove={handleApprove}
               />

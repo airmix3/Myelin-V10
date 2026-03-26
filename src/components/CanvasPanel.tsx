@@ -2,10 +2,12 @@
 
 import { useState, useEffect, useRef } from 'react';
 import { marked } from 'marked';
+import ConfigPanel from './ConfigPanel';
 
 export interface CanvasPanelProps {
   planMarkdown: string;
   taskId: string;
+  department: string; // For cross-dept gallery logic
   isNewPlan: boolean; // true = typewriter effect, false = render immediately (rehydration per D-17)
   onApprove: () => void;
 }
@@ -13,6 +15,7 @@ export interface CanvasPanelProps {
 export default function CanvasPanel({
   planMarkdown,
   taskId,
+  department,
   isNewPlan,
   onApprove,
 }: CanvasPanelProps) {
@@ -149,6 +152,13 @@ export default function CanvasPanel({
           Approve Plan
         </button>
       </div>
+
+      {/* Config section - shown when plan is ready (per Plan 06: TAMIR-05) */}
+      {!isTyping && (
+        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '16px' }}>
+          <ConfigPanel taskId={taskId} currentDepartment={department} />
+        </div>
+      )}
     </div>
   );
 }
