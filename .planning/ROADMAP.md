@@ -88,13 +88,14 @@ Plans:
   3. Skill extraction triggers after task completion — supervisor analyzes deliverables and proposes reusable skills via propose_skill
   4. Acceptance Scenario A passes: a task routes to CMO, agent discovers tools, produces a video deliverable, and a skill is extracted
   5. Acceptance Scenario B passes: a task routes to CTO, a temp employee is hired, real Python executes in the desk, real metrics/plots are produced, and the CTO review gate works
-**Plans**: TBD
+**Plans**: 4 plans
 **UI hint**: yes
 
 Plans:
-- [ ] 04-01: TBD
-- [ ] 04-02: TBD
-- [ ] 04-03: TBD
+- [ ] 04-01-PLAN.md — Backend wiring: review tools supervisor enqueue, budget handling, deliverable chat + file serve APIs
+- [ ] 04-02-PLAN.md — CSS additions + sidebar Settings nav + settings page + system reset API
+- [ ] 04-03-PLAN.md — Deliverable workspace page: split-pane, chat, all 4 tabs, approval cards, file browser
+- [ ] 04-04-PLAN.md — EEG test fixture + acceptance scenario runbooks + end-to-end verification checkpoint
 
 ## Progress
 
@@ -106,4 +107,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 1. Foundation Infrastructure | 4/4 | Complete | - |
 | 2. Agent Execution Layer | 6/6 | Complete | - |
 | 3. Cortex UI + Tamir Interface | 6/6 | Complete   | 2026-03-26 |
-| 4. Deliverable Workspace + Integration | 0/3 | Not started | - |
+| 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
