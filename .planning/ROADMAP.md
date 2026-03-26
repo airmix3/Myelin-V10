@@ -55,7 +55,7 @@ Plans:
 - [ ] 02-03-PLAN.md — invokeAgent() wrapper + orchestrator singleton + worker integration + concurrent isolation validation
 - [ ] 02-04-PLAN.md — Remaining MCP tools (review, vault, skills, inbox, hire) + server update
 - [ ] 02-05-PLAN.md — Hire approval API endpoints + structured output schemas
-- [ ] 02-06-PLAN.md — 3 global skills (memory-management, skill-extractor, system-reset)
+- [x] 02-06-PLAN.md — 3 global skills (memory-management, skill-extractor, system-reset)
 
 ### Phase 3: Cortex UI + Tamir Interface
 **Goal**: The CEO can interact with the system through a complete web dashboard and submit tasks through Tamir's planning flow — route, plan, configure, and approve for execution

@@ -84,9 +84,9 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Global Skills (Ship with System)
 
-- [ ] **GSKILL-01**: `memory-management` active global skill at `data/departments/global/skills/memory-management/SKILL.md` — teaches agents when/how to read_memory at task start and write_memory at task end
-- [ ] **GSKILL-02**: `skill-extractor` active global skill at `data/departments/global/skills/skill-extractor/SKILL.md` — teaches agents to analyze completed deliverables for reusable patterns and call propose_skill
-- [ ] **GSKILL-03**: `system-reset` active global skill at `data/departments/global/skills/system-reset/SKILL.md` — clears operational tables, preserves vault + DNA + skills + permanent employees
+- [x] **GSKILL-01**: `memory-management` active global skill at `data/departments/global/skills/memory-management/SKILL.md` — teaches agents when/how to read_memory at task start and write_memory at task end
+- [x] **GSKILL-02**: `skill-extractor` active global skill at `data/departments/global/skills/skill-extractor/SKILL.md` — teaches agents to analyze completed deliverables for reusable patterns and call propose_skill
+- [x] **GSKILL-03**: `system-reset` active global skill at `data/departments/global/skills/system-reset/SKILL.md` — clears operational tables, preserves vault + DNA + skills + permanent employees
 
 ### Integration & Acceptance Tests
 
@@ -167,9 +167,9 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TOOL-12 | Phase 2 | Pending |
 | TOOL-13 | Phase 2 | Pending |
 | TOOL-14 | Phase 2 | Pending |
-| GSKILL-01 | Phase 2 | Pending |
-| GSKILL-02 | Phase 2 | Pending |
-| GSKILL-03 | Phase 2 | Pending |
+| GSKILL-01 | Phase 2 | Complete |
+| GSKILL-02 | Phase 2 | Complete |
+| GSKILL-03 | Phase 2 | Complete |
 | UI-01 | Phase 3 | Pending |
 | UI-02 | Phase 3 | Pending |
 | UI-03 | Phase 3 | Pending |
