@@ -75,7 +75,7 @@ Requirements for initial release. Each maps to roadmap phases.
 
 - [x] **DELIV-01**: `/deliverables/[id]` split-pane: 400px chat left, tabbed workspace right (Deliverable | Agent Log | Build Log | Files(N)); metadata bar above tabs (ID, creator, dept, type, created, task description)
 - [x] **DELIV-02**: Chat panel: load + render planning JSONL history with correct avatars; "--- plan approved --- task executing ---" divider; agent greeting; continued chat via `POST /api/deliverables/[id]/chat` routing to currentActorId
-- [ ] **DELIV-03**: Deliverable tab: renders primaryFile from `deliverable_manifest.json` (markdown via marked.js, image, video with controls, PDF iframe); clear empty state when no primary file
+- [x] **DELIV-03**: Deliverable tab: renders primaryFile from `deliverable_manifest.json` (markdown via marked.js, image, video with controls, PDF iframe); clear empty state when no primary file
 - [x] **DELIV-04**: Build Log tab: live partial SDK events via SSE (`includePartialMessages:true`); expandable entries (chevron, type badge, agent, description, timestamp, metadata JSON); periodic heartbeat liveness entries
 - [x] **DELIV-05**: Files tab: two sections (Deliverables prominent, Desk/Working Files collapsible default); card grid (icon, filename, size); inline preview on click (image/video/PDF/markdown/code); `GET /api/deliverables/[id]/file?path=...` with path traversal prevention (path.resolve + startsWith workspace root)
 - [x] **DELIV-06**: Agent Log tab: durable SDK activity rows from activity_log table (SDK_SESSION_INIT, SDK_ASSISTANT, SDK_TOOL_PROGRESS, SDK_TOOL_SUMMARY, SDK_RESULT_SUCCESS, SDK_RESULT_ERROR); expandable metadata; action type badge colors from Doc 12
@@ -190,7 +190,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | TAMIR-08 | Phase 3 | Complete |
 | DELIV-01 | Phase 4 | Complete |
 | DELIV-02 | Phase 4 | Complete |
-| DELIV-03 | Phase 4 | Pending |
+| DELIV-03 | Phase 4 | Complete |
 | DELIV-04 | Phase 4 | Complete |
 | DELIV-05 | Phase 4 | Complete |
 | DELIV-06 | Phase 4 | Complete |
