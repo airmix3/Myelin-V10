@@ -54,7 +54,7 @@ Plans:
 - [x] 02-02-PLAN.md — Agent identity (4 executives: soul.md, card.json, agent.ts) + DB seed
 - [x] 02-03-PLAN.md — invokeAgent() wrapper + orchestrator singleton + worker integration + concurrent isolation validation
 - [x] 02-04-PLAN.md — Remaining MCP tools (review, vault, skills, inbox, hire) + server update
-- [ ] 02-05-PLAN.md — Hire approval API endpoints + structured output schemas
+- [x] 02-05-PLAN.md — Hire approval API endpoints + structured output schemas
 - [x] 02-06-PLAN.md — 3 global skills (memory-management, skill-extractor, system-reset)
 
 ### Phase 3: Cortex UI + Tamir Interface

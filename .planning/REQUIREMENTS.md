@@ -28,7 +28,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **AGENT-03**: Self-contained agent directories (`src/agents/{tamir,cto,cmo,coo}/`): soul.md + card.json + agent.ts for each; 4 executive employees seeded to DB
 - [x] **AGENT-04**: SDK structured output (`outputFormat: {type:'json_schema',schema:...}`) for ALL turn routing — no regex, no freeform parsing; planning turn schema and routing result schema defined in `src/a2a/types.ts`
 - [x] **AGENT-05**: A2A TypeScript interfaces: AgentCard, A2ATask, A2AMessage, TaskState, TaskHandoff, TaskConfig, AgentTurnResult, RoutingResult
-- [ ] **AGENT-06**: Temp employee hire flow: `hire_employee` tool creates HireRequest, transitions task to `input-required` (metadata.inputType=hire_approval); on CEO approval, dept head re-invoked with employee as SDK AgentDefinition subagent; employee sandbox has read_knowledge, search_knowledge, promote_to_deliverable, propose_skill, submit_for_review only
+- [x] **AGENT-06**: Temp employee hire flow: `hire_employee` tool creates HireRequest, transitions task to `input-required` (metadata.inputType=hire_approval); on CEO approval, dept head re-invoked with employee as SDK AgentDefinition subagent; employee sandbox has read_knowledge, search_knowledge, promote_to_deliverable, propose_skill, submit_for_review only
 
 ### Custom Tools (MCP)
 
@@ -152,7 +152,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AGENT-03 | Phase 2 | Complete |
 | AGENT-04 | Phase 2 | Complete |
 | AGENT-05 | Phase 2 | Complete |
-| AGENT-06 | Phase 2 | Pending |
+| AGENT-06 | Phase 2 | Complete |
 | TOOL-01 | Phase 2 | Complete |
 | TOOL-02 | Phase 2 | Complete |
 | TOOL-03 | Phase 2 | Complete |
