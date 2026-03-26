@@ -66,6 +66,7 @@ model TaskRun {
   failureReason String?
   sessionId     String?                      // SDK session ID for resume
   workspaceCwd  String?                      // absolute path to desk directory
+  agents        String?                      // JSON: subagent definitions from hire approval
   createdAt     DateTime @default(now())
 
   task          Task     @relation(fields: [taskId], references: [id])
