@@ -1,0 +1,86 @@
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma, sqlite } from '@/lib/db';
+import { appendFileSync } from 'fs';
+import { orchestrator } from '@/lib/orchestrator';
+import { logger } from '@/lib/logger';
+
+const log = logger.child({ module: 'deliverable-chat' });
+
+export const maxDuration = 120;
+
+/**
+ * POST /api/deliverables/[id]/chat
+ * Per DELIV-02: Send a message in the deliverable workspace chat.
+ * Routes to the task's currentActorId (executor or supervisor depending on review state).
+ * Free-form chat -- no structured output (Research Open Question 3).
+ */
+export async function POST(
+  request: NextRequest,
+  { params }: { params: { id: string } }
+) {
+  const { id: deliverableId } = params;
+  const body = await request.json();
+  const { message } = body;
+
+  if (!message || typeof message !== 'string') {
+    return NextResponse.json({ error: 'Message required' }, { status: 400 });
+  }
+
+  // Look up deliverable and its task
+  const deliverable = await prisma.deliverable.findUnique({
+    where: { id: deliverableId },
+    include: { task: true },
+  });
+  if (!deliverable) return NextResponse.json({ error: 'Deliverable not found' }, { status: 404 });
+
+  const task = deliverable.task;
+  if (!task.currentActorId) {
+    return NextResponse.json({ error: 'No active agent for this task' }, { status: 400 });
+  }
+
+  // Append user message to JSONL chat file
+  const chatEntry = { role: 'user', content: message, ts: new Date().toISOString() };
+  if (task.chatFilePath) {
+    appendFileSync(task.chatFilePath, JSON.stringify(chatEntry) + '\n', 'utf-8');
+  }
+
+  // Route message to currentActorId via orchestrator (free-form, no outputFormat)
+  try {
+    const agent = orchestrator.getAgent(task.currentActorId);
+    if (!agent) {
+      return NextResponse.json({ error: `Agent ${task.currentActorId} not found` }, { status: 404 });
+    }
+
+    // Get workspace paths from latest task_run
+    const latestRun = sqlite.prepare(
+      'SELECT workspaceCwd FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1'
+    ).get(task.id) as { workspaceCwd: string | null } | undefined;
+
+    const deskDir = latestRun?.workspaceCwd ?? '';
+    const result = await orchestrator.invoke({
+      taskId: task.id,
+      runId: `chat_${Date.now()}`,
+      agentId: task.currentActorId,
+      prompt: message,
+      deskDir,
+      delivDir: deliverable.workspacePath ? `${deliverable.workspacePath}/../deliverables` : '',
+      manifestPath: deliverable.manifestPath ?? '',
+    });
+
+    // Append agent response to JSONL
+    const agentEntry = {
+      role: 'agent',
+      content: result.result ?? 'No response',
+      ts: new Date().toISOString(),
+      agentId: task.currentActorId,
+    };
+    if (task.chatFilePath) {
+      appendFileSync(task.chatFilePath, JSON.stringify(agentEntry) + '\n', 'utf-8');
+    }
+
+    return NextResponse.json({ success: true, response: agentEntry });
+  } catch (err) {
+    log.error({ err, deliverableId, taskId: task.id }, 'Chat invocation failed');
+    return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
+  }
+}
