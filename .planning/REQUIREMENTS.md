@@ -27,17 +27,17 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **AGENT-02**: Orchestrator singleton holding configs for all 4 agents; `invoke()` method exposes outputFormat, agents, maxBudgetUsd, cwd, sessionId options
 - [ ] **AGENT-03**: Self-contained agent directories (`src/agents/{tamir,cto,cmo,coo}/`): soul.md + card.json + agent.ts for each; 4 executive employees seeded to DB
 - [ ] **AGENT-04**: SDK structured output (`outputFormat: {type:'json_schema',schema:...}`) for ALL turn routing — no regex, no freeform parsing; planning turn schema and routing result schema defined in `src/a2a/types.ts`
-- [ ] **AGENT-05**: A2A TypeScript interfaces: AgentCard, A2ATask, A2AMessage, TaskState, TaskHandoff, TaskConfig, AgentTurnResult, RoutingResult
+- [x] **AGENT-05**: A2A TypeScript interfaces: AgentCard, A2ATask, A2AMessage, TaskState, TaskHandoff, TaskConfig, AgentTurnResult, RoutingResult
 - [ ] **AGENT-06**: Temp employee hire flow: `hire_employee` tool creates HireRequest, transitions task to `input-required` (metadata.inputType=hire_approval); on CEO approval, dept head re-invoked with employee as SDK AgentDefinition subagent; employee sandbox has read_knowledge, search_knowledge, promote_to_deliverable, propose_skill, submit_for_review only
 
 ### Custom Tools (MCP)
 
-- [ ] **TOOL-01**: Single in-process MCP server via `createSdkMcpServer({name:'myelin'})` with per-invocation ToolContext closure factory (`buildMyelinMcpServer(ctx)`) — no shared mutable state between concurrent agents
-- [ ] **TOOL-02**: `buildCanUseTool(agentId, department)` returns `(toolName,input) => {behavior:'allow'|'deny',message?}` — Tamir-only tools, dept-head-only tools, temp employee restrictions all enforced here
-- [ ] **TOOL-03**: `read_memory` / `write_memory` — reads/writes `data/agents/{agentId}/MEMORY.md` via tool boundary (file lives outside desk CWD)
-- [ ] **TOOL-04**: `promote_to_deliverable` — copies file from desk to `deliverables/`, creates/updates `deliverable_manifest.json`, indexes to FTS5 documents table
-- [ ] **TOOL-05**: `read_knowledge` / `write_knowledge` — reads/writes `data/departments/{dept}/knowledge/*.md`; write_knowledge updates FTS5 index; concurrent write protection via proper-lockfile
-- [ ] **TOOL-06**: `search_knowledge` — FTS5 BM25 search across vault + knowledge + task_deliverables; returns essence + file path (not full content); agent uses read_knowledge to load full file if needed
+- [x] **TOOL-01**: Single in-process MCP server via `createSdkMcpServer({name:'myelin'})` with per-invocation ToolContext closure factory (`buildMyelinMcpServer(ctx)`) — no shared mutable state between concurrent agents
+- [x] **TOOL-02**: `buildCanUseTool(agentId, department)` returns `(toolName,input) => {behavior:'allow'|'deny',message?}` — Tamir-only tools, dept-head-only tools, temp employee restrictions all enforced here
+- [x] **TOOL-03**: `read_memory` / `write_memory` — reads/writes `data/agents/{agentId}/MEMORY.md` via tool boundary (file lives outside desk CWD)
+- [x] **TOOL-04**: `promote_to_deliverable` — copies file from desk to `deliverables/`, creates/updates `deliverable_manifest.json`, indexes to FTS5 documents table
+- [x] **TOOL-05**: `read_knowledge` / `write_knowledge` — reads/writes `data/departments/{dept}/knowledge/*.md`; write_knowledge updates FTS5 index; concurrent write protection via proper-lockfile
+- [x] **TOOL-06**: `search_knowledge` — FTS5 BM25 search across vault + knowledge + task_deliverables; returns essence + file path (not full content); agent uses read_knowledge to load full file if needed
 - [ ] **TOOL-07**: `submit_for_review` — sets `currentActorId` to supervisorAgentId (task stays in `working` state; lifecycle derives to review)
 - [ ] **TOOL-08**: `approve_deliverable` (dept heads only) — sets `completedAt`, transitions task to `completed`, notifies Tamir inbox
 - [ ] **TOOL-09**: `request_changes` (dept heads only) — stores feedback in `reviewFeedback`, increments `reviewRound`, sets `currentActorId` back to executor
@@ -151,14 +151,14 @@ Which phases cover which requirements. Updated during roadmap creation.
 | AGENT-02 | Phase 2 | Pending |
 | AGENT-03 | Phase 2 | Pending |
 | AGENT-04 | Phase 2 | Pending |
-| AGENT-05 | Phase 2 | Pending |
+| AGENT-05 | Phase 2 | Complete |
 | AGENT-06 | Phase 2 | Pending |
-| TOOL-01 | Phase 2 | Pending |
-| TOOL-02 | Phase 2 | Pending |
-| TOOL-03 | Phase 2 | Pending |
-| TOOL-04 | Phase 2 | Pending |
-| TOOL-05 | Phase 2 | Pending |
-| TOOL-06 | Phase 2 | Pending |
+| TOOL-01 | Phase 2 | Complete |
+| TOOL-02 | Phase 2 | Complete |
+| TOOL-03 | Phase 2 | Complete |
+| TOOL-04 | Phase 2 | Complete |
+| TOOL-05 | Phase 2 | Complete |
+| TOOL-06 | Phase 2 | Complete |
 | TOOL-07 | Phase 2 | Pending |
 | TOOL-08 | Phase 2 | Pending |
 | TOOL-09 | Phase 2 | Pending |
