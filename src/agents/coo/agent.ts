@@ -23,6 +23,7 @@ export function getAgentConfig(): AgentConfig {
   const soulMd = readFileSync(resolve(__dirname, 'soul.md'), 'utf-8');
   return {
     ...cardJson,
+    role: cardJson.role as AgentConfig['role'],
     soulMd,
   };
 }
