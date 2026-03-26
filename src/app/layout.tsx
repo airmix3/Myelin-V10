@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = {
   title: 'Myelin v10 — The Cortex',
@@ -8,7 +9,15 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en">
-      <body>{children}</body>
+      <head>
+        <link rel="stylesheet" href="/cortex.css" />
+      </head>
+      <body>
+        <div className="app-layout">
+          <Sidebar />
+          <main className="main">{children}</main>
+        </div>
+      </body>
     </html>
   );
 }
