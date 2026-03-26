@@ -41,15 +41,15 @@ Declared values (must be multiples of 4):
 | 2xl | 48px | Major section breaks (page-level vertical rhythm) |
 | 3xl | 64px | Page-level spacing (sidebar total width: ~200px uses multiples) |
 
-Exceptions:
-- Chat bubble padding: `10px 14px` (non-standard but prescribed by Doc 12)
-- Chat input min-height: `44px` (touch target, prescribed by Doc 12)
-- Send button padding: `12px 18px` (prescribed by Doc 12)
-- Badge padding: `2px 7px` (compact, prescribed by Doc 12)
-- Button padding: `5px 12px` default, `3px 8px` small (prescribed by Doc 12)
-- Avatar size: `30px` chat / `28px` workspace (prescribed by Doc 12)
+Exceptions (all multiples of 4):
+- Chat bubble padding: `8px 16px` (snapped from Doc 12's 10px 14px to nearest grid-safe values)
+- Chat input min-height: `48px` (snapped from Doc 12's 44px to nearest multiple of 4)
+- Send button padding: `12px 16px` (snapped from Doc 12's 12px 18px to nearest grid-safe values)
+- Badge padding: `4px 8px` (snapped from Doc 12's 2px 7px to nearest grid-safe values)
+- Button padding: `4px 12px` default, `4px 8px` small (snapped from Doc 12's 5px 12px and 3px 8px)
+- Avatar size: `32px` chat / `28px` workspace (snapped from Doc 12's 30px to nearest multiple of 4)
 
-Source: Doc 12 CSS variables and component definitions.
+Source: Doc 12 CSS variables and component definitions, adjusted to 4px grid compliance.
 
 ---
 
@@ -133,12 +133,12 @@ All components defined in Doc 12. Executor implements these CSS classes in `publ
 ### Interactive Components
 | Component | CSS Class | Notes |
 |-----------|-----------|-------|
-| Button default | `.btn` | 5px 12px padding, border on hover turns accent |
+| Button default | `.btn` | 4px 12px padding, border on hover turns accent |
 | Button accent | `.btn-accent` | Accent bg, white text |
-| Button small | `.btn-sm` | 3px 8px padding, 11px font |
+| Button small | `.btn-sm` | 4px 8px padding, 11px font |
 | Button approve | `.btn-approve` | Green bg, dark text, bold |
 | Button cancel | `.btn-cancel` | Ghost style, red on hover |
-| Chat input | `.input-area` + `textarea.chat-input` | Auto-resize, 44px min, 120px max, 8px border-radius |
+| Chat input | `.input-area` + `textarea.chat-input` | Auto-resize, 48px min, 120px max, 8px border-radius |
 | Send button | `.send-btn` | Accent bg, 8px border-radius |
 | Search bar | `.search-bar` | Same as text input styling |
 | Range slider | `input[type="range"]` | 4px track, 16px accent thumb |
@@ -152,7 +152,7 @@ All components defined in Doc 12. Executor implements these CSS classes in `publ
 | Badge (dept) | `.badge-tech`, `.badge-marketing`, `.badge-ops` | 15% bg, full text |
 | Badge (status) | `.badge-active`, `.badge-pending`, `.badge-error`, `.badge-done` | With 30% border |
 | Status dot | `.dot` + `.dot-green/amber/red/gray` | 8px circle |
-| Avatar | `.avatar` | 30px circle, white initial, dept color bg |
+| Avatar | `.avatar` | 32px circle, white initial, dept color bg |
 | Gallery card | `.gallery-card` | VS Code extension style, 190px min grid |
 | Chat bubble (agent) | `.msg.agent .bubble` | Dark bg, sharp top-left corner |
 | Chat bubble (user) | `.msg.user .bubble` | Accent bg, white text, sharp bottom-right |
@@ -206,7 +206,7 @@ Source: Doc 12 (all sections), D-02, D-03.
 | Context | Copy |
 |---------|------|
 | SSE connection lost | "Live connection lost. Reconnecting..." (auto-retry, no user action needed) |
-| API route failure | "Something went wrong. [Retry]" (generic, with retry button) |
+| API route failure | "Request failed. Check your connection and try again. If the problem persists, open the browser console for details. [Retry]" |
 | Tamir routing failure | "Tamir could not route this request. Try rephrasing your task description. [Retry]" |
 | Agent invocation failure | "Agent failed to respond. The task has been marked as failed. Check the build log for details." |
 | FTS5 search error | "Search is temporarily unavailable. [Retry]" |
