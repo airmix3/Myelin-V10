@@ -27,6 +27,10 @@ interface BuildLogEntry {
   timestamp?: string;
   attempt?: number;
   retry_delay_ms?: number;
+  tool_name?: string;
+  elapsed_time_seconds?: number;
+  summary?: string;
+  tool_use_id?: string;
 }
 
 export default function WorkspaceClient({

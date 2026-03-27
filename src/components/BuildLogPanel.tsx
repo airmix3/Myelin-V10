@@ -4,13 +4,17 @@ import { useState, useRef, useEffect } from 'react';
 import ApprovalCard from './ApprovalCard';
 
 interface BuildLogEntry {
-  type: string;
+  type?: string;
   agentId?: string;
   content?: unknown;
   message?: string;
   timestamp?: string;
   attempt?: number;
   retry_delay_ms?: number;
+  tool_name?: string;
+  elapsed_time_seconds?: number;
+  summary?: string;
+  tool_use_id?: string;
 }
 
 interface BuildLogPanelProps {
@@ -27,6 +31,9 @@ const ENTRY_TYPE_BADGES: Record<string, { className: string; label: string }> = 
   'stream_event': { className: 'log-type-progress', label: 'STREAM' },
   'tool_progress': { className: 'log-type-progress', label: 'PROGRESS' },
   'budget_exceeded': { className: 'log-type-error', label: 'BUDGET' },
+  'tool_call': { className: 'log-type-tool', label: 'TOOL' },
+  'tool_activity': { className: 'log-type-tool', label: 'TOOL' },
+  'tool_summary': { className: 'log-type-summary', label: 'SUMMARY' },
 };
 
 function truncate(text: string, maxLen: number): string {
@@ -130,8 +137,60 @@ export default function BuildLogPanel({
           );
         }
 
+        // Tool call entry (agent calling a tool)
+        if (entry.type === 'tool_call') {
+          return (
+            <div key={i} className="log-entry log-entry-tool">
+              <div className="log-entry-header">
+                <span className="badge log-type-tool">TOOL</span>
+                <span className="tool-name">{entry.tool_name}</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '10px', flexShrink: 0 }}>
+                  {formatTimestamp(entry.timestamp)}
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        // Tool activity entry (in-progress with elapsed time)
+        if (entry.type === 'tool_activity') {
+          return (
+            <div key={i} className="log-entry log-entry-tool">
+              <div className="log-entry-header">
+                <span className="badge log-type-tool">TOOL</span>
+                <span className="tool-name">{entry.tool_name}</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '10px' }}>
+                  {entry.elapsed_time_seconds !== undefined
+                    ? `${Math.round(entry.elapsed_time_seconds)}s`
+                    : ''}
+                </span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '10px', flexShrink: 0 }}>
+                  {formatTimestamp(entry.timestamp)}
+                </span>
+              </div>
+            </div>
+          );
+        }
+
+        // Tool summary entry (completed action summary)
+        if (entry.type === 'tool_summary') {
+          return (
+            <div key={i} className="log-entry log-entry-summary">
+              <div className="log-entry-header">
+                <span className="badge log-type-summary">DONE</span>
+                <span style={{ flex: 1, fontSize: '11px' }}>{entry.summary}</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: '10px', flexShrink: 0 }}>
+                  {formatTimestamp(entry.timestamp)}
+                </span>
+              </div>
+            </div>
+          );
+        }
+
         // Standard log entry
-        const badge = ENTRY_TYPE_BADGES[entry.type] || { className: 'log-type-session', label: entry.type.toUpperCase() };
+        const badge = entry.type && ENTRY_TYPE_BADGES[entry.type]
+          ? ENTRY_TYPE_BADGES[entry.type]
+          : { className: 'log-type-session', label: entry.type?.toUpperCase() || 'EVENT' };
         const isOpen = openIndices.has(i);
         const description = entry.message || (typeof entry.content === 'string' ? entry.content : '');
 
