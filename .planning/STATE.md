@@ -3,14 +3,14 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Phase 6 context gathered
-last_updated: "2026-03-27T19:52:08.618Z"
+stopped_at: Completed 06-02-PLAN.md
+last_updated: "2026-03-27T20:07:34.235Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 6
-  completed_phases: 4
-  total_plans: 22
-  completed_plans: 21
+  completed_phases: 5
+  total_plans: 24
+  completed_plans: 23
 ---
 
 # Project State
@@ -20,11 +20,11 @@ progress:
 See: .planning/PROJECT.md (updated 2026-03-25)
 
 **Core value:** Agents actually execute real business tasks end-to-end — not just generate text
-**Current focus:** Phase 05 — langfuse-integration
+**Current focus:** Phase 06 — sandboxing-agents
 
 ## Current Position
 
-Phase: 05 (langfuse-integration) — EXECUTING
+Phase: 06 (sandboxing-agents) — EXECUTING
 Plan: 2 of 2
 
 ## Performance Metrics
@@ -68,6 +68,7 @@ Plan: 2 of 2
 | Phase 04 P03 | 4min | 4 tasks | 9 files |
 | Phase 05 P01 | 3min | 2 tasks | 4 files |
 | Phase 05 P02 | 1min | 1 tasks | 2 files |
+| Phase 06 P02 | 1min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -113,6 +114,7 @@ Recent decisions affecting current work:
 - [Phase 05]: Dynamic imports for Langfuse/OTel packages to keep edge runtime clean
 - [Phase 05]: No per-message child observations in SDK query loop (subprocess context doesn't propagate)
 - [Phase 05]: Lightweight env var check for Langfuse status instead of importing SDK in API route
+- [Phase 06]: CLAUDE.md is minimal pointer with MCP tool list; plan content in separate PLAN.md
 
 ### Pending Todos
 
@@ -136,7 +138,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T19:52:08.617Z
-Stopped at: Phase 6 context gathered
+Last session: 2026-03-27T20:07:28.307Z
+Stopped at: Completed 06-02-PLAN.md
 Last activity: 2026-03-27
-Resume file: .planning/phases/06-sandboxing-agents/06-CONTEXT.md
+Resume file: None

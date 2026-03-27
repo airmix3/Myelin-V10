@@ -142,5 +142,5 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 **Plans**: 2 plans
 
 Plans:
-- [ ] 06-01-PLAN.md — Filesystem boundary enforcement in canUseTool + settingSources isolation
-- [ ] 06-02-PLAN.md — Workspace PLAN.md separation + CLAUDE.md restructure + planning desk CLAUDE.md
+- [x] 06-01-PLAN.md — Filesystem boundary enforcement in canUseTool + settingSources isolation
+- [x] 06-02-PLAN.md — Workspace PLAN.md separation + CLAUDE.md restructure + planning desk CLAUDE.md

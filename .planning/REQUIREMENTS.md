@@ -111,8 +111,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **SANDBOX-01**: `buildCanUseTool()` extended with `workspaceBoundaries` parameter; built-in tools (Read, Write, Edit, Glob, Grep) denied when targeting absolute paths outside `deskDir` or `delivDir`; `isPathAllowed()` helper resolves relative paths against deskDir before checking boundaries
 - [ ] **SANDBOX-02**: Bash tool file operations denied when command contains absolute paths outside workspace boundaries; relative paths allowed (resolve within CWD); no restrictions on bash commands themselves per D-08
 - [ ] **SANDBOX-03**: `invokeAgent()` passes `settingSources: []` (not `['project']`) and passes `{ deskDir, delivDir }` workspace boundaries to `buildCanUseTool()` for all invocations
-- [ ] **SANDBOX-04**: `createTaskWorkspace()` writes approved plan to separate `desk/PLAN.md` file; `desk/CLAUDE.md` is a minimal pointer with task context, MCP tool reference, workspace boundary reminder, and pointer to PLAN.md
-- [ ] **SANDBOX-05**: Planning desks get their own `CLAUDE.md` with planning mode instructions; combined with `settingSources: []`, agent's entire instruction set comes from workspace CLAUDE.md only per D-07
+- [x] **SANDBOX-04**: `createTaskWorkspace()` writes approved plan to separate `desk/PLAN.md` file; `desk/CLAUDE.md` is a minimal pointer with task context, MCP tool reference, workspace boundary reminder, and pointer to PLAN.md
+- [x] **SANDBOX-05**: Planning desks get their own `CLAUDE.md` with planning mode instructions; combined with `settingSources: []`, agent's entire instruction set comes from workspace CLAUDE.md only per D-07
 
 ## v2 Requirements
 
@@ -229,8 +229,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SANDBOX-01 | Phase 6 | Pending |
 | SANDBOX-02 | Phase 6 | Pending |
 | SANDBOX-03 | Phase 6 | Pending |
-| SANDBOX-04 | Phase 6 | Pending |
-| SANDBOX-05 | Phase 6 | Pending |
+| SANDBOX-04 | Phase 6 | Complete |
+| SANDBOX-05 | Phase 6 | Complete |
 
 **Coverage:**
 - v1 requirements: 77 total
