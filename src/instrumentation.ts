@@ -88,6 +88,15 @@ export async function register() {
       log.error({ err }, 'Agent seeding failed');
     }
 
+    // 4.5. Seed gallery data (MCP servers + skills)
+    try {
+      const { seedGallery } = await import('./lib/seed-gallery');
+      await seedGallery();
+      log.info('Gallery data seeded (MCP servers + skills)');
+    } catch (err) {
+      log.error({ err }, 'Gallery seeding failed');
+    }
+
     // 5. Initialize orchestrator with all agent configs
     try {
       const { initOrchestrator } = await import('./lib/orchestrator');
