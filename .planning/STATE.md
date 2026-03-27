@@ -138,10 +138,11 @@ None yet.
 | # | Description | Date | Commit | Directory |
 |---|-------------|------|--------|-----------|
 | 260327-fhz | End-to-end flow test: run Tamir routing, planning session with typewriter canvas, approval, and worker execution | 2026-03-27 | 709504c | [260327-fhz-end-to-end-flow-test-run-tamir-routing-p](./quick/260327-fhz-end-to-end-flow-test-run-tamir-routing-p/) |
+| 260327-wry | Live agent activity feed: show tool calls, elapsed time, and summaries in Build Log | 2026-03-27 | a168c09 | [260327-wry-live-agent-activity-feed-show-claude-age](./quick/260327-wry-live-agent-activity-feed-show-claude-age/) |
 
 ## Session Continuity
 
-Last session: 2026-03-27T20:07:40.672Z
-Stopped at: Completed 06-01-PLAN.md
+Last session: 2026-03-27T20:40:48Z
+Stopped at: Completed quick/260327-wry
 Last activity: 2026-03-27
 Resume file: None
