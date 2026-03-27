@@ -139,10 +139,11 @@ None yet.
 |---|-------------|------|--------|-----------|
 | 260327-fhz | End-to-end flow test: run Tamir routing, planning session with typewriter canvas, approval, and worker execution | 2026-03-27 | 709504c | [260327-fhz-end-to-end-flow-test-run-tamir-routing-p](./quick/260327-fhz-end-to-end-flow-test-run-tamir-routing-p/) |
 | 260327-wry | Live agent activity feed: show tool calls, elapsed time, and summaries in Build Log | 2026-03-27 | a168c09 | [260327-wry-live-agent-activity-feed-show-claude-age](./quick/260327-wry-live-agent-activity-feed-show-claude-age/) |
+| 260328-188 | Fix planning desk CLAUDE.md to list MCP tools available during planning | 2026-03-28 | e0cac66 | [260328-188-fix-mcp-tools-and-skills-not-showing-dur](./quick/260328-188-fix-mcp-tools-and-skills-not-showing-dur/) |
 
 ## Session Continuity
 
-Last session: 2026-03-27T20:40:48Z
-Stopped at: Completed quick/260327-wry
-Last activity: 2026-03-27
+Last session: 2026-03-27T21:57:36Z
+Stopped at: Completed quick/260328-188
+Last activity: 2026-03-28
 Resume file: None
