@@ -7,5 +7,6 @@ export async function GET() {
     dbPath: 'data/myelin.db',
     runtime: 'Next.js 14 (App Router)',
     workerStatus: 'running', // Worker is always running when server is up
+    langfuseStatus: process.env.LANGFUSE_PUBLIC_KEY ? 'active' : 'inactive',
   });
 }
