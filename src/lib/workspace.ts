@@ -45,15 +45,30 @@ export function createTaskWorkspace(
     catch (err) { log.warn({ err, source: globalSkillsSource }, 'Failed to symlink global skills'); }
   }
 
-  // Write desk/CLAUDE.md with plan and constraints
-  const claudeMd = [
-    `# Task: ${taskId}`,
-    `## Department: ${department}`,
-    '',
-    plan ? `## Plan\n\n${plan}` : '## Plan\n\n(No plan provided)',
-    '',
-    constraints ? `## Constraints\n\n${constraints}` : '',
-  ].filter(Boolean).join('\n');
+  // Write plan to separate PLAN.md (per D-06)
+  if (plan) {
+    writeFileSync(join(deskDir, 'PLAN.md'), plan, 'utf-8');
+  }
+
+  // Write minimal CLAUDE.md as pointer file
+  const constraintsSection = constraints ? `\n## Constraints\n\n${constraints}\n` : '';
+  const claudeMd = `# Task: ${taskId}
+
+## Department: ${department}
+
+## Instructions
+
+Your complete task plan is in \`PLAN.md\` in this directory. Read it first before doing anything else.
+
+You have access to MCP tools for shared resources:
+- \`read_memory\` / \`write_memory\` — Your personal memory
+- \`read_knowledge\` / \`search_knowledge\` — Department knowledge base
+- \`promote_to_deliverable\` — Move files to deliverables
+- \`file_to_vault\` — Save important files to vault
+- \`submit_for_review\` — Submit work for supervisor review
+
+All your work must stay within this directory. Do not try to access files outside your workspace.
+${constraintsSection}`;
   writeFileSync(join(deskDir, 'CLAUDE.md'), claudeMd, 'utf-8');
 
   // Stub deliverable_manifest.json
@@ -87,6 +102,21 @@ export function ensurePlanningDesks(): void {
     if (dept !== 'global' && existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
       try { symlinkSync(deptSkillsSource, deptSkillsTarget, 'junction'); }
       catch (err) { log.warn({ err, dept }, 'Failed to symlink dept skills to planning desk'); }
+    }
+
+    // Write minimal CLAUDE.md for planning desk if not present
+    const planningClaudeMd = join(planningDesk, 'CLAUDE.md');
+    if (!existsSync(planningClaudeMd)) {
+      writeFileSync(planningClaudeMd, [
+        `# Planning Desk: ${dept}`,
+        '',
+        '## Instructions',
+        '',
+        'You are in PLANNING MODE. Help the CEO plan a task. Do NOT execute anything.',
+        'Ask clarifying questions, then produce a detailed plan when ready.',
+        '',
+        'All planning artifacts stay in this directory.',
+      ].join('\n'), 'utf-8');
     }
   }
   log.info('Planning desks ensured for all departments');
