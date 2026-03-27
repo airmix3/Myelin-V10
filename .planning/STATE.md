@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-1iv
-last_updated: "2026-03-27T22:09:30.882Z"
+stopped_at: Completed quick/260328-1qu
+last_updated: "2026-03-27T22:22:21.392Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
@@ -141,10 +141,11 @@ None yet.
 | 260327-wry | Live agent activity feed: show tool calls, elapsed time, and summaries in Build Log | 2026-03-27 | a168c09 | [260327-wry-live-agent-activity-feed-show-claude-age](./quick/260327-wry-live-agent-activity-feed-show-claude-age/) |
 | 260328-188 | Fix planning desk CLAUDE.md to list MCP tools available during planning | 2026-03-28 | e0cac66 | [260328-188-fix-mcp-tools-and-skills-not-showing-dur](./quick/260328-188-fix-mcp-tools-and-skills-not-showing-dur/) |
 | 260328-1iv | Give planning agents full tool access by removing tools:[] restriction | 2026-03-28 | 72073cf | [260328-1iv-give-planning-agents-full-tool-access-re](./quick/260328-1iv-give-planning-agents-full-tool-access-re/) |
+| 260328-1qu | Fix skills and MCP tools not browsable in gallery during planning | 2026-03-28 | 73f739e | [260328-1qu-fix-skills-and-mcp-tools-not-browsable-d](./quick/260328-1qu-fix-skills-and-mcp-tools-not-browsable-d/) |
 
 ## Session Continuity
 
-Last session: 2026-03-27T22:09:30.881Z
-Stopped at: Completed quick/260328-1iv
+Last session: 2026-03-27T22:22:21.390Z
+Stopped at: Completed quick/260328-1qu
 Last activity: 2026-03-28
 Resume file: None
