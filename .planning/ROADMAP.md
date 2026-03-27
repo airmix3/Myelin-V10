@@ -110,7 +110,7 @@ Plans:
 **Plans**: 2 plans
 
 Plans:
-- [ ] 05-01-PLAN.md — Langfuse SDK install + tracing module + OTel init + invokeAgent instrumentation
+- [x] 05-01-PLAN.md — Langfuse SDK install + tracing module + OTel init + invokeAgent instrumentation
 - [ ] 05-02-PLAN.md — System info API langfuseStatus + settings page observability badge
 
 ## Progress
@@ -124,4 +124,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 2. Agent Execution Layer | 6/6 | Complete | - |
 | 3. Cortex UI + Tamir Interface | 6/6 | Complete   | 2026-03-26 |
 | 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
-| 5. Langfuse Integration | 0/2 | Not started | - |
+| 5. Langfuse Integration | 1/2 | In Progress|  |

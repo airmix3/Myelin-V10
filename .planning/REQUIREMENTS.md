@@ -98,11 +98,11 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Langfuse Observability
 
-- [ ] **LANG-01**: `@langfuse/tracing@5.0.1` + `@langfuse/otel@5.0.1` + `@opentelemetry/sdk-node@0.214.0` + `@opentelemetry/api@1.9.1` installed via pnpm; single copy of `@opentelemetry/api` verified
-- [ ] **LANG-02**: `src/lib/langfuse.ts` singleton module: `initLangfuse()` initializes OTel NodeSDK with `LangfuseSpanProcessor` on `globalThis.__langfuseOtelSdk` (HMR-safe); `isLangfuseEnabled()` returns true when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` env vars present; conditional activation -- silently disabled when keys absent
-- [ ] **LANG-03**: `initLangfuse()` called in `instrumentation.ts` between orchestrator init and worker loop start (OTel must be ready before any agent invocations)
-- [ ] **LANG-04**: `withAgentObservation()` wraps `invokeAgent()` query loop: creates one Langfuse agent observation per invocation with metadata (taskId, agentId, department, soulExcerpt, prompt excerpt); deterministic traceId from `createTraceId(taskId)` so all invocations for same task nest under one trace; `propagateAttributes()` sets userId='founder', sessionId=taskId, tags=[department, agentId]
-- [ ] **LANG-05**: Fail-silent design: all Langfuse operations wrapped in try/catch with Pino warn logging; Langfuse SDK background queue handles async batching/retry; agent execution never blocked by Langfuse unavailability
+- [x] **LANG-01**: `@langfuse/tracing@5.0.1` + `@langfuse/otel@5.0.1` + `@opentelemetry/sdk-node@0.214.0` + `@opentelemetry/api@1.9.1` installed via pnpm; single copy of `@opentelemetry/api` verified
+- [x] **LANG-02**: `src/lib/langfuse.ts` singleton module: `initLangfuse()` initializes OTel NodeSDK with `LangfuseSpanProcessor` on `globalThis.__langfuseOtelSdk` (HMR-safe); `isLangfuseEnabled()` returns true when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` env vars present; conditional activation -- silently disabled when keys absent
+- [x] **LANG-03**: `initLangfuse()` called in `instrumentation.ts` between orchestrator init and worker loop start (OTel must be ready before any agent invocations)
+- [x] **LANG-04**: `withAgentObservation()` wraps `invokeAgent()` query loop: creates one Langfuse agent observation per invocation with metadata (taskId, agentId, department, soulExcerpt, prompt excerpt); deterministic traceId from `createTraceId(taskId)` so all invocations for same task nest under one trace; `propagateAttributes()` sets userId='founder', sessionId=taskId, tags=[department, agentId]
+- [x] **LANG-05**: Fail-silent design: all Langfuse operations wrapped in try/catch with Pino warn logging; Langfuse SDK background queue handles async batching/retry; agent execution never blocked by Langfuse unavailability
 - [ ] **LANG-06**: `GET /api/system/info` returns `langfuseStatus: 'active'|'inactive'` based on env var presence
 - [ ] **LANG-07**: Settings page (`src/app/settings/page.tsx`) shows "Observability" badge with green dot (`var(--green)`) when active, muted dot (`var(--text-muted)`) when inactive, matching existing Worker status dot pattern
 
@@ -211,11 +211,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INT-03 | Phase 4 | Complete |
 | INT-04 | Phase 4 | Pending |
 | INT-05 | Phase 4 | Pending |
-| LANG-01 | Phase 5 | Pending |
-| LANG-02 | Phase 5 | Pending |
-| LANG-03 | Phase 5 | Pending |
-| LANG-04 | Phase 5 | Pending |
-| LANG-05 | Phase 5 | Pending |
+| LANG-01 | Phase 5 | Complete |
+| LANG-02 | Phase 5 | Complete |
+| LANG-03 | Phase 5 | Complete |
+| LANG-04 | Phase 5 | Complete |
+| LANG-05 | Phase 5 | Complete |
 | LANG-06 | Phase 5 | Pending |
 | LANG-07 | Phase 5 | Pending |
 
