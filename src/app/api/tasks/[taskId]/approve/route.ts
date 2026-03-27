@@ -1,4 +1,4 @@
-import { prisma } from '@/lib/db';
+import { prisma, sqlite } from '@/lib/db';
 import { generateId } from '@/lib/id';
 import { createTaskWorkspace } from '@/lib/workspace';
 import { eventBus } from '@/lib/events';
@@ -38,10 +38,11 @@ export async function POST(
     }
   }
 
+  const fullPlan = plan + (claudeMdExtra || '');
   const workspace = createTaskWorkspace(
     params.taskId,
     task.department as Department,
-    plan + claudeMdExtra,
+    fullPlan,
     constraints,
   );
 
@@ -60,13 +61,20 @@ export async function POST(
     },
   });
 
+  // Look up employee DB id from agentId (task.executorAgentId is an agentId string like 'cto')
+  const agentId = task.executorAgentId || task.planningAgentId || 'cto';
+  const employeeRow = sqlite.prepare('SELECT id FROM employees WHERE agentId = ?').get(agentId) as { id: string } | undefined;
+  if (!employeeRow) {
+    return NextResponse.json({ error: `No employee found for agentId: ${agentId}` }, { status: 500 });
+  }
+
   // Enqueue task_run
   const runId = generateId('run');
   await prisma.taskRun.create({
     data: {
       id: runId,
       taskId: params.taskId,
-      employeeId: task.executorAgentId || task.planningAgentId || 'cto',
+      employeeId: employeeRow.id,
       status: 'queued',
       workspaceCwd: workspace.deskDir,
     },
