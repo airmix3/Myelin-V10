@@ -97,7 +97,7 @@ export default function CanvasPanel({
   const displayContent = renderedContent || planMarkdown;
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '16px' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', padding: '24px', overflow: 'hidden' }}>
       {/* Canvas content area */}
       <div
         ref={containerRef}
@@ -135,8 +135,8 @@ export default function CanvasPanel({
         )}
       </div>
 
-      {/* Action buttons */}
-      <div style={{ display: 'flex', gap: '8px', marginTop: '16px', borderTop: '1px solid var(--border)', paddingTop: '16px' }}>
+      {/* Action buttons - sticky below scrollable plan */}
+      <div style={{ flexShrink: 0, display: 'flex', gap: '8px', paddingTop: '16px', borderTop: '1px solid var(--border)' }}>
         <button
           className="btn"
           onClick={handleEditToggle}
@@ -153,9 +153,9 @@ export default function CanvasPanel({
         </button>
       </div>
 
-      {/* Config section - shown when plan is ready (per Plan 06: TAMIR-05) */}
+      {/* Config section inside its own scroll container so it never collapses the plan */}
       {!isTyping && (
-        <div style={{ borderTop: '1px solid var(--border)', paddingTop: '16px', marginTop: '16px' }}>
+        <div style={{ flexShrink: 0, maxHeight: '400px', overflowY: 'auto', borderTop: '1px solid var(--border)', paddingTop: '12px', marginTop: '8px' }}>
           <ConfigPanel taskId={taskId} currentDepartment={department} />
         </div>
       )}
