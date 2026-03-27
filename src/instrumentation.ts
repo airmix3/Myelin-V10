@@ -97,6 +97,15 @@ export async function register() {
       log.error({ err }, 'Orchestrator initialization failed');
     }
 
+    // 5.5. Initialize Langfuse OTel tracing (D-07, must be before worker loop per Pitfall 1)
+    try {
+      const { initLangfuse } = await import('./lib/langfuse');
+      await initLangfuse();
+      log.info('Langfuse tracing initialized');
+    } catch (err) {
+      log.error({ err }, 'Langfuse initialization failed');
+    }
+
     // 6. Start worker loop (fire-and-forget, does not block startup)
     try {
       startWorkerLoop();

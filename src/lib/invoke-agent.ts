@@ -22,6 +22,7 @@ import { eventBus } from '@/lib/events';
 import { sqlite } from '@/lib/db';
 import { generateId } from '@/lib/id';
 import { logger } from '@/lib/logger';
+import { withAgentObservation } from '@/lib/langfuse';
 
 export interface InvokeAgentOptions {
   taskId: string;
@@ -69,6 +70,7 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
 
   // 4. Build query options
   const queryOptions: Parameters<typeof query>[0]['options'] = {
+    pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_PATH ?? '/home/omersh/.npm-global/bin/claude',
     systemPrompt: { type: 'preset', preset: 'claude_code', append: opts.soulMd },
     cwd: opts.deskDir,
     mcpServers: { myelin: myelinServer },
@@ -95,124 +97,144 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     queryOptions!.agents = opts.agents;
   }
 
-  // 5. Call SDK query()
-  const q = query({ prompt: opts.prompt, options: queryOptions });
+  // 5. Call SDK query() wrapped in Langfuse agent observation
+  return withAgentObservation(
+    {
+      taskId: opts.taskId,
+      agentId: opts.agentId,
+      department: opts.department,
+      soulMd: opts.soulMd,
+      prompt: opts.prompt,
+      runId: opts.runId,
+    },
+    async () => {
+      const q = query({ prompt: opts.prompt, options: queryOptions });
 
-  let sessionId = '';
+      let sessionId = '';
 
-  // 6. Iterate the async generator
-  for await (const msg of q) {
-    // Init message -- capture session_id, check MCP server status
-    if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'init') {
-      const initMsg = msg as SDKSystemMessage;
-      sessionId = initMsg.session_id;
-      log.info({ sessionId, model: initMsg.model, tools: initMsg.tools.length }, 'SDK session initialized');
+      // 6. Iterate the async generator
+      for await (const msg of q) {
+        // Init message -- capture session_id, check MCP server status
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'init') {
+          const initMsg = msg as SDKSystemMessage;
+          sessionId = initMsg.session_id;
+          log.info({ sessionId, model: initMsg.model, tools: initMsg.tools.length }, 'SDK session initialized');
 
-      // Check for failed MCP connections
-      const failedMcp = initMsg.mcp_servers.filter(s => s.status !== 'connected');
-      if (failedMcp.length > 0) {
-        log.error({ failedMcp }, 'MCP servers failed to connect');
+          // Check for failed MCP connections
+          const failedMcp = initMsg.mcp_servers.filter(s => s.status !== 'connected');
+          if (failedMcp.length > 0) {
+            log.error({ failedMcp }, 'MCP servers failed to connect');
+          }
+        }
+
+        // API retry -- log warning
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'api_retry') {
+          const retryMsg = msg as SDKAPIRetryMessage;
+          log.warn({ attempt: retryMsg.attempt, retryDelayMs: retryMsg.retry_delay_ms }, 'API retry');
+        }
+
+        // Assistant message -- log to activity_log and emit to build log
+        if (msg.type === 'assistant') {
+          const assistantMsg = msg as SDKAssistantMessage;
+          sqlite.prepare(`
+            INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
+            VALUES (?, ?, ?, 'SDK_ASSISTANT', ?, datetime('now'))
+          `).run(generateId('log'), opts.taskId, opts.agentId, 'Assistant message');
+
+          eventBus.emit('task:buildlog', {
+            taskId: opts.taskId,
+            event: { type: 'assistant', agentId: opts.agentId, content: assistantMsg },
+          });
+        }
+
+        // Stream event -- emit to build log (partial messages)
+        if (msg.type === 'stream_event') {
+          eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
+        }
+
+        // Tool progress -- emit to build log
+        if (msg.type === 'tool_progress') {
+          eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
+        }
+
+        // Tool use summary -- log to activity_log
+        if (msg.type === 'tool_use_summary') {
+          const summaryMsg = msg as SDKToolUseSummaryMessage;
+          sqlite.prepare(`
+            INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
+            VALUES (?, ?, ?, 'SDK_TOOL_SUMMARY', ?, datetime('now'))
+          `).run(generateId('log'), opts.taskId, opts.agentId, summaryMsg.summary);
+        }
+
+        // Result message -- extract cost, store session, return
+        if (msg.type === 'result') {
+          if (msg.subtype === 'success') {
+            const result = msg as SDKResultSuccess;
+            const totalCostUsd = result.total_cost_usd;
+            const usage = result.usage;
+            const modelUsage = result.modelUsage;
+
+            // Determine model from modelUsage (first key)
+            const model = Object.keys(modelUsage)[0] ?? 'unknown';
+            const modelStats = modelUsage[model];
+
+            // Log cost event to cost_events table (wrapped: task may not exist yet for routing calls)
+            try {
+              sqlite.prepare(`
+                INSERT INTO cost_events (id, taskId, agentId, inputTokens, outputTokens, costUsd, model, createdAt)
+                VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
+              `).run(
+                generateId('cost'),
+                opts.taskId,
+                opts.agentId,
+                modelStats?.inputTokens ?? usage.input_tokens ?? 0,
+                modelStats?.outputTokens ?? usage.output_tokens ?? 0,
+                totalCostUsd,
+                model,
+              );
+            } catch (costErr) {
+              log.warn({ taskId: opts.taskId, costErr }, 'Cost event insert skipped (task not yet persisted)');
+            }
+
+            // Store session for resume (runId may not exist for routing-only calls)
+            try {
+              sqlite.prepare(
+                'UPDATE task_runs SET sessionId = ?, workspaceCwd = ? WHERE id = ?'
+              ).run(sessionId, opts.deskDir, opts.runId);
+            } catch (runErr) {
+              log.warn({ taskId: opts.taskId, runErr }, 'task_runs session update skipped');
+            }
+
+            log.info({
+              sessionId,
+              totalCostUsd,
+              numTurns: result.num_turns,
+              durationMs: result.duration_ms,
+            }, 'Agent invocation completed successfully');
+
+            return {
+              sessionId,
+              totalCostUsd,
+              result: result.result,
+              structuredOutput: result.structured_output,
+            };
+          } else {
+            // Error result
+            const errorResult = msg as SDKResultError;
+            log.error({
+              subtype: errorResult.subtype,
+              errors: errorResult.errors,
+              totalCostUsd: errorResult.total_cost_usd,
+            }, 'Agent execution failed');
+            throw new Error(`Agent execution failed: ${errorResult.subtype} - ${errorResult.errors.join(', ')}`);
+          }
+        }
       }
-    }
 
-    // API retry -- log warning
-    if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'api_retry') {
-      const retryMsg = msg as SDKAPIRetryMessage;
-      log.warn({ attempt: retryMsg.attempt, retryDelayMs: retryMsg.retry_delay_ms }, 'API retry');
-    }
-
-    // Assistant message -- log to activity_log and emit to build log
-    if (msg.type === 'assistant') {
-      const assistantMsg = msg as SDKAssistantMessage;
-      sqlite.prepare(`
-        INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
-        VALUES (?, ?, ?, 'SDK_ASSISTANT', ?, datetime('now'))
-      `).run(generateId('log'), opts.taskId, opts.agentId, 'Assistant message');
-
-      eventBus.emit('task:buildlog', {
-        taskId: opts.taskId,
-        event: { type: 'assistant', agentId: opts.agentId, content: assistantMsg },
-      });
-    }
-
-    // Stream event -- emit to build log (partial messages)
-    if (msg.type === 'stream_event') {
-      eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
-    }
-
-    // Tool progress -- emit to build log
-    if (msg.type === 'tool_progress') {
-      eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
-    }
-
-    // Tool use summary -- log to activity_log
-    if (msg.type === 'tool_use_summary') {
-      const summaryMsg = msg as SDKToolUseSummaryMessage;
-      sqlite.prepare(`
-        INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
-        VALUES (?, ?, ?, 'SDK_TOOL_SUMMARY', ?, datetime('now'))
-      `).run(generateId('log'), opts.taskId, opts.agentId, summaryMsg.summary);
-    }
-
-    // Result message -- extract cost, store session, return
-    if (msg.type === 'result') {
-      if (msg.subtype === 'success') {
-        const result = msg as SDKResultSuccess;
-        const totalCostUsd = result.total_cost_usd;
-        const usage = result.usage;
-        const modelUsage = result.modelUsage;
-
-        // Determine model from modelUsage (first key)
-        const model = Object.keys(modelUsage)[0] ?? 'unknown';
-        const modelStats = modelUsage[model];
-
-        // Log cost event to cost_events table
-        sqlite.prepare(`
-          INSERT INTO cost_events (id, taskId, agentId, inputTokens, outputTokens, costUsd, model, createdAt)
-          VALUES (?, ?, ?, ?, ?, ?, ?, datetime('now'))
-        `).run(
-          generateId('cost'),
-          opts.taskId,
-          opts.agentId,
-          modelStats?.inputTokens ?? usage.input_tokens ?? 0,
-          modelStats?.outputTokens ?? usage.output_tokens ?? 0,
-          totalCostUsd,
-          model,
-        );
-
-        // Store session for resume
-        sqlite.prepare(
-          'UPDATE task_runs SET sessionId = ?, workspaceCwd = ? WHERE id = ?'
-        ).run(sessionId, opts.deskDir, opts.runId);
-
-        log.info({
-          sessionId,
-          totalCostUsd,
-          numTurns: result.num_turns,
-          durationMs: result.duration_ms,
-        }, 'Agent invocation completed successfully');
-
-        return {
-          sessionId,
-          totalCostUsd,
-          result: result.result,
-          structuredOutput: result.structured_output,
-        };
-      } else {
-        // Error result
-        const errorResult = msg as SDKResultError;
-        log.error({
-          subtype: errorResult.subtype,
-          errors: errorResult.errors,
-          totalCostUsd: errorResult.total_cost_usd,
-        }, 'Agent execution failed');
-        throw new Error(`Agent execution failed: ${errorResult.subtype} - ${errorResult.errors.join(', ')}`);
-      }
-    }
-  }
-
-  // Should not reach here -- query should always end with a result message
-  throw new Error('Query ended without result message');
+      // Should not reach here -- query should always end with a result message
+      throw new Error('Query ended without result message');
+    },
+  );
 }
 
 /**
