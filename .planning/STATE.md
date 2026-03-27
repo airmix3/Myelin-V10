@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Phase complete — ready for verification
-stopped_at: Completed 06-02-PLAN.md
-last_updated: "2026-03-27T20:07:34.235Z"
+stopped_at: Completed 06-01-PLAN.md
+last_updated: "2026-03-27T20:07:40.674Z"
 last_activity: 2026-03-27
 progress:
   total_phases: 6
@@ -69,6 +69,7 @@ Plan: 2 of 2
 | Phase 05 P01 | 3min | 2 tasks | 4 files |
 | Phase 05 P02 | 1min | 1 tasks | 2 files |
 | Phase 06 P02 | 1min | 2 tasks | 2 files |
+| Phase 06 P01 | 2min | 2 tasks | 2 files |
 
 ## Accumulated Context
 
@@ -115,6 +116,8 @@ Recent decisions affecting current work:
 - [Phase 05]: No per-message child observations in SDK query loop (subprocess context doesn't propagate)
 - [Phase 05]: Lightweight env var check for Langfuse status instead of importing SDK in API route
 - [Phase 06]: CLAUDE.md is minimal pointer with MCP tool list; plan content in separate PLAN.md
+- [Phase 06]: Filesystem boundary check runs before MCP role-based checks in canUseTool pipeline
+- [Phase 06]: Bash tool scans for absolute paths via regex rather than blocking all bash commands (per D-08)
 
 ### Pending Todos
 
@@ -138,7 +141,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-27T20:07:28.307Z
-Stopped at: Completed 06-02-PLAN.md
+Last session: 2026-03-27T20:07:40.672Z
+Stopped at: Completed 06-01-PLAN.md
 Last activity: 2026-03-27
 Resume file: None
