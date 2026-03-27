@@ -103,8 +103,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **LANG-03**: `initLangfuse()` called in `instrumentation.ts` between orchestrator init and worker loop start (OTel must be ready before any agent invocations)
 - [x] **LANG-04**: `withAgentObservation()` wraps `invokeAgent()` query loop: creates one Langfuse agent observation per invocation with metadata (taskId, agentId, department, soulExcerpt, prompt excerpt); deterministic traceId from `createTraceId(taskId)` so all invocations for same task nest under one trace; `propagateAttributes()` sets userId='founder', sessionId=taskId, tags=[department, agentId]
 - [x] **LANG-05**: Fail-silent design: all Langfuse operations wrapped in try/catch with Pino warn logging; Langfuse SDK background queue handles async batching/retry; agent execution never blocked by Langfuse unavailability
-- [ ] **LANG-06**: `GET /api/system/info` returns `langfuseStatus: 'active'|'inactive'` based on env var presence
-- [ ] **LANG-07**: Settings page (`src/app/settings/page.tsx`) shows "Observability" badge with green dot (`var(--green)`) when active, muted dot (`var(--text-muted)`) when inactive, matching existing Worker status dot pattern
+- [x] **LANG-06**: `GET /api/system/info` returns `langfuseStatus: 'active'|'inactive'` based on env var presence
+- [x] **LANG-07**: Settings page (`src/app/settings/page.tsx`) shows "Observability" badge with green dot (`var(--green)`) when active, muted dot (`var(--text-muted)`) when inactive, matching existing Worker status dot pattern
+
+### Agent Sandboxing
+
+- [ ] **SANDBOX-01**: `buildCanUseTool()` extended with `workspaceBoundaries` parameter; built-in tools (Read, Write, Edit, Glob, Grep) denied when targeting absolute paths outside `deskDir` or `delivDir`; `isPathAllowed()` helper resolves relative paths against deskDir before checking boundaries
+- [ ] **SANDBOX-02**: Bash tool file operations denied when command contains absolute paths outside workspace boundaries; relative paths allowed (resolve within CWD); no restrictions on bash commands themselves per D-08
+- [ ] **SANDBOX-03**: `invokeAgent()` passes `settingSources: []` (not `['project']`) and passes `{ deskDir, delivDir }` workspace boundaries to `buildCanUseTool()` for all invocations
+- [ ] **SANDBOX-04**: `createTaskWorkspace()` writes approved plan to separate `desk/PLAN.md` file; `desk/CLAUDE.md` is a minimal pointer with task context, MCP tool reference, workspace boundary reminder, and pointer to PLAN.md
+- [ ] **SANDBOX-05**: Planning desks get their own `CLAUDE.md` with planning mode instructions; combined with `settingSources: []`, agent's entire instruction set comes from workspace CLAUDE.md only per D-07
 
 ## v2 Requirements
 
@@ -216,14 +224,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | LANG-03 | Phase 5 | Complete |
 | LANG-04 | Phase 5 | Complete |
 | LANG-05 | Phase 5 | Complete |
-| LANG-06 | Phase 5 | Pending |
-| LANG-07 | Phase 5 | Pending |
+| LANG-06 | Phase 5 | Complete |
+| LANG-07 | Phase 5 | Complete |
+| SANDBOX-01 | Phase 6 | Pending |
+| SANDBOX-02 | Phase 6 | Pending |
+| SANDBOX-03 | Phase 6 | Pending |
+| SANDBOX-04 | Phase 6 | Pending |
+| SANDBOX-05 | Phase 6 | Pending |
 
 **Coverage:**
-- v1 requirements: 72 total
-- Mapped to phases: 72
+- v1 requirements: 77 total
+- Mapped to phases: 77
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-27 after Phase 5 planning*
+*Last updated: 2026-03-27 after Phase 6 planning*

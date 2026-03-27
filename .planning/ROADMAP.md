@@ -17,6 +17,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [x] **Phase 3: Cortex UI + Tamir Interface** - Six core pages, CSS design system, Tamir routing, planning flow, and tool gallery (completed 2026-03-26)
 - [ ] **Phase 4: Deliverable Workspace + Integration** - Split-pane workspace, supervisor review, skill extraction, and acceptance scenarios
 - [ ] **Phase 5: Langfuse Integration** - Hierarchical trace visualization, cost analytics, observability status badge
+- [ ] **Phase 6: Sandboxing Agents** - Filesystem boundary enforcement, workspace isolation, settingSources cleanup
 
 ## Phase Details
 
@@ -116,7 +117,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -125,3 +126,21 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 | 3. Cortex UI + Tamir Interface | 6/6 | Complete   | 2026-03-26 |
 | 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
 | 5. Langfuse Integration | 1/2 | In Progress|  |
+| 6. Sandboxing Agents | 0/2 | Not started | - |
+
+### Phase 6: Sandboxing Agents
+
+**Goal:** Restrict agent filesystem access to workspace boundaries for faster inference and security isolation — agents use only their desk/deliverables dirs via built-in tools, and MCP tools for shared resources
+**Requirements**: SANDBOX-01, SANDBOX-02, SANDBOX-03, SANDBOX-04, SANDBOX-05
+**Depends on:** Phase 5
+**Success Criteria** (what must be TRUE):
+  1. Built-in tools (Read/Write/Edit/Glob/Grep/Bash) are denied when targeting paths outside the agent's workspace
+  2. MCP tools continue to work for shared resource access (memory, knowledge, vault)
+  3. settingSources is empty — agents see only their workspace CLAUDE.md
+  4. Approved plan lives in separate PLAN.md, CLAUDE.md is a minimal pointer
+  5. Planning desk invocations are sandboxed to planning desk directory
+**Plans**: 2 plans
+
+Plans:
+- [ ] 06-01-PLAN.md — Filesystem boundary enforcement in canUseTool + settingSources isolation
+- [ ] 06-02-PLAN.md — Workspace PLAN.md separation + CLAUDE.md restructure + planning desk CLAUDE.md
