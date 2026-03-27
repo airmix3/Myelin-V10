@@ -8,6 +8,7 @@ interface SystemInfo {
   dbPath: string;
   runtime: string;
   workerStatus: string;
+  langfuseStatus: string;
 }
 
 export default function SettingsPage() {
@@ -64,6 +65,20 @@ export default function SettingsPage() {
             <div style={{ fontWeight: 'bold' }}>
               <span style={{ display: 'inline-block', width: '8px', height: '8px', borderRadius: '50%', background: 'var(--green)', marginRight: '4px' }} />
               {systemInfo?.workerStatus === 'running' ? 'Running' : 'Loading...'}
+            </div>
+          </div>
+          <div>
+            <span style={{ color: 'var(--text-dim)' }}>Observability</span>
+            <div style={{ fontWeight: 'bold' }}>
+              <span style={{
+                display: 'inline-block',
+                width: '8px',
+                height: '8px',
+                borderRadius: '50%',
+                background: systemInfo?.langfuseStatus === 'active' ? 'var(--green)' : 'var(--text-muted)',
+                marginRight: '4px',
+              }} />
+              {systemInfo?.langfuseStatus === 'active' ? 'Active' : 'Inactive'}
             </div>
           </div>
         </div>
