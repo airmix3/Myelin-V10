@@ -26,26 +26,37 @@ export async function POST(request: NextRequest) {
   // Planning turns don't need a full workspace -- use the planning desk
   // and provide dummy delivDir/manifestPath since planning doesn't produce deliverables
   const tamirDeskDir = join(DATA_DIR, 'departments', 'global', 'planning-desk');
+  mkdirSync(join(tamirDeskDir, 'chat'), { recursive: true });
   const tmpDelivDir = join(DATA_DIR, 'tmp', taskId);
   mkdirSync(tmpDelivDir, { recursive: true });
   const tmpManifestPath = join(tmpDelivDir, 'manifest.json');
   writeFileSync(tmpManifestPath, '{}', 'utf-8');
 
   // Invoke Tamir with ROUTING_SCHEMA for immediate routing (per D-04)
-  const result = await orchestrator.invoke({
-    taskId,
-    runId,
-    agentId: 'tamir',
-    prompt: `The CEO wants to get something done. Route this request to the correct department.\n\nCEO's request: "${message}"`,
-    deskDir: tamirDeskDir,
-    delivDir: tmpDelivDir,
-    manifestPath: tmpManifestPath,
-    outputFormat: ROUTING_SCHEMA,
-    maxBudgetUsd: 1,
-  });
+  let result;
+  try {
+    result = await orchestrator.invoke({
+      taskId,
+      runId,
+      agentId: 'tamir',
+      prompt: `The CEO wants to get something done. Route this request to the correct department.\n\nCEO's request: "${message}"`,
+      deskDir: tamirDeskDir,
+      delivDir: tmpDelivDir,
+      manifestPath: tmpManifestPath,
+      outputFormat: ROUTING_SCHEMA,
+      maxBudgetUsd: 1,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    const stack = err instanceof Error ? err.stack : '';
+    console.error('[tamir/route] orchestrator.invoke failed:', msg);
+    console.error('[tamir/route] stack:', stack);
+    return NextResponse.json({ error: `Tamir invocation failed: ${msg}` }, { status: 500 });
+  }
 
   const routing = result.structuredOutput as RoutingResult;
   if (!routing?.department) {
+    console.error('[tamir/route] No structured output returned. Result:', JSON.stringify(result));
     return NextResponse.json(
       { error: 'Tamir could not route this request. Try rephrasing your task description.' },
       { status: 500 },

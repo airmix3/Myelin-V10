@@ -5,7 +5,7 @@ import { transitionTask } from '@/lib/state-machine';
 import { AGENT_TURN_SCHEMA } from '@/a2a/schemas';
 import type { AgentTurnResult, TaskState } from '@/a2a/types';
 import { NextRequest, NextResponse } from 'next/server';
-import { appendFileSync, mkdirSync, writeFileSync } from 'fs';
+import { appendFileSync, existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { join, resolve, dirname } from 'path';
 
 export const maxDuration = 120;
@@ -48,26 +48,73 @@ export async function POST(
   // Invoke agent with AGENT_TURN_SCHEMA (per D-06)
   const runId = generateId('run');
   const planningDeskDir = join(DATA_DIR, 'departments', task.department, 'planning-desk');
+  mkdirSync(join(planningDeskDir, 'chat'), { recursive: true });
   const tmpDelivDir = join(DATA_DIR, 'tmp', params.taskId);
   mkdirSync(tmpDelivDir, { recursive: true });
   const tmpManifestPath = join(tmpDelivDir, 'manifest.json');
   writeFileSync(tmpManifestPath, '{}', 'utf-8');
 
-  const result = await orchestrator.invoke({
-    taskId: params.taskId,
-    runId,
-    agentId,
-    prompt: message,
-    deskDir: planningDeskDir,
-    delivDir: tmpDelivDir,
-    manifestPath: tmpManifestPath,
-    outputFormat: AGENT_TURN_SCHEMA,
-    maxBudgetUsd: 2,
-  });
+  // Build context-rich prompt for planning turns
+  // Include task title + description + chat history so the agent knows what it's planning
+  let agentPrompt = message;
+  if (chosenAgentId) {
+    // First planning turn: inject full task context so agent knows what to plan
+    agentPrompt = [
+      `## Task to Plan\n**Title:** ${task.title}\n**Description:** ${task.description || task.title}`,
+      `\n## CEO's message\n${message}`,
+      `\n## Instructions\nYou are in PLANNING MODE. Do NOT execute the task. Produce a plan the CEO can review and approve. Respond with turn_type "plan_ready" and the full plan in plan_markdown once you have enough information.`,
+    ].join('\n');
+  } else {
+    // Follow-up turn: include chat history + re-state planning instructions
+    const chatHistory = existsSync(chatPath)
+      ? readFileSync(chatPath, 'utf-8').trim().split('\n').filter(Boolean).slice(-10).map(l => {
+          try {
+            const e = JSON.parse(l) as { role: string; content?: string; planMarkdown?: string };
+            const text = e.planMarkdown ? `[plan_ready — plan attached]` : (e.content || '').substring(0, 400);
+            return `${e.role === 'user' ? 'CEO' : 'You'}: ${text}`;
+          } catch { return ''; }
+        }).filter(Boolean).join('\n')
+      : '';
+    agentPrompt = [
+      chatHistory ? `## Conversation so far\n${chatHistory}` : '',
+      `## CEO's latest message\n${message}`,
+      `\n## Instructions\nYou are in PLANNING MODE. Continue the planning conversation. Respond with turn_type "question" to ask another clarifying question, or "plan_ready" with a full plan_markdown if you have enough information to proceed.`,
+    ].filter(Boolean).join('\n\n');
+  }
 
-  const turn = result.structuredOutput as AgentTurnResult;
+  let result;
+  try {
+    result = await orchestrator.invoke({
+      taskId: params.taskId,
+      runId,
+      agentId,
+      prompt: agentPrompt,
+      deskDir: planningDeskDir,
+      delivDir: tmpDelivDir,
+      manifestPath: tmpManifestPath,
+      outputFormat: AGENT_TURN_SCHEMA,
+      maxBudgetUsd: 2,
+    });
+  } catch (err) {
+    const msg = err instanceof Error ? err.message : String(err);
+    return NextResponse.json({ error: `Agent invocation failed: ${msg}` }, { status: 500 });
+  }
+
+  // Prefer structured_output; fall back to parsing result.result as JSON
+  let turn = result.structuredOutput as AgentTurnResult | undefined;
+  if (!turn && result.result) {
+    try {
+      const parsed = JSON.parse(result.result.trim());
+      if (parsed.turn_type && parsed.message) turn = parsed as AgentTurnResult;
+    } catch { /* not JSON */ }
+  }
   if (!turn) {
-    return NextResponse.json({ error: 'Agent failed to respond.' }, { status: 500 });
+    // Last resort: wrap plain text response as a question turn
+    if (result.result?.trim()) {
+      turn = { turn_type: 'question', message: result.result.trim() };
+    } else {
+      return NextResponse.json({ error: 'Agent failed to respond.' }, { status: 500 });
+    }
   }
 
   // Append agent response to JSONL
