@@ -16,6 +16,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 2: Agent Execution Layer** - SDK integration, MCP tool server, workspace isolation, agent identity, and global skills
 - [x] **Phase 3: Cortex UI + Tamir Interface** - Six core pages, CSS design system, Tamir routing, planning flow, and tool gallery (completed 2026-03-26)
 - [ ] **Phase 4: Deliverable Workspace + Integration** - Split-pane workspace, supervisor review, skill extraction, and acceptance scenarios
+- [ ] **Phase 5: Langfuse Integration** - Hierarchical trace visualization, cost analytics, observability status badge
 
 ## Phase Details
 
@@ -97,10 +98,25 @@ Plans:
 - [x] 04-03-PLAN.md — Deliverable workspace page: split-pane, chat, all 4 tabs, approval cards, file browser
 - [ ] 04-04-PLAN.md — EEG test fixture + acceptance scenario runbooks + end-to-end verification checkpoint
 
+### Phase 5: Langfuse Integration
+**Goal**: Hierarchical trace visualization and cost analytics for all agent invocations via Langfuse Cloud, with conditional activation and silent degradation
+**Depends on**: Phase 4
+**Requirements**: LANG-01, LANG-02, LANG-03, LANG-04, LANG-05, LANG-06, LANG-07
+**Success Criteria** (what must be TRUE):
+  1. Langfuse OTel SDK initializes at server boot when API keys present, silently skips when absent
+  2. Every invokeAgent() call creates a Langfuse agent observation with task/agent metadata under a deterministic per-task trace
+  3. Traces are batched and sent async with zero impact on agent execution performance
+  4. Settings page shows Observability status badge (Active/Inactive) reflecting Langfuse configuration
+**Plans**: 2 plans
+
+Plans:
+- [ ] 05-01-PLAN.md — Langfuse SDK install + tracing module + OTel init + invokeAgent instrumentation
+- [ ] 05-02-PLAN.md — System info API langfuseStatus + settings page observability badge
+
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -108,3 +124,4 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4
 | 2. Agent Execution Layer | 6/6 | Complete | - |
 | 3. Cortex UI + Tamir Interface | 6/6 | Complete   | 2026-03-26 |
 | 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
+| 5. Langfuse Integration | 0/2 | Not started | - |

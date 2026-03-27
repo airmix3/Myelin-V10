@@ -96,6 +96,16 @@ Requirements for initial release. Each maps to roadmap phases.
 - [ ] **INT-04**: Acceptance Scenario A passes: AI-generated brand video for X — routes to CMO, agent discovers AI video tools via web search, produces video deliverable, skill extracted and approved, skill auto-triggers on second similar request
 - [ ] **INT-05**: Acceptance Scenario B passes: EEG SVM classifier — routes to CTO, temp data scientist hired, real Python code executes in desk, real metrics and plots produced, CTO review gate works, all files viewable in workspace
 
+### Langfuse Observability
+
+- [ ] **LANG-01**: `@langfuse/tracing@5.0.1` + `@langfuse/otel@5.0.1` + `@opentelemetry/sdk-node@0.214.0` + `@opentelemetry/api@1.9.1` installed via pnpm; single copy of `@opentelemetry/api` verified
+- [ ] **LANG-02**: `src/lib/langfuse.ts` singleton module: `initLangfuse()` initializes OTel NodeSDK with `LangfuseSpanProcessor` on `globalThis.__langfuseOtelSdk` (HMR-safe); `isLangfuseEnabled()` returns true when `LANGFUSE_PUBLIC_KEY` + `LANGFUSE_SECRET_KEY` env vars present; conditional activation -- silently disabled when keys absent
+- [ ] **LANG-03**: `initLangfuse()` called in `instrumentation.ts` between orchestrator init and worker loop start (OTel must be ready before any agent invocations)
+- [ ] **LANG-04**: `withAgentObservation()` wraps `invokeAgent()` query loop: creates one Langfuse agent observation per invocation with metadata (taskId, agentId, department, soulExcerpt, prompt excerpt); deterministic traceId from `createTraceId(taskId)` so all invocations for same task nest under one trace; `propagateAttributes()` sets userId='founder', sessionId=taskId, tags=[department, agentId]
+- [ ] **LANG-05**: Fail-silent design: all Langfuse operations wrapped in try/catch with Pino warn logging; Langfuse SDK background queue handles async batching/retry; agent execution never blocked by Langfuse unavailability
+- [ ] **LANG-06**: `GET /api/system/info` returns `langfuseStatus: 'active'|'inactive'` based on env var presence
+- [ ] **LANG-07**: Settings page (`src/app/settings/page.tsx`) shows "Observability" badge with green dot (`var(--green)`) when active, muted dot (`var(--text-muted)`) when inactive, matching existing Worker status dot pattern
+
 ## v2 Requirements
 
 Deferred to next milestone.
@@ -201,12 +211,19 @@ Which phases cover which requirements. Updated during roadmap creation.
 | INT-03 | Phase 4 | Complete |
 | INT-04 | Phase 4 | Pending |
 | INT-05 | Phase 4 | Pending |
+| LANG-01 | Phase 5 | Pending |
+| LANG-02 | Phase 5 | Pending |
+| LANG-03 | Phase 5 | Pending |
+| LANG-04 | Phase 5 | Pending |
+| LANG-05 | Phase 5 | Pending |
+| LANG-06 | Phase 5 | Pending |
+| LANG-07 | Phase 5 | Pending |
 
 **Coverage:**
-- v1 requirements: 65 total
-- Mapped to phases: 65
+- v1 requirements: 72 total
+- Mapped to phases: 72
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-25 after roadmap creation*
+*Last updated: 2026-03-27 after Phase 5 planning*
