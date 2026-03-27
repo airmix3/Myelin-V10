@@ -38,6 +38,9 @@ export interface InvokeAgentOptions {
   maxBudgetUsd?: number;
   outputFormat?: JsonSchemaOutputFormat;
   agents?: Record<string, AgentDefinition>;
+  /** Restrict available built-in tools. `[]` disables all built-in tools (LLM-only mode).
+   *  Omit to use full Claude Code preset (default for execution runs). */
+  tools?: string[] | { type: 'preset'; preset: 'claude_code' };
 }
 
 export interface InvokeAgentResult {
@@ -64,7 +67,10 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
   const myelinServer = buildMyelinMcpServer(ctx);
 
   // 3. Create role-based access control callback
-  const canUseTool = buildCanUseTool(opts.agentId, opts.department);
+  const canUseTool = buildCanUseTool(opts.agentId, opts.department, {
+    deskDir: opts.deskDir,
+    delivDir: opts.delivDir,
+  });
 
   log.info({ deskDir: opts.deskDir, sessionId: opts.sessionId ?? 'new' }, 'Starting agent invocation');
 
@@ -81,13 +87,18 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     maxBudgetUsd: opts.maxBudgetUsd ?? 10,
     includePartialMessages: true,
     resume: opts.sessionId,
-    settingSources: ['project'],
+    settingSources: [],
     env: {
       ...process.env as Record<string, string>,
       CLAUDE_CODE_USE_BEDROCK: '1',
       CLAUDE_CODE_STREAM_CLOSE_TIMEOUT: '120000',
     },
   };
+
+  // Restrict built-in tools when specified (e.g., planning turns use tools: [] for LLM-only mode)
+  if (opts.tools !== undefined) {
+    queryOptions!.tools = opts.tools;
+  }
 
   // Only add optional fields if provided
   if (opts.outputFormat) {
