@@ -12,6 +12,7 @@ import type {
   SDKResultSuccess,
   SDKResultError,
   SDKToolUseSummaryMessage,
+  SDKToolProgressMessage,
   AgentDefinition,
   JsonSchemaOutputFormat,
 } from '@anthropic-ai/claude-agent-sdk';
@@ -156,6 +157,25 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
             taskId: opts.taskId,
             event: { type: 'assistant', agentId: opts.agentId, content: assistantMsg },
           });
+
+          // Extract tool_use blocks for richer activity feed
+          const content = assistantMsg.message?.content;
+          if (Array.isArray(content)) {
+            for (const block of content) {
+              if (block.type === 'tool_use') {
+                eventBus.emit('task:buildlog', {
+                  taskId: opts.taskId,
+                  event: {
+                    type: 'tool_call',
+                    agentId: opts.agentId,
+                    tool_name: block.name,
+                    tool_use_id: block.id,
+                    timestamp: new Date().toISOString(),
+                  },
+                });
+              }
+            }
+          }
         }
 
         // Stream event -- emit to build log (partial messages)
@@ -163,9 +183,20 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
           eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
         }
 
-        // Tool progress -- emit to build log
+        // Tool progress -- emit structured activity to build log
         if (msg.type === 'tool_progress') {
-          eventBus.emit('task:buildlog', { taskId: opts.taskId, event: msg });
+          const toolMsg = msg as SDKToolProgressMessage;
+          eventBus.emit('task:buildlog', {
+            taskId: opts.taskId,
+            event: {
+              type: 'tool_activity',
+              agentId: opts.agentId,
+              tool_name: toolMsg.tool_name,
+              elapsed_time_seconds: toolMsg.elapsed_time_seconds,
+              tool_use_id: toolMsg.tool_use_id,
+              timestamp: new Date().toISOString(),
+            },
+          });
         }
 
         // Tool use summary -- log to activity_log
@@ -175,6 +206,17 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
             INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
             VALUES (?, ?, ?, 'SDK_TOOL_SUMMARY', ?, datetime('now'))
           `).run(generateId('log'), opts.taskId, opts.agentId, summaryMsg.summary);
+
+          // Also emit to buildlog for live UI
+          eventBus.emit('task:buildlog', {
+            taskId: opts.taskId,
+            event: {
+              type: 'tool_summary',
+              agentId: opts.agentId,
+              summary: summaryMsg.summary,
+              timestamp: new Date().toISOString(),
+            },
+          });
         }
 
         // Result message -- extract cost, store session, return
