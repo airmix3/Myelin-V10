@@ -168,4 +168,4 @@ This document evolves at phase transitions and milestone boundaries.
 4. Update Context with current state
 
 ---
-*Last updated: 2026-03-26 after Phase 3: Cortex UI + Tamir Interface — 6 Cortex pages, full Tamir planning flow (route→chat→canvas→configure→approve), all Tamir backend APIs complete*
+*Last updated: 2026-03-27 after Phase 6: Sandboxing Agents — filesystem boundary enforcement via canUseTool callback (isPathAllowed), settingSources: [] for full agent isolation, workspace PLAN.md/CLAUDE.md separation*
