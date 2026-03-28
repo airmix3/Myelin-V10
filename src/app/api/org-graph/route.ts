@@ -1,6 +1,13 @@
 import { NextResponse } from 'next/server';
 import { sqlite } from '@/lib/db';
 
+interface ActivityLogRow {
+  id: string;
+  actionType: string;
+  description: string | null;
+  createdAt: string;
+}
+
 interface OrgNode {
   id: string;
   name: string;
@@ -16,6 +23,7 @@ interface OrgNode {
     runId: string | null;
     sessionId: string | null;
     workspaceCwd: string | null;
+    recentActivity: ActivityLogRow[];
   }[];
 }
 
@@ -62,13 +70,13 @@ export async function GET() {
     const tamir = employees.find(e => e.agentId === 'tamir');
 
     for (const emp of employees) {
-      // Fetch active tasks for this employee
-      const activeTasks = sqlite.prepare(`
+      // Fetch active tasks for this employee via task_runs join
+      const activeTaskRows = sqlite.prepare(`
         SELECT t.id as taskId, t.title, t.state,
                tr.id as runId, tr.sessionId, tr.workspaceCwd
-        FROM tasks t
-        LEFT JOIN task_runs tr ON tr.taskId = t.id AND tr.status = 'executing'
-        WHERE t.assigneeId = ?
+        FROM task_runs tr
+        INNER JOIN tasks t ON t.id = tr.taskId
+        WHERE tr.employeeId = ?
           AND t.state IN ('submitted', 'working', 'input-required')
         ORDER BY t.createdAt DESC
       `).all(emp.id) as Array<{
@@ -79,6 +87,28 @@ export async function GET() {
         sessionId: string | null;
         workspaceCwd: string | null;
       }>;
+
+      // Attach recent activity_log entries to each active task
+      const activeTasks = activeTaskRows.map(task => {
+        const rawActivity = sqlite.prepare(`
+          SELECT id, actionType, description, createdAt
+          FROM activity_log
+          WHERE taskId = ?
+          ORDER BY createdAt DESC
+          LIMIT 20
+        `).all(task.taskId) as ActivityLogRow[];
+
+        // Filter out generic SDK_ASSISTANT noise, then reverse to chronological order
+        const recentActivity = rawActivity
+          .filter(a => {
+            if (a.actionType !== 'SDK_ASSISTANT') return true;
+            const desc = a.description;
+            return Boolean(desc && desc !== 'Assistant message');
+          })
+          .reverse();
+
+        return { ...task, recentActivity };
+      });
 
       nodes.push({
         id: emp.id,
