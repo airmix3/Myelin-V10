@@ -5,12 +5,6 @@
 import { logger } from '@/lib/logger';
 import { invokeAgent, type InvokeAgentResult } from '@/lib/invoke-agent';
 import type { AgentDefinition, JsonSchemaOutputFormat } from '@anthropic-ai/claude-agent-sdk';
-import { readFileSync } from 'fs';
-import { resolve } from 'path';
-import tamirCard from '@/agents/tamir/card.json';
-import ctoCard from '@/agents/cto/card.json';
-import cmoCard from '@/agents/cmo/card.json';
-import cooCard from '@/agents/coo/card.json';
 
 interface AgentRegistryEntry {
   agentId: string;
@@ -50,16 +44,7 @@ export class AgentOrchestrator {
     maxBudgetUsd?: number;
     outputFormat?: JsonSchemaOutputFormat;
     agents?: Record<string, AgentDefinition>;
-    tools?: string[] | { type: 'preset'; preset: 'claude_code' };
-    projectRoot?: string;
   }): Promise<InvokeAgentResult> {
-    // Lazy init -- handles Next.js dev worker context splits where instrumentation
-    // runs in a different context than API route handlers.
-    if (this.agents.size === 0) {
-      this.log.info('Lazy-initializing orchestrator (no agents registered in this context)');
-      initOrchestrator();
-    }
-
     const agent = this.agents.get(opts.agentId);
     if (!agent) throw new Error(`Unknown agent: ${opts.agentId}`);
 
@@ -79,26 +64,23 @@ export const orchestrator: AgentOrchestrator = globalForOrch.__orchestrator ??= 
 
 /**
  * Initialize orchestrator with all 4 executive agent configs.
- * Safe to call multiple times -- register() is idempotent (Map.set).
- * Automatically called by invoke() if agents haven't been loaded yet.
+ * Called once from instrumentation.ts on server startup.
+ * Uses dynamic imports since agent.ts files use import.meta.url + readFileSync.
  */
-export function initOrchestrator(): void {
-  const cwd = process.cwd();
-  const agents = [
-    { card: tamirCard, soul: 'tamir' },
-    { card: ctoCard, soul: 'cto' },
-    { card: cmoCard, soul: 'cmo' },
-    { card: cooCard, soul: 'coo' },
-  ];
-  for (const { card, soul } of agents) {
-    const soulMd = readFileSync(resolve(cwd, `src/agents/${soul}/soul.md`), 'utf-8');
+export async function initOrchestrator(): Promise<void> {
+  const { agentConfig: tamirConfig } = await import('@/agents/tamir/agent');
+  const { agentConfig: ctoConfig } = await import('@/agents/cto/agent');
+  const { agentConfig: cmoConfig } = await import('@/agents/cmo/agent');
+  const { agentConfig: cooConfig } = await import('@/agents/coo/agent');
+
+  for (const config of [tamirConfig, ctoConfig, cmoConfig, cooConfig]) {
     orchestrator.register({
-      agentId: card.agentId,
-      name: card.name,
-      department: card.department,
-      role: card.role,
-      soulMd,
-      avatarColor: card.avatarColor,
+      agentId: config.agentId,
+      name: config.name,
+      department: config.department,
+      role: config.role,
+      soulMd: config.soulMd,
+      avatarColor: config.avatarColor,
     });
   }
 }
