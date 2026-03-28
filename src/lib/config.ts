@@ -1,5 +1,5 @@
 /**
- * Myelin runtime configuration.
+ * Cortex runtime configuration.
  *
  * All tuneable values live here. No magic numbers in application code.
  * Values are grouped by subsystem and annotated with the decision reference

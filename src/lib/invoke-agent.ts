@@ -21,7 +21,7 @@ import type {
   AgentDefinition,
   JsonSchemaOutputFormat,
 } from '@anthropic-ai/claude-agent-sdk';
-import { buildMyelinMcpServer } from '@/lib/mcp/server';
+import { buildCortexMcpServer } from '@/lib/mcp/server';
 import { createToolContext } from '@/lib/mcp/tool-context';
 import { buildCanUseTool } from '@/lib/mcp/access-control';
 import { eventBus } from '@/lib/events';
@@ -174,7 +174,7 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
   });
 
   // 2. Create fresh MCP server for this invocation
-  const myelinServer = buildMyelinMcpServer(ctx);
+  const cortexServer = buildCortexMcpServer(ctx);
 
   // 3. Create role-based access control callback
   const canUseTool = buildCanUseTool(opts.agentId, opts.department, {
@@ -189,8 +189,8 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     pathToClaudeCodeExecutable: process.env.CLAUDE_CODE_PATH ?? '/home/omersh/.npm-global/bin/claude',
     systemPrompt: { type: 'preset', preset: 'claude_code', append: opts.soulMd },
     cwd: opts.deskDir,
-    mcpServers: { myelin: myelinServer },
-    allowedTools: ['mcp__myelin__*'],
+    mcpServers: { cortex: cortexServer },
+    allowedTools: ['mcp__cortex__*'],
     canUseTool,
     permissionMode: 'acceptEdits',
     maxBudgetUsd: opts.maxBudgetUsd ?? 10,
@@ -249,6 +249,15 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
           const initMsg = msg as SDKSystemMessage;
           sessionId = initMsg.session_id;
           log.info({ sessionId, model: initMsg.model, tools: initMsg.tools.length }, 'SDK session initialized');
+
+          // Persist sessionId immediately so "Take His Role" can resume mid-execution
+          try {
+            sqlite.prepare(
+              'UPDATE task_runs SET sessionId = ? WHERE id = ? AND sessionId IS NULL'
+            ).run(sessionId, opts.runId);
+          } catch (earlySessionErr) {
+            log.warn({ runId: opts.runId, earlySessionErr }, 'Early sessionId persist skipped');
+          }
 
           insertActivityLog({
             taskId: opts.taskId,

@@ -16,7 +16,7 @@ import { createHireTools } from './tools/hire';
 import { createInstallTools } from './tools/install';
 import { createEscalateTools } from './tools/escalate';
 
-export function buildMyelinMcpServer(ctx: ToolContext) {
+export function buildCortexMcpServer(ctx: ToolContext) {
   const memoryTools = createMemoryTools(ctx);
   const knowledgeTools = createKnowledgeTools(ctx);
   const deliverableTools = createDeliverableTools(ctx);
@@ -29,7 +29,7 @@ export function buildMyelinMcpServer(ctx: ToolContext) {
   const escalateTools = createEscalateTools(ctx);
 
   return createSdkMcpServer({
-    name: 'myelin',
+    name: 'cortex',
     tools: [
       ...memoryTools,
       ...knowledgeTools,

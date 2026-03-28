@@ -16,24 +16,24 @@ export async function seedGallery(): Promise<void> {
 }
 
 /**
- * Seed the Myelin internal MCP server entry.
+ * Seed the Cortex internal MCP server entry.
  * 8 tool modules with ~14 total tools.
  */
 async function seedMcpServers(): Promise<void> {
-  const existing = await prisma.mcpServer.findUnique({ where: { name: 'myelin' } });
+  const existing = await prisma.mcpServer.findUnique({ where: { name: 'cortex' } });
   if (!existing) {
     await prisma.mcpServer.create({
       data: {
         id: generateId('mcp'),
-        name: 'myelin',
-        description: 'Myelin internal tools (memory, knowledge, vault, deliverable, review, skills, inbox, hire)',
+        name: 'cortex',
+        description: 'Cortex internal tools (memory, knowledge, vault, deliverable, review, skills, inbox, hire)',
         status: 'active',
         toolCount: 14,
       },
     });
-    log.info('Seeded MCP server: myelin');
+    log.info('Seeded MCP server: cortex');
   } else {
-    log.debug('MCP server "myelin" already exists');
+    log.debug('MCP server "cortex" already exists');
   }
 }
 

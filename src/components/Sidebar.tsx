@@ -20,8 +20,8 @@ export default function Sidebar() {
 
   return (
     <aside className="sidebar">
-      <div className="sidebar-logo">Myelin</div>
-      <div className="sidebar-version">v10 — The Cortex</div>
+      <div className="sidebar-logo">Cortex</div>
+      <div className="sidebar-version">AI Operating System</div>
       <nav>
         {NAV_ITEMS.map((link) => {
           const isActive =

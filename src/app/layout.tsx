@@ -2,7 +2,7 @@ import type { Metadata } from 'next';
 import Sidebar from '@/components/Sidebar';
 
 export const metadata: Metadata = {
-  title: 'Myelin v10 — The Cortex',
+  title: 'Cortex — AI Operating System',
   description: 'AI Company Operating System',
 };
 

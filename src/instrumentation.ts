@@ -11,9 +11,9 @@
 export async function register() {
   if (process.env.NEXT_RUNTIME === 'nodejs') {
     // Singleton guard -- prevent duplicate init on HMR
-    const g = globalThis as typeof globalThis & { __myelinInit?: boolean };
-    if (g.__myelinInit) return;
-    g.__myelinInit = true;
+    const g = globalThis as typeof globalThis & { __cortexInit?: boolean };
+    if (g.__cortexInit) return;
+    g.__cortexInit = true;
 
     // Dynamic imports to keep edge runtime clean
     const { initFTS5 } = await import('./lib/fts');
@@ -27,7 +27,7 @@ export async function register() {
 
     const log = logger.child({ module: 'instrumentation' });
 
-    log.info('Myelin v10 server initialization starting');
+    log.info('Cortex server initialization starting');
 
     // 1. Initialize FTS5 safety net (sync, fast)
     try {
@@ -176,6 +176,6 @@ export async function register() {
       log.error({ err }, 'Worker loop start failed');
     }
 
-    log.info('Myelin v10 server initialization complete');
+    log.info('Cortex server initialization complete');
   }
 }

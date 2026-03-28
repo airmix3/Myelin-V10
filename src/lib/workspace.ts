@@ -42,7 +42,7 @@ export function createTaskWorkspace(
   const settingsPath = join(deskDir, '.claude', 'settings.json');
   writeFileSync(settingsPath, JSON.stringify({
     permissions: {
-      allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+      allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
       deny: [],
     },
   }, null, 2), 'utf-8');
@@ -152,7 +152,7 @@ export function ensureManagerDesks(): void {
     const settingsPath = join(settingsDir, 'settings.json');
     writeFileSync(settingsPath, JSON.stringify({
       permissions: {
-        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
         deny: [],
       },
     }, null, 2), 'utf-8');
@@ -206,7 +206,7 @@ export function ensurePlanningDesks(): void {
       const settingsPath = join(cosDir, '.claude', 'settings.json');
       writeFileSync(settingsPath, JSON.stringify({
         permissions: {
-          allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+          allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
           deny: [],
         },
       }, null, 2), 'utf-8');
@@ -268,7 +268,7 @@ Do NOT use built-in tools to modify production code during planning. Planning mo
     const settingsPath = join(planningDesk, '.claude', 'settings.json');
     writeFileSync(settingsPath, JSON.stringify({
       permissions: {
-        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
         deny: [],
       },
     }, null, 2), 'utf-8');

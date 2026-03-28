@@ -70,10 +70,10 @@ export async function POST(
       ].join(' '),
       tools: [
         'Read', 'Edit', 'Write', 'Bash', 'Glob', 'Grep',
-        'mcp__myelin__read_memory', 'mcp__myelin__write_memory',
-        'mcp__myelin__read_knowledge', 'mcp__myelin__search_knowledge',
-        'mcp__myelin__promote_to_deliverable', 'mcp__myelin__propose_skill',
-        'mcp__myelin__submit_for_review',
+        'mcp__cortex__read_memory', 'mcp__cortex__write_memory',
+        'mcp__cortex__read_knowledge', 'mcp__cortex__search_knowledge',
+        'mcp__cortex__promote_to_deliverable', 'mcp__cortex__propose_skill',
+        'mcp__cortex__submit_for_review',
       ],
     },
   };

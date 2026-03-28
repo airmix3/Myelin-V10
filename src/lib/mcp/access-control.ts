@@ -2,7 +2,7 @@
  * Role-based access control for MCP tools — Per TOOL-02.
  * Filesystem boundary enforcement for built-in tools — Per SANDBOX-01.
  *
- * MCP tools are exposed as mcp__myelin__toolname by the SDK.
+ * MCP tools are exposed as mcp__cortex__toolname by the SDK.
  * Three tiers: Tamir-only, dept-head-only (+ Tamir), temp employee whitelist.
  *
  * Built-in tools (Read, Write, Edit, Glob, Grep, Bash) are restricted to
@@ -13,27 +13,27 @@ import { resolve } from 'path';
 import { logger } from '@/lib/logger';
 
 // Tamir-only tools
-const TAMIR_ONLY = ['mcp__myelin__read_inbox', 'mcp__myelin__get_dept_status'];
+const TAMIR_ONLY = ['mcp__cortex__read_inbox', 'mcp__cortex__get_dept_status'];
 
 // Dept head (+ Tamir) tools
 const DEPT_HEAD_ONLY = [
-  'mcp__myelin__approve_deliverable',
-  'mcp__myelin__request_changes',
-  'mcp__myelin__hire_employee',
-  'mcp__myelin__file_to_vault',
+  'mcp__cortex__approve_deliverable',
+  'mcp__cortex__request_changes',
+  'mcp__cortex__hire_employee',
+  'mcp__cortex__file_to_vault',
 ];
 
 // Temp employee whitelist — only these tools are allowed for temps
 const TEMP_ALLOWED = [
-  'mcp__myelin__read_memory',
-  'mcp__myelin__write_memory',
-  'mcp__myelin__read_knowledge',
-  'mcp__myelin__search_knowledge',
-  'mcp__myelin__promote_to_deliverable',
-  'mcp__myelin__propose_skill',
-  'mcp__myelin__submit_for_review',
-  'mcp__myelin__install_tool',
-  'mcp__myelin__install_skill',
+  'mcp__cortex__read_memory',
+  'mcp__cortex__write_memory',
+  'mcp__cortex__read_knowledge',
+  'mcp__cortex__search_knowledge',
+  'mcp__cortex__promote_to_deliverable',
+  'mcp__cortex__propose_skill',
+  'mcp__cortex__submit_for_review',
+  'mcp__cortex__install_tool',
+  'mcp__cortex__install_skill',
 ];
 
 // Built-in Claude Code tools that access the filesystem
@@ -141,7 +141,7 @@ export function buildCanUseTool(
 
     // --- MCP role-based access control ---
     // Non-MCP tools — allow (filesystem check above already handled)
-    if (!toolName.startsWith('mcp__myelin__')) {
+    if (!toolName.startsWith('mcp__cortex__')) {
       return { behavior: 'allow' };
     }
 
@@ -159,7 +159,7 @@ export function buildCanUseTool(
     if (isTempEmployee && !TEMP_ALLOWED.includes(toolName)) {
       return {
         behavior: 'deny',
-        message: `Temp employees can only use: ${TEMP_ALLOWED.map(t => t.replace('mcp__myelin__', '')).join(', ')}`,
+        message: `Temp employees can only use: ${TEMP_ALLOWED.map(t => t.replace('mcp__cortex__', '')).join(', ')}`,
       };
     }
 
