@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-c3k
-last_updated: "2026-03-28T05:47:54.495Z"
+stopped_at: Completed quick/260328-c6r
+last_updated: "2026-03-28T05:49:58.306Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
@@ -154,10 +154,11 @@ None yet.
 | 260328-bjv | Add inline planning activity indicators and fix hardcoded port | 2026-03-28 | 11a10c6 | [260328-bjv-add-inline-planning-activity-indicators-](./quick/260328-bjv-add-inline-planning-activity-indicators-/) |
 | 260328-bxt | Include conversation history in deliverable chat for context-rich follow-up | 2026-03-28 | 0e64ea2 | [260328-bxt-include-conversation-history-in-delivera](./quick/260328-bxt-include-conversation-history-in-delivera/) |
 | 260328-c3k | Fix skills/tools not being used by agents - enable settingSources: ['project'] | 2026-03-28 | 7e120a9 | [260328-c3k-fix-skills-tools-not-being-used-by-agent](./quick/260328-c3k-fix-skills-tools-not-being-used-by-agent/) |
+| 260328-c6r | Fix deliverables incorrectly showing in Vault page - filter to vault+knowledge sources | 2026-03-28 | 352e5d2 | [260328-c6r-fix-deliverables-incorrectly-showing-in-](./quick/260328-c6r-fix-deliverables-incorrectly-showing-in-/) |
 
 ## Session Continuity
 
-Last session: 2026-03-28T05:47:51.253Z
-Stopped at: Completed quick/260328-c3k
+Last session: 2026-03-28T05:49:58.304Z
+Stopped at: Completed quick/260328-c6r
 Last activity: 2026-03-28
 Resume file: None
