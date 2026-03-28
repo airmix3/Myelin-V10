@@ -176,10 +176,12 @@ None yet.
 | 260328-ofg | Department skills and tools gallery UI with refresh/remove actions via CoS | 2026-03-28 | b90d7f5 | [260328-ofg-department-skills-and-tools-gallery-ui-w](./quick/260328-ofg-department-skills-and-tools-gallery-ui-w/) |
 | 260328-oqj | Add description field to all global and cos skills to match Anthropic skill format | 2026-03-28 | 8f688a3 | [260328-oqj-add-description-field-to-all-global-and-](./quick/260328-oqj-add-description-field-to-all-global-and-/) |
 | 260328-txi | Show in-progress deliverables list on dashboard | 2026-03-28 | 53576c0 | [260328-txi-show-in-progress-deliverables-list-on-da](./quick/260328-txi-show-in-progress-deliverables-list-on-da/) |
+| 260328-ol3 | Add interactive company org graph with employee nodes, task overlay with live logs, and Take His Role button for CEO to take over agent sessions via web-based Claude Code | 2026-03-28 | 6beabc2 | [260328-ol3-add-interactive-company-org-graph-with-e](./quick/260328-ol3-add-interactive-company-org-graph-with-e/) |
+| 260328-tvl | Fix org graph: hierarchical layout, activity logs from agent log source, and add Take Control button | 2026-03-28 | 953fe96 | [260328-tvl-fix-org-graph-hierarchical-layout-activi](./quick/260328-tvl-fix-org-graph-hierarchical-layout-activi/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T18:36:46.035Z
 Stopped at: Completed quick/260328-tvl
-Last activity: 2026-03-28 - Completed quick task 260328-txi: Show in-progress deliverables list on dashboard
+Last activity: 2026-03-28 - Completed quick task 260328-tvl: Fix org graph hierarchical layout, activity logs, Take Control button
 Resume file: None
