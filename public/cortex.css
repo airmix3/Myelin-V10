@@ -1132,7 +1132,6 @@ input[type="checkbox"] {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 80px;
   min-height: 400px;
 }
 
@@ -1151,6 +1150,26 @@ input[type="checkbox"] {
   justify-content: center;
   gap: 24px;
   flex-wrap: wrap;
+  position: relative;
+  z-index: 1;
+}
+
+.org-subtree {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.org-subtree-node {
+  position: relative;
+  z-index: 1;
+}
+
+.org-subtree-children {
+  display: flex;
+  justify-content: center;
+  gap: 24px;
+  margin-top: 80px;
   position: relative;
   z-index: 1;
 }

@@ -55,35 +55,6 @@ function stateBadgeColor(state: string): string {
   }
 }
 
-/** Assign hierarchy levels from edges. CEO=0, children get parent+1. */
-function assignLevels(nodes: OrgNode[], edges: OrgEdge[]): Map<string, number> {
-  const levels = new Map<string, number>();
-  const childrenOf = new Map<string, string[]>();
-  for (const e of edges) {
-    const list = childrenOf.get(e.from) || [];
-    list.push(e.to);
-    childrenOf.set(e.from, list);
-  }
-  // BFS from CEO
-  levels.set('ceo', 0);
-  const queue = ['ceo'];
-  while (queue.length > 0) {
-    const current = queue.shift()!;
-    const currentLevel = levels.get(current) ?? 0;
-    for (const child of childrenOf.get(current) || []) {
-      if (!levels.has(child)) {
-        levels.set(child, currentLevel + 1);
-        queue.push(child);
-      }
-    }
-  }
-  // Any node not reached gets level 3
-  for (const n of nodes) {
-    if (!levels.has(n.id)) levels.set(n.id, 3);
-  }
-  return levels;
-}
-
 export default function OrgGraphClient() {
   const [nodes, setNodes] = useState<OrgNode[]>([]);
   const [edges, setEdges] = useState<OrgEdge[]>([]);
@@ -159,16 +130,17 @@ export default function OrgGraphClient() {
     return () => es.close();
   }, [selectedNode]);
 
-  // Compute hierarchy levels
-  const levels = assignLevels(nodes, edges);
-  const levelGroups: Map<number, OrgNode[]> = new Map();
-  for (const node of nodes) {
-    const level = levels.get(node.id) ?? 3;
-    const group = levelGroups.get(level) || [];
-    group.push(node);
-    levelGroups.set(level, group);
+  // Build children map and node lookup from edges
+  const childrenOf = new Map<string, string[]>();
+  const nodeMap = new Map<string, OrgNode>();
+  for (const e of edges) {
+    const list = childrenOf.get(e.from) || [];
+    list.push(e.to);
+    childrenOf.set(e.from, list);
   }
-  const sortedLevels = Array.from(levelGroups.entries()).sort((a, b) => a[0] - b[0]);
+  for (const node of nodes) {
+    nodeMap.set(node.id, node);
+  }
 
   // Draw connector lines after layout
   useLayoutEffect(() => {
@@ -225,6 +197,94 @@ export default function OrgGraphClient() {
     }
   }, []);
 
+  function renderSubtree(nodeId: string): React.ReactNode {
+    const node = nodeMap.get(nodeId);
+    if (!node) return null;
+    const children = childrenOf.get(nodeId) || [];
+    const deptColor = DEPT_COLORS[node.department] || node.avatarColor || '#666';
+    const isSelected = selectedNode?.id === nodeId;
+    const hasWorking = node.activeTasks.some(t => t.state === 'working');
+
+    return (
+      <div className="org-subtree" key={nodeId}>
+        <div className="org-subtree-node">
+          <div
+            ref={(el) => setCardRef(nodeId, el)}
+            className={`org-node-card ${isSelected ? 'selected' : ''}`}
+            onClick={() => handleCardClick(node)}
+            style={{ cursor: nodeId === 'ceo' ? 'default' : 'pointer' }}
+          >
+            {/* Status dot */}
+            {hasWorking && (
+              <div
+                className="org-node-status"
+                style={{
+                  top: '-3px',
+                  right: '-3px',
+                  backgroundColor: '#00d68f',
+                }}
+              />
+            )}
+
+            {/* Name row with dept color dot */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+              <div
+                style={{
+                  width: '8px',
+                  height: '8px',
+                  borderRadius: '50%',
+                  backgroundColor: deptColor,
+                  flexShrink: 0,
+                }}
+              />
+              <div style={{ fontWeight: 700, fontSize: '13px', lineHeight: 1.2 }}>
+                {node.name}
+              </div>
+            </div>
+
+            {/* Role */}
+            <div style={{ fontSize: '10px', color: 'var(--text-dim, #a0a0b0)', marginTop: '2px' }}>
+              {node.role}
+            </div>
+
+            {/* Department label */}
+            <div style={{
+              fontSize: '9px',
+              color: deptColor,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              marginTop: '4px',
+            }}>
+              {node.department}
+            </div>
+
+            {/* Active tasks badge */}
+            {node.activeTasks.length > 0 && (
+              <div style={{
+                marginTop: '6px',
+                fontSize: '9px',
+                fontWeight: 700,
+                color: '#111',
+                backgroundColor: 'var(--amber, #ffb347)',
+                padding: '1px 6px',
+                borderRadius: '4px',
+                display: 'inline-block',
+              }}>
+                {node.activeTasks.length} active
+              </div>
+            )}
+          </div>
+        </div>
+
+        {children.length > 0 && (
+          <div className="org-subtree-children">
+            {children.map(childId => renderSubtree(childId))}
+          </div>
+        )}
+      </div>
+    );
+  }
+
   return (
     <div className="org-graph-container">
       {/* Hierarchical tree */}
@@ -245,87 +305,7 @@ export default function OrgGraphClient() {
             ))}
           </svg>
 
-          {sortedLevels.map(([level, groupNodes]) => (
-            <div key={level} className="org-tree-level">
-              {groupNodes.map(node => {
-                const deptColor = DEPT_COLORS[node.department] || node.avatarColor || '#666';
-                const isSelected = selectedNode?.id === node.id;
-                const hasWorking = node.activeTasks.some(t => t.state === 'working');
-
-                return (
-                  <div
-                    key={node.id}
-                    ref={(el) => setCardRef(node.id, el)}
-                    className={`org-node-card ${isSelected ? 'selected' : ''}`}
-                    onClick={() => handleCardClick(node)}
-                    style={{
-                      cursor: node.id === 'ceo' ? 'default' : 'pointer',
-                    }}
-                  >
-                    {/* Status dot */}
-                    {hasWorking && (
-                      <div
-                        className="org-node-status"
-                        style={{
-                          top: '-3px',
-                          right: '-3px',
-                          backgroundColor: '#00d68f',
-                        }}
-                      />
-                    )}
-
-                    {/* Name row with dept color dot */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
-                      <div
-                        style={{
-                          width: '8px',
-                          height: '8px',
-                          borderRadius: '50%',
-                          backgroundColor: deptColor,
-                          flexShrink: 0,
-                        }}
-                      />
-                      <div style={{ fontWeight: 700, fontSize: '13px', lineHeight: 1.2 }}>
-                        {node.name}
-                      </div>
-                    </div>
-
-                    {/* Role */}
-                    <div style={{ fontSize: '10px', color: 'var(--text-dim, #a0a0b0)', marginTop: '2px' }}>
-                      {node.role}
-                    </div>
-
-                    {/* Department label */}
-                    <div style={{
-                      fontSize: '9px',
-                      color: deptColor,
-                      textTransform: 'uppercase',
-                      letterSpacing: '0.05em',
-                      marginTop: '4px',
-                    }}>
-                      {node.department}
-                    </div>
-
-                    {/* Active tasks badge */}
-                    {node.activeTasks.length > 0 && (
-                      <div style={{
-                        marginTop: '6px',
-                        fontSize: '9px',
-                        fontWeight: 700,
-                        color: '#111',
-                        backgroundColor: 'var(--amber, #ffb347)',
-                        padding: '1px 6px',
-                        borderRadius: '4px',
-                        display: 'inline-block',
-                      }}>
-                        {node.activeTasks.length} active
-                      </div>
-                    )}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+          {renderSubtree('ceo')}
         </div>
       </div>
 
