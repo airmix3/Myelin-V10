@@ -12,8 +12,6 @@ data/myelin.db-shm
 
 # Runtime data directories (regenerated on startup or during execution)
 data/workspaces/
-data/agents/
-data/departments/*/knowledge/
 data/departments/*/planning-desk/chat/
 data/tmp/
 
