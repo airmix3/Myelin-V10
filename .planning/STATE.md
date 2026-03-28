@@ -5,7 +5,7 @@ milestone_name: milestone
 status: Milestone complete
 stopped_at: Completed quick/260328-oqj
 last_updated: "2026-03-28T14:51:38.267Z"
-last_activity: "2026-03-28 - Completed quick task 260328-ofg: Department skills and tools gallery UI with refresh/remove actions via CoS"
+last_activity: "2026-03-28 - Completed quick task 260328-oqj: Add description field to all global and cos skills to match Anthropic skill format"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -174,10 +174,11 @@ None yet.
 | 260328-l84 | Create Tamir installer skill and enrich install_tool/install_skill prompts with full context | 2026-03-28 | 26e5d53 | [260328-l84-create-tamir-installer-skill-and-enrich-](./quick/260328-l84-create-tamir-installer-skill-and-enrich-/) |
 | 260328-lt5 | Restore global/ skills directory as canonical source, separate from cos/ Tamir-specific skills | 2026-03-28 | 97744cc | [260328-lt5-restore-global-skills-directory-as-canon](./quick/260328-lt5-restore-global-skills-directory-as-canon/) |
 | 260328-ofg | Department skills and tools gallery UI with refresh/remove actions via CoS | 2026-03-28 | b90d7f5 | [260328-ofg-department-skills-and-tools-gallery-ui-w](./quick/260328-ofg-department-skills-and-tools-gallery-ui-w/) |
+| 260328-oqj | Add description field to all global and cos skills to match Anthropic skill format | 2026-03-28 | 8f688a3 | [260328-oqj-add-description-field-to-all-global-and-](./quick/260328-oqj-add-description-field-to-all-global-and-/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T14:51:38.265Z
 Stopped at: Completed quick/260328-oqj
-Last activity: 2026-03-28 - Completed quick task 260328-ofg: Department skills and tools gallery UI with refresh/remove actions via CoS
+Last activity: 2026-03-28 - Completed quick task 260328-oqj: Add description field to all global and cos skills to match Anthropic skill format
 Resume file: None
