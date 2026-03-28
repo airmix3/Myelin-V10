@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-cyc
-last_updated: "2026-03-28T06:44:49.444Z"
+stopped_at: Completed quick/260328-e6x
+last_updated: "2026-03-28T07:17:12.594Z"
 last_activity: "2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks"
 progress:
   total_phases: 6
@@ -124,6 +124,7 @@ Recent decisions affecting current work:
 - [Phase quick-260328-bxt]: FOLLOW-UP MODE prompt pattern: Task Context + Plan (2000 char) + History (last 20, 500 char each) + Message + Instructions
 - [Phase quick-260328-c3k]: settingSources: ['project'] is safe because data/CLAUDE.md project boundary prevents upward traversal to GSD root CLAUDE.md
 - [Phase quick-260328-cyc]: Query registry pattern: Map<runId, queryRef> for install tool hot-reload via setMcpServers
+- [Phase quick-260328-e6x]: Hints section placed between MCP tools list and workspace boundary notice in CLAUDE.md for maximum agent visibility
 
 ### Pending Todos
 
@@ -161,7 +162,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T06:44:35.339Z
-Stopped at: Completed quick/260328-cyc
+Last session: 2026-03-28T07:17:08.197Z
+Stopped at: Completed quick/260328-e6x
 Last activity: 2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks
 Resume file: None
