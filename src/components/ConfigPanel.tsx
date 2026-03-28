@@ -10,12 +10,7 @@ interface ConfigPanelProps {
   currentDepartment: string;
 }
 
-const AUTONOMY_LEVELS: TaskConfig['autonomyLevel'][] = ['minimal', 'balanced', 'high', 'full'];
-
 export default function ConfigPanel({ taskId, initialConfig, currentDepartment }: ConfigPanelProps) {
-  const [autonomyIndex, setAutonomyIndex] = useState(
-    initialConfig?.autonomyLevel ? AUTONOMY_LEVELS.indexOf(initialConfig.autonomyLevel) : 1
-  );
   const [maxBudget, setMaxBudget] = useState(initialConfig?.maxBudgetUsd ?? 10);
   const [constraints, setConstraints] = useState(initialConfig?.constraints ?? '');
   const [selectedTools, setSelectedTools] = useState<string[]>(initialConfig?.selectedTools ?? []);
@@ -24,8 +19,7 @@ export default function ConfigPanel({ taskId, initialConfig, currentDepartment }
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const saveConfig = useCallback(async () => {
-    const config: TaskConfig = {
-      autonomyLevel: AUTONOMY_LEVELS[autonomyIndex],
+    const config: Partial<TaskConfig> = {
       maxBudgetUsd: maxBudget,
       constraints,
       selectedTools,
@@ -41,7 +35,7 @@ export default function ConfigPanel({ taskId, initialConfig, currentDepartment }
     } catch {
       // Silent fail — config save is best-effort
     }
-  }, [taskId, autonomyIndex, maxBudget, constraints, selectedTools, selectedSkills, toolHints]);
+  }, [taskId, maxBudget, constraints, selectedTools, selectedSkills, toolHints]);
 
   // Auto-save with 500ms debounce
   useEffect(() => {
@@ -54,10 +48,6 @@ export default function ConfigPanel({ taskId, initialConfig, currentDepartment }
     };
   }, [saveConfig]);
 
-  function handleAutonomyChange(e: React.ChangeEvent<HTMLInputElement>) {
-    setAutonomyIndex(Number(e.target.value));
-  }
-
   function handleSelectionChange(tools: string[], skills: string[], hints: Record<string, string>) {
     setSelectedTools(tools);
     setSelectedSkills(skills);
@@ -69,30 +59,6 @@ export default function ConfigPanel({ taskId, initialConfig, currentDepartment }
       <h3 style={{ margin: 0, fontSize: '13px', textTransform: 'uppercase', color: 'var(--text-dim)', letterSpacing: '0.5px' }}>
         Configuration
       </h3>
-
-      {/* Autonomy Level Slider */}
-      <div>
-        <label className="text-dim" style={{ fontSize: '11px', textTransform: 'uppercase', display: 'block', marginBottom: '6px' }}>
-          Autonomy Level
-        </label>
-        <input
-          type="range"
-          min={0}
-          max={3}
-          value={autonomyIndex}
-          onChange={handleAutonomyChange}
-          style={{ width: '100%' }}
-        />
-        <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '10px', color: 'var(--text-dim)' }}>
-          <span>Minimal</span>
-          <span>Balanced</span>
-          <span>High</span>
-          <span>Full</span>
-        </div>
-        <div style={{ fontSize: '12px', color: 'var(--text-primary)', marginTop: '4px' }}>
-          Selected: <strong>{AUTONOMY_LEVELS[autonomyIndex]}</strong>
-        </div>
-      </div>
 
       {/* Max Budget Input */}
       <div>
