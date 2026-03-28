@@ -171,10 +171,11 @@ None yet.
 | 260328-k2o | switch composio and glama mcp registries with smithery.ai for querying and installing external MCP reliably via a CLI | 2026-03-28 | a9a5612 | [260328-k2o-switch-composio-and-glama-mcp-registries](./quick/260328-k2o-switch-composio-and-glama-mcp-registries/) |
 | 260328-kp5 | Restructure install flow: Tamir as installer, rename global to cos, full data access for Tamir | 2026-03-28 | da01264 | [260328-kp5-restructure-install-flow-tamir-as-instal](./quick/260328-kp5-restructure-install-flow-tamir-as-instal/) |
 | 260328-l84 | Create Tamir installer skill and enrich install_tool/install_skill prompts with full context | 2026-03-28 | 26e5d53 | [260328-l84-create-tamir-installer-skill-and-enrich-](./quick/260328-l84-create-tamir-installer-skill-and-enrich-/) |
+| 260328-lt5 | Restore global/ skills directory as canonical source, separate from cos/ Tamir-specific skills | 2026-03-28 | 97744cc | [260328-lt5-restore-global-skills-directory-as-canon](./quick/260328-lt5-restore-global-skills-directory-as-canon/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T12:47:04.361Z
 Stopped at: Completed quick/260328-lt5
-Last activity: 2026-03-28 - Completed quick task 260328-l84: Create Tamir installer skill and enrich install prompts
+Last activity: 2026-03-28 - Completed quick task 260328-lt5: Restore global skills directory as canonical source
 Resume file: None
