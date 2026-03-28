@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-lt5
-last_updated: "2026-03-28T12:47:08.243Z"
-last_activity: "2026-03-28 - Completed quick task 260328-l84: Create Tamir installer skill and enrich install prompts"
+stopped_at: Completed quick/260328-ofg
+last_updated: "2026-03-28T14:42:23.383Z"
+last_activity: "2026-03-28 - Completed quick task 260328-lt5: Restore global skills directory as canonical source"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -130,6 +130,7 @@ Recent decisions affecting current work:
 - [Phase quick-260328-kp5]: Install flow delegates to Tamir via invokeAgent with claude_code preset tools (no direct execSync)
 - [Phase quick-260328-l84]: Installer SKILL.md follows same format as memory-management skill; install prompts reference installer skill procedure
 - [Phase quick-260328-lt5]: Global skills separated from cos: global/skills/ for all agents, cos/skills/ for Tamir only
+- [Phase quick-260328-ofg]: Refresh/remove actions delegate to Tamir via invokeAgent with skill-tool-manager skill, using synthetic taskId for system management
 
 ### Pending Todos
 
@@ -175,7 +176,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T12:47:04.361Z
-Stopped at: Completed quick/260328-lt5
+Last session: 2026-03-28T14:42:20.239Z
+Stopped at: Completed quick/260328-ofg
 Last activity: 2026-03-28 - Completed quick task 260328-lt5: Restore global skills directory as canonical source
 Resume file: None
