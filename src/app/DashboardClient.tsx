@@ -170,10 +170,10 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
   void inProgressDeliverables;
 
   const heroStats = [
-    { label: 'Agents', value: stats.activeAgents, color: 'cyan' },
+    { label: 'Agents', value: stats.activeAgents, color: 'accent' },
     { label: 'Tasks', value: stats.activeTasks, color: 'blue' },
-    { label: 'Approvals', value: stats.pendingApprovals, color: 'magenta' },
-    { label: 'Deliverables', value: stats.deliverableCount, color: 'mint' },
+    { label: 'Approvals', value: stats.pendingApprovals, color: 'green' },
+    { label: 'Deliverables', value: stats.deliverableCount, color: 'amber' },
   ];
 
   return (
@@ -197,7 +197,7 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
       )}
 
       {/* 1. Neural Hero */}
-      <NeuralHero title="MYELIN v3" subtitle="The Cortex" stats={heroStats} />
+      <NeuralHero title="MYELIN v10" subtitle="The Cortex" stats={heroStats} />
 
       {/* 2. Org Graph Section with Activity Overlay */}
       <div className="dashboard-org-section">
