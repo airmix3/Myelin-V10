@@ -5,7 +5,7 @@ milestone_name: milestone
 status: Milestone complete
 stopped_at: Completed quick/260328-w72
 last_updated: "2026-03-28T20:15:52.268Z"
-last_activity: "2026-03-28 - Completed quick task 260328-vpf: Fix agent idle in org graph when improving deliverable"
+last_activity: "2026-03-28 - Completed quick task 260328-w72: Fix org graph hierarchy layout"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -181,10 +181,11 @@ None yet.
 | 260328-vh6 | Remove autonomy level bar from planning screen | 2026-03-28 | bb93c52 | [260328-vh6-remove-autonomy-level-bar-from-planning-](./quick/260328-vh6-remove-autonomy-level-bar-from-planning-/) |
 | 260328-vll | Fix Take His Role black screen - eventBus require path and PTY output race condition | 2026-03-28 | 579c848 | [260328-vll-fix-take-his-role-black-screen-eventbus-](./quick/260328-vll-fix-take-his-role-black-screen-eventbus-/) |
 | 260328-vpf | Fix agent showing idle in org graph when improving a completed deliverable | 2026-03-28 | pending | [260328-vpf-fix-agent-showing-idle-in-org-graph-when](./quick/260328-vpf-fix-agent-showing-idle-in-org-graph-when/) |
+| 260328-w72 | Fix org graph hierarchy: cluster children under parents and fix edge fallbacks | 2026-03-28 | be6a235 | [260328-w72-fix-org-graph-hierarchy-cluster-children](./quick/260328-w72-fix-org-graph-hierarchy-cluster-children/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T20:15:52.266Z
 Stopped at: Completed quick/260328-w72
-Last activity: 2026-03-28 - Completed quick task 260328-vpf: Fix agent idle in org graph when improving deliverable
+Last activity: 2026-03-28 - Completed quick task 260328-w72: Fix org graph hierarchy layout
 Resume file: None
