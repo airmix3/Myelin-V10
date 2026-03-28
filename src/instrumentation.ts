@@ -87,6 +87,36 @@ export async function register() {
       log.error({ err }, 'Company DNA copy/index failed');
     }
 
+    // 3.5. Index any vault files not yet in the documents table
+    try {
+      const vaultDir = path.resolve(process.cwd(), 'data', 'vault');
+      if (fs.existsSync(vaultDir)) {
+        const vaultFiles = fs.readdirSync(vaultDir).filter((f: string) => f.endsWith('.md') && f !== '.gitkeep');
+        const matter = await import('gray-matter');
+
+        for (const file of vaultFiles) {
+          const filePath = path.join(vaultDir, file);
+          // Check if already indexed by filePath
+          const existing = sqlite.prepare('SELECT id FROM documents WHERE filePath = ?').get(filePath);
+          if (existing) continue;
+
+          const content = fs.readFileSync(filePath, 'utf-8');
+          const parsed = matter.default(content);
+          const title = parsed.data.title || file.replace(/\.md$/, '').replace(/-/g, ' ');
+          const docId = generateId('doc');
+
+          sqlite.prepare(`
+            INSERT INTO documents (id, title, content, source, department, filedBy, filePath, createdAt, updatedAt)
+            VALUES (?, ?, ?, 'vault', 'global', 'system', ?, datetime('now'), datetime('now'))
+          `).run(docId, title, parsed.content, filePath);
+
+          log.info({ docId, file }, 'Vault file indexed on startup');
+        }
+      }
+    } catch (err) {
+      log.error({ err }, 'Vault file sync failed');
+    }
+
     // 4. Seed executive agents to DB (idempotent)
     try {
       const { seedAgents } = await import('./lib/seed-agents');
