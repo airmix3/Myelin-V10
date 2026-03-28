@@ -18,6 +18,7 @@ data/departments/*/planning-desk/chat/
 data/tmp/
 
 # Environment
+.env
 .env.local
 .env.production.local
 .env.development.local
