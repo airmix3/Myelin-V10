@@ -6,7 +6,6 @@
  */
 import { tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
-import { execSync } from 'child_process';
 import { mkdirSync, existsSync, writeFileSync } from 'fs';
 import { resolve } from 'path';
 import type { ToolContext } from '../tool-context';
@@ -25,7 +24,7 @@ function getDeptHeadId(department: string): string {
     case 'tech': return 'cto';
     case 'marketing': return 'cmo';
     case 'operations': return 'coo';
-    case 'global': return 'tamir';
+    case 'cos': return 'tamir';
     default: return 'cto'; // fallback
   }
 }
@@ -51,8 +50,10 @@ async function runApproval(
     return { approved: false, reasoning: `Department head '${deptHeadId}' not found in agent registry` };
   }
 
-  // Manager desk path
-  const managerDesk = resolve(DATA_DIR, 'departments', ctx.department, 'manager-desk');
+  // Manager desk path (Tamir lives flat in cos/ -- no manager-desk subdir)
+  const managerDesk = deptHeadId === 'tamir'
+    ? resolve(DATA_DIR, 'departments', 'cos')
+    : resolve(DATA_DIR, 'departments', ctx.department, 'manager-desk');
   const delivDir = resolve(managerDesk, 'deliverables');
   mkdirSync(delivDir, { recursive: true });
   const manifestPath = resolve(delivDir, 'deliverable_manifest.json');
@@ -156,33 +157,82 @@ export function createInstallTools(ctx: ToolContext) {
         };
       }
 
-      // Install npm package to dept tools directory
+      // Invoke Tamir to perform the actual installation
       const deptToolsDir = resolve(DATA_DIR, 'departments', ctx.department, 'tools');
       mkdirSync(deptToolsDir, { recursive: true });
 
-      // Initialize package.json if not exists
-      const pkgJsonPath = resolve(deptToolsDir, 'package.json');
-      if (!existsSync(pkgJsonPath)) {
-        writeFileSync(pkgJsonPath, JSON.stringify({
-          name: `${ctx.department}-tools`,
-          version: '1.0.0',
-          private: true,
-          dependencies: {},
+      const tamirDeskDir = resolve(DATA_DIR, 'departments', 'cos');
+      const tamirDelivDir = resolve(tamirDeskDir, 'deliverables');
+      mkdirSync(tamirDelivDir, { recursive: true });
+      const tamirManifestPath = resolve(tamirDelivDir, 'deliverable_manifest.json');
+      if (!existsSync(tamirManifestPath)) {
+        writeFileSync(tamirManifestPath, JSON.stringify({
+          taskId: ctx.taskId, files: [], primaryFile: null, createdAt: new Date().toISOString(),
         }, null, 2), 'utf-8');
       }
 
+      // Get Tamir's soul.md
+      const { orchestrator: orch } = await import('@/lib/orchestrator');
+      const tamirAgent = orch.getAgent('tamir');
+      const tamirSoulMd = tamirAgent?.soulMd ?? '';
+
+      const installPrompt = `Install the MCP tool server "${package_name}" to the ${ctx.department} department's tools directory.
+
+Target directory: ${deptToolsDir}
+
+Steps:
+1. Initialize package.json in the target directory if it doesn't exist
+2. Run: npx @smithery/cli mcp add ${package_name} --client claude-code
+3. Run the command in the target directory: ${deptToolsDir}
+
+Report success or failure.`;
+
+      insertActivityLog({
+        taskId: ctx.taskId,
+        agentId: ctx.agentId,
+        actionType: 'AGENT_SWITCH_START',
+        description: `Switching to tamir for tool installation: ${package_name}`,
+        metadata: { fromAgent: ctx.agentId, toAgent: 'tamir', reason: 'tool_installation' },
+      });
+
       try {
-        execSync(`npx @smithery/cli mcp add ${package_name} --client claude-code`, {
-          cwd: deptToolsDir,
-          timeout: 60000,
-          stdio: 'pipe',
+        const { invokeAgent } = await import('@/lib/invoke-agent');
+        const installRunId = generateId('run');
+        await invokeAgent({
+          taskId: ctx.taskId,
+          runId: installRunId,
+          agentId: 'tamir',
+          department: 'cos',
+          prompt: installPrompt,
+          soulMd: tamirSoulMd,
+          deskDir: tamirDeskDir,
+          delivDir: tamirDelivDir,
+          manifestPath: tamirManifestPath,
+          maxBudgetUsd: 2,
+          tools: { type: 'preset', preset: 'claude_code' },
+        });
+
+        insertActivityLog({
+          taskId: ctx.taskId,
+          agentId: ctx.agentId,
+          actionType: 'AGENT_SWITCH_END',
+          description: `Switched back from tamir (tool install complete)`,
+          metadata: { fromAgent: 'tamir', toAgent: ctx.agentId },
         });
       } catch (installErr) {
-        log.error({ err: installErr, package_name }, 'Smithery CLI install failed');
+        insertActivityLog({
+          taskId: ctx.taskId,
+          agentId: ctx.agentId,
+          actionType: 'AGENT_SWITCH_END',
+          description: `Switched back from tamir (tool install error)`,
+          metadata: { fromAgent: 'tamir', toAgent: ctx.agentId, error: String(installErr) },
+        });
+
+        log.error({ err: installErr, package_name }, 'Tamir tool installation failed');
         return {
           content: [{
             type: 'text' as const,
-            text: `Tool installation APPROVED but Smithery install failed: ${String(installErr)}`,
+            text: `Tool installation APPROVED but Tamir install failed: ${String(installErr)}`,
           }],
         };
       }
@@ -263,7 +313,7 @@ export function createInstallTools(ctx: ToolContext) {
         };
       }
 
-      // Install skill to dept skills directory
+      // Invoke Tamir to install the skill
       // skills.sh CLI: npx skills add <owner/repo> --skill '<Display Name>' --yes
       // The --skill flag matches against SKILL.md frontmatter name (e.g., "SVG Logo Designer")
       // not the directory name (e.g., "svg-logo-designer"). Convert kebab to title case.
@@ -274,18 +324,77 @@ export function createInstallTools(ctx: ToolContext) {
       const deptSkillsDir = resolve(DATA_DIR, 'departments', ctx.department, 'skills');
       mkdirSync(deptSkillsDir, { recursive: true });
 
+      const tamirDeskDir = resolve(DATA_DIR, 'departments', 'cos');
+      const tamirDelivDir = resolve(tamirDeskDir, 'deliverables');
+      mkdirSync(tamirDelivDir, { recursive: true });
+      const tamirManifestPath = resolve(tamirDelivDir, 'deliverable_manifest.json');
+      if (!existsSync(tamirManifestPath)) {
+        writeFileSync(tamirManifestPath, JSON.stringify({
+          taskId: ctx.taskId, files: [], primaryFile: null, createdAt: new Date().toISOString(),
+        }, null, 2), 'utf-8');
+      }
+
+      const { orchestrator: orch } = await import('@/lib/orchestrator');
+      const tamirAgent = orch.getAgent('tamir');
+      const tamirSoulMd = tamirAgent?.soulMd ?? '';
+
+      const installPrompt = `Install the skill "${skill_id}" (display name: "${displayName}") to the ${ctx.department} department's skills directory.
+
+Target directory: ${deptSkillsDir}
+Owner/Repo: ${ownerRepo}
+Skill name: ${displayName}
+
+Run: npx skills add ${ownerRepo} --skill '${displayName}' --yes
+Run the command in the target directory: ${deptSkillsDir}
+
+Report success or failure.`;
+
+      insertActivityLog({
+        taskId: ctx.taskId,
+        agentId: ctx.agentId,
+        actionType: 'AGENT_SWITCH_START',
+        description: `Switching to tamir for skill installation: ${skill_id}`,
+        metadata: { fromAgent: ctx.agentId, toAgent: 'tamir', reason: 'skill_installation' },
+      });
+
       try {
-        execSync(`npx skills add ${ownerRepo} --skill '${displayName}' --yes`, {
-          cwd: deptSkillsDir,
-          timeout: 30000,
-          stdio: 'pipe',
+        const { invokeAgent } = await import('@/lib/invoke-agent');
+        const installRunId = generateId('run');
+        await invokeAgent({
+          taskId: ctx.taskId,
+          runId: installRunId,
+          agentId: 'tamir',
+          department: 'cos',
+          prompt: installPrompt,
+          soulMd: tamirSoulMd,
+          deskDir: tamirDeskDir,
+          delivDir: tamirDelivDir,
+          manifestPath: tamirManifestPath,
+          maxBudgetUsd: 2,
+          tools: { type: 'preset', preset: 'claude_code' },
+        });
+
+        insertActivityLog({
+          taskId: ctx.taskId,
+          agentId: ctx.agentId,
+          actionType: 'AGENT_SWITCH_END',
+          description: `Switched back from tamir (skill install complete)`,
+          metadata: { fromAgent: 'tamir', toAgent: ctx.agentId },
         });
       } catch (installErr) {
-        log.error({ err: installErr, skill_id, ownerRepo, skillName }, 'skills add failed');
+        insertActivityLog({
+          taskId: ctx.taskId,
+          agentId: ctx.agentId,
+          actionType: 'AGENT_SWITCH_END',
+          description: `Switched back from tamir (skill install error)`,
+          metadata: { fromAgent: 'tamir', toAgent: ctx.agentId, error: String(installErr) },
+        });
+
+        log.error({ err: installErr, skill_id, ownerRepo, skillName }, 'Tamir skill install failed');
         return {
           content: [{
             type: 'text' as const,
-            text: `Skill installation APPROVED but install failed: ${String(installErr)}`,
+            text: `Skill installation APPROVED but Tamir install failed: ${String(installErr)}`,
           }],
         };
       }

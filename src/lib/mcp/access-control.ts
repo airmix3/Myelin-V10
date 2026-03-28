@@ -91,12 +91,17 @@ export function buildCanUseTool(
   return async (toolName: string, input: Record<string, unknown>) => {
     // --- Filesystem boundary enforcement (built-in tools only) ---
     if (workspaceBoundaries && !toolName.startsWith('mcp__')) {
+      // Tamir gets full data/ boundary (can install to any department)
+      const effectiveBoundaries = isTamir
+        ? { deskDir: resolve(process.cwd(), 'data'), delivDir: workspaceBoundaries.delivDir }
+        : workspaceBoundaries;
+
       // Read, Write, Edit — required file_path
       const filePathKey = FILE_PATH_TOOLS[toolName];
       if (filePathKey) {
         const targetPath = input[filePathKey] as string | undefined;
-        if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
-          log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
+        if (targetPath && !isPathAllowed(targetPath, effectiveBoundaries)) {
+          log.warn({ toolName, targetPath, deskDir: effectiveBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
             behavior: 'deny',
             message: `Access denied: ${toolName} cannot access '${targetPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
@@ -108,8 +113,8 @@ export function buildCanUseTool(
       const optPathKey = OPTIONAL_PATH_TOOLS[toolName];
       if (optPathKey) {
         const targetPath = input[optPathKey] as string | undefined;
-        if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
-          log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
+        if (targetPath && !isPathAllowed(targetPath, effectiveBoundaries)) {
+          log.warn({ toolName, targetPath, deskDir: effectiveBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
             behavior: 'deny',
             message: `Access denied: ${toolName} cannot access '${targetPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
@@ -123,7 +128,7 @@ export function buildCanUseTool(
         if (command) {
           const absPaths = extractAbsolutePathsFromCommand(command);
           for (const absPath of absPaths) {
-            if (!isPathAllowed(absPath, workspaceBoundaries)) {
+            if (!isPathAllowed(absPath, effectiveBoundaries)) {
               return {
                 behavior: 'deny',
                 message: `Access denied: Bash cannot access '${absPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
