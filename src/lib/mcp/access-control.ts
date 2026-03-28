@@ -10,6 +10,7 @@
  */
 
 import { resolve } from 'path';
+import { logger } from '@/lib/logger';
 
 // Tamir-only tools
 const TAMIR_ONLY = ['mcp__myelin__read_inbox', 'mcp__myelin__get_dept_status'];
@@ -83,6 +84,8 @@ export function buildCanUseTool(
   const isDeptHead = ['cto', 'cmo', 'coo'].includes(agentId);
   const isTempEmployee = !isTamir && !isDeptHead;
 
+  const log = logger.child({ module: 'access-control', agentId });
+
   return async (toolName: string, input: Record<string, unknown>) => {
     // --- Filesystem boundary enforcement (built-in tools only) ---
     if (workspaceBoundaries && !toolName.startsWith('mcp__')) {
@@ -91,6 +94,7 @@ export function buildCanUseTool(
       if (filePathKey) {
         const targetPath = input[filePathKey] as string | undefined;
         if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
+          log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
             behavior: 'deny',
             message: `Access denied: ${toolName} cannot access '${targetPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
@@ -103,6 +107,7 @@ export function buildCanUseTool(
       if (optPathKey) {
         const targetPath = input[optPathKey] as string | undefined;
         if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
+          log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
             behavior: 'deny',
             message: `Access denied: ${toolName} cannot access '${targetPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
