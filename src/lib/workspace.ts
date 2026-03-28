@@ -87,7 +87,7 @@ export function createTaskWorkspace(
       hintsSection += '### Skills to Install\n';
       for (const skill of ceoHints.selectedSkills) {
         hintsSection += `- \`${skill}\`\n`;
-        hintsSection += `  -> Run: \`install_skill\` MCP tool with skillId="${skill}"\n`;
+        hintsSection += `  -> Run: \`install_skill\` MCP tool with skill_id="${skill}"\n`;
       }
       hintsSection += '\n';
     }

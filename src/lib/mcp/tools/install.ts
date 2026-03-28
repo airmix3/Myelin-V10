@@ -222,25 +222,38 @@ export function createInstallTools(ctx: ToolContext) {
 
   const installSkill = tool(
     'install_skill',
-    'Request installation of a skill from skills.sh. Triggers department head approval and installs on approval.',
+    'Request installation of a skill from skills.sh. Pass the full skill identifier in owner/repo@skill-name format. Triggers department head approval, then installs on approval.',
     {
-      skill_name: z.string().describe('Skill name from skills.sh (e.g., "nextjs-app-router")'),
+      skill_id: z.string().describe('Full skill identifier from skills.sh in owner/repo@skill-name format (e.g., "rknall/claude-skills@svg-logo-designer")'),
       justification: z.string().describe('Why you need this skill — what task requirement it fulfills'),
     },
     async (args) => {
-      const { skill_name, justification } = args;
+      const { skill_id, justification } = args;
+
+      // Parse owner/repo@skill-name format
+      const atIndex = skill_id.indexOf('@');
+      if (atIndex === -1) {
+        return {
+          content: [{
+            type: 'text' as const,
+            text: `Invalid skill_id format: "${skill_id}". Expected owner/repo@skill-name (e.g., "rknall/claude-skills@svg-logo-designer").`,
+          }],
+        };
+      }
+      const ownerRepo = skill_id.substring(0, atIndex);  // e.g., "rknall/claude-skills"
+      const skillName = skill_id.substring(atIndex + 1);  // e.g., "svg-logo-designer"
 
       // Log request
       insertActivityLog({
         taskId: ctx.taskId,
         agentId: ctx.agentId,
         actionType: 'INSTALL_SKILL_REQUESTED',
-        description: `Requesting install of skill: ${skill_name}`,
-        metadata: { skill_name, justification },
+        description: `Requesting install of skill: ${skill_id}`,
+        metadata: { skill_id, ownerRepo, skillName, justification },
       });
 
       // Run approval flow
-      const approval = await runApproval(ctx, 'skill', skill_name, justification);
+      const approval = await runApproval(ctx, 'skill', skill_id, justification);
 
       if (!approval.approved) {
         return {
@@ -252,17 +265,18 @@ export function createInstallTools(ctx: ToolContext) {
       }
 
       // Install skill to dept skills directory
+      // skills.sh CLI format: npx skills add <owner/repo> --skill '<Skill Name>'
       const deptSkillsDir = resolve(DATA_DIR, 'departments', ctx.department, 'skills');
       mkdirSync(deptSkillsDir, { recursive: true });
 
       try {
-        execSync(`npx skills install ${skill_name}`, {
+        execSync(`npx skills add ${ownerRepo} --skill '${skillName}'`, {
           cwd: deptSkillsDir,
           timeout: 30000,
           stdio: 'pipe',
         });
       } catch (installErr) {
-        log.error({ err: installErr, skill_name }, 'skills install failed');
+        log.error({ err: installErr, skill_id, ownerRepo, skillName }, 'skills add failed');
         return {
           content: [{
             type: 'text' as const,
@@ -272,12 +286,12 @@ export function createInstallTools(ctx: ToolContext) {
       }
 
       // Return the symlinked path so the agent knows where to find the skill
-      const skillPath = resolve(ctx.deskDir, '.claude', 'skills', ctx.department, skill_name);
+      const skillPath = resolve(ctx.deskDir, '.claude', 'skills', ctx.department, skillName);
 
       return {
         content: [{
           type: 'text' as const,
-          text: `Skill '${skill_name}' APPROVED and installed.\nAvailable at: ${skillPath}\n\nDept head reasoning: ${approval.reasoning}`,
+          text: `Skill '${skill_id}' APPROVED and installed.\nAvailable at: ${skillPath}\n\nDept head reasoning: ${approval.reasoning}`,
         }],
       };
     },
