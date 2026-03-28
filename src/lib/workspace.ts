@@ -49,17 +49,17 @@ export function createTaskWorkspace(
 
   // Symlink active department skills into desk/.claude/skills/
   const deptSkillsSource = join(DATA_DIR, 'departments', department, 'skills');
-  const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
+  const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
   const deptSkillsTarget = join(skillsDir, department);
-  const cosSkillsTarget = join(skillsDir, 'cos');
+  const globalSkillsTarget = join(skillsDir, 'global');
 
   if (existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
     try { symlinkSync(deptSkillsSource, deptSkillsTarget, 'junction'); }
     catch (err) { log.warn({ err, source: deptSkillsSource }, 'Failed to symlink dept skills'); }
   }
-  if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
-    try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
-    catch (err) { log.warn({ err, source: cosSkillsSource }, 'Failed to symlink cos skills'); }
+  if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+    try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+    catch (err) { log.warn({ err, source: globalSkillsSource }, 'Failed to symlink global skills'); }
   }
 
   // Write plan to separate PLAN.md (per D-06)
@@ -186,12 +186,20 @@ export function ensurePlanningDesks(): void {
       mkdirSync(skillsDir, { recursive: true });
       mkdirSync(chatDir, { recursive: true });
 
-      // Symlink cos/skills into Tamir's .claude/skills/cos for skill discovery
+      // Symlink cos/skills into Tamir's .claude/skills/cos for Tamir-specific skills (installer)
       const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
       const cosSkillsTarget = join(skillsDir, 'cos');
       if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
         try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
         catch (err) { log.warn({ err }, 'Failed to symlink cos skills to Tamir desk'); }
+      }
+
+      // Symlink global/skills into Tamir's .claude/skills/global for shared skills
+      const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+      const globalSkillsTarget = join(skillsDir, 'global');
+      if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+        try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+        catch (err) { log.warn({ err }, 'Failed to symlink global skills to Tamir desk'); }
       }
 
       const settingsPath = join(cosDir, '.claude', 'settings.json');
@@ -264,11 +272,11 @@ Do NOT use built-in tools to modify production code during planning. Planning mo
       },
     }, null, 2), 'utf-8');
 
-    const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
-    const cosSkillsTarget = join(skillsDir, 'cos');
-    if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
-      try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
-      catch (err) { log.warn({ err, dept }, 'Failed to symlink cos skills to planning desk'); }
+    const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+    const globalSkillsTarget = join(skillsDir, 'global');
+    if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+      try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+      catch (err) { log.warn({ err, dept }, 'Failed to symlink global skills to planning desk'); }
     }
 
     const deptSkillsSource = join(DATA_DIR, 'departments', dept, 'skills');
