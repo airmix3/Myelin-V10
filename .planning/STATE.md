@@ -142,6 +142,7 @@ None yet.
 | 260328-188 | Fix planning desk CLAUDE.md to list MCP tools available during planning | 2026-03-28 | e0cac66 | [260328-188-fix-mcp-tools-and-skills-not-showing-dur](./quick/260328-188-fix-mcp-tools-and-skills-not-showing-dur/) |
 | 260328-1iv | Give planning agents full tool access by removing tools:[] restriction | 2026-03-28 | 72073cf | [260328-1iv-give-planning-agents-full-tool-access-re](./quick/260328-1iv-give-planning-agents-full-tool-access-re/) |
 | 260328-1qu | Fix skills and MCP tools not browsable in gallery during planning | 2026-03-28 | 73f739e | [260328-1qu-fix-skills-and-mcp-tools-not-browsable-d](./quick/260328-1qu-fix-skills-and-mcp-tools-not-browsable-d/) |
+| 260328-9l3 | Fix 200s agent timeout - remove hardcoded CLAUDE_CODE_USE_BEDROCK=1 (user has OAuth) | 2026-03-28 | pending | [260328-9l3-fix-slow-agent-invocations-remove-hard](./quick/260328-9l3-fix-slow-agent-invocations-remove-hard/) |
 
 ## Session Continuity
 

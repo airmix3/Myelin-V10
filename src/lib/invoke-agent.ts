@@ -13,6 +13,11 @@ import type {
   SDKResultError,
   SDKToolUseSummaryMessage,
   SDKToolProgressMessage,
+  SDKFilesPersistedEvent,
+  SDKHookStartedMessage,
+  SDKHookProgressMessage,
+  SDKHookResponseMessage,
+  SDKLocalCommandOutputMessage,
   AgentDefinition,
   JsonSchemaOutputFormat,
 } from '@anthropic-ai/claude-agent-sdk';
@@ -24,6 +29,7 @@ import { sqlite } from '@/lib/db';
 import { generateId } from '@/lib/id';
 import { logger } from '@/lib/logger';
 import { withAgentObservation } from '@/lib/langfuse';
+import { insertActivityLog } from '@/lib/activity-log';
 
 export interface InvokeAgentOptions {
   taskId: string;
@@ -49,6 +55,107 @@ export interface InvokeAgentResult {
   totalCostUsd: number;
   result?: string;
   structuredOutput?: unknown;
+}
+
+interface ToolUseBlock {
+  id: string;
+  name: string;
+  input: Record<string, unknown>;
+}
+
+function normalizeWhitespace(text: string): string {
+  return text.replace(/\s+/g, ' ').trim();
+}
+
+function truncateText(text: string, maxLen = 180): string {
+  if (text.length <= maxLen) return text;
+  return text.slice(0, maxLen - 3) + '...';
+}
+
+function asRecord(value: unknown): Record<string, unknown> | null {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) return null;
+  return value as Record<string, unknown>;
+}
+
+function getPathFromInput(input: Record<string, unknown>): string {
+  const candidates = [
+    input.file_path,
+    input.path,
+    input.notebook_path,
+    input.target_file,
+    input.uri,
+  ];
+  for (const candidate of candidates) {
+    if (typeof candidate === 'string' && candidate.trim()) return candidate;
+  }
+  if (Array.isArray(input.paths) && typeof input.paths[0] === 'string') return input.paths[0];
+  return '';
+}
+
+function summarizeToolUse(name: string, input: Record<string, unknown>): string {
+  const path = getPathFromInput(input);
+  switch (name) {
+    case 'Read':
+      return path ? `Read ${path}` : 'Read file';
+    case 'Write':
+      return path ? `Wrote ${path}` : 'Wrote file';
+    case 'Edit':
+    case 'MultiEdit':
+      return path ? `Edited ${path}` : 'Edited file';
+    case 'Glob': {
+      const pattern = typeof input.pattern === 'string' ? input.pattern : typeof input.glob === 'string' ? input.glob : '';
+      const scope = typeof input.path === 'string' ? ` in ${input.path}` : '';
+      return pattern ? `Globbed ${pattern}${scope}` : 'Ran glob search';
+    }
+    case 'Grep': {
+      const pattern = typeof input.pattern === 'string' ? input.pattern : typeof input.query === 'string' ? input.query : '';
+      const scope = typeof input.path === 'string' ? ` in ${input.path}` : '';
+      return pattern ? `Searched for ${truncateText(pattern, 80)}${scope}` : 'Ran search';
+    }
+    case 'Bash': {
+      const command = typeof input.command === 'string' ? input.command : '';
+      return command ? `Ran bash: ${truncateText(command, 120)}` : 'Ran bash command';
+    }
+    case 'LS':
+      return path ? `Listed ${path}` : 'Listed files';
+    case 'WebFetch':
+      return typeof input.url === 'string' ? `Fetched ${input.url}` : 'Fetched web page';
+    case 'WebSearch':
+      return typeof input.query === 'string' || typeof input.search_term === 'string'
+        ? `Web searched ${truncateText(String(input.query ?? input.search_term), 90)}`
+        : 'Ran web search';
+    default:
+      if (name.startsWith('mcp__')) {
+        return `Used ${name.replace(/^mcp__/, '').replace(/__/g, '.')}`;
+      }
+      return `${name}${path ? ` ${path}` : ''}`.trim();
+  }
+}
+
+function extractAssistantText(message: SDKAssistantMessage): string {
+  const content = message.message?.content;
+  if (!Array.isArray(content)) return '';
+  const text = content.flatMap((block) => {
+    const record = asRecord(block);
+    if (!record || record.type !== 'text' || typeof record.text !== 'string') return [];
+    return [record.text];
+  }).join('\n\n');
+  return normalizeWhitespace(text);
+}
+
+function extractToolUseBlocks(message: SDKAssistantMessage): ToolUseBlock[] {
+  const content = message.message?.content;
+  if (!Array.isArray(content)) return [];
+
+  return content.flatMap((block) => {
+    const record = asRecord(block);
+    if (!record || record.type !== 'tool_use') return [];
+    return [{
+      id: typeof record.id === 'string' ? record.id : generateId('tool'),
+      name: typeof record.name === 'string' ? record.name : 'tool',
+      input: asRecord(record.input) ?? {},
+    }];
+  });
 }
 
 export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgentResult> {
@@ -91,7 +198,6 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     settingSources: [],
     env: {
       ...process.env as Record<string, string>,
-      CLAUDE_CODE_USE_BEDROCK: '1',
       CLAUDE_CODE_STREAM_CLOSE_TIMEOUT: '120000',
     },
   };
@@ -125,12 +231,44 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
       let sessionId = '';
 
       // 6. Iterate the async generator
+      const seenTypes = new Set<string>();
       for await (const msg of q) {
+        // Debug: track all message types seen
+        const typeKey = msg.type + ('subtype' in msg ? `:${(msg as Record<string, unknown>).subtype}` : '');
+        if (!seenTypes.has(typeKey)) {
+          seenTypes.add(typeKey);
+          log.info({ msgType: typeKey }, 'SDK message type seen (first occurrence)');
+        }
         // Init message -- capture session_id, check MCP server status
         if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'init') {
           const initMsg = msg as SDKSystemMessage;
           sessionId = initMsg.session_id;
           log.info({ sessionId, model: initMsg.model, tools: initMsg.tools.length }, 'SDK session initialized');
+
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_SESSION_INIT',
+            description: `Started ${initMsg.model}`,
+            metadata: {
+              sessionId,
+              model: initMsg.model,
+              cwd: initMsg.cwd,
+              tools: initMsg.tools,
+              skills: initMsg.skills,
+              mcpServers: initMsg.mcp_servers,
+            },
+          });
+
+          for (const skill of initMsg.skills ?? []) {
+            insertActivityLog({
+              taskId: opts.taskId,
+              agentId: opts.agentId,
+              actionType: 'SDK_SKILL_LOAD',
+              description: `Loaded skill ${skill}`,
+              metadata: { skill },
+            });
+          }
 
           // Check for failed MCP connections
           const failedMcp = initMsg.mcp_servers.filter(s => s.status !== 'connected');
@@ -143,38 +281,70 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
         if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'api_retry') {
           const retryMsg = msg as SDKAPIRetryMessage;
           log.warn({ attempt: retryMsg.attempt, retryDelayMs: retryMsg.retry_delay_ms }, 'API retry');
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_API_RETRY',
+            description: `API retry ${retryMsg.attempt}/${retryMsg.max_retries}`,
+            metadata: {
+              attempt: retryMsg.attempt,
+              maxRetries: retryMsg.max_retries,
+              retryDelayMs: retryMsg.retry_delay_ms,
+              errorStatus: retryMsg.error_status,
+              error: retryMsg.error,
+            },
+          });
         }
 
         // Assistant message -- log to activity_log and emit to build log
         if (msg.type === 'assistant') {
           const assistantMsg = msg as SDKAssistantMessage;
-          sqlite.prepare(`
-            INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
-            VALUES (?, ?, ?, 'SDK_ASSISTANT', ?, datetime('now'))
-          `).run(generateId('log'), opts.taskId, opts.agentId, 'Assistant message');
+          const assistantText = extractAssistantText(assistantMsg);
+          if (assistantText || assistantMsg.error) {
+            insertActivityLog({
+              taskId: opts.taskId,
+              agentId: opts.agentId,
+              actionType: 'SDK_ASSISTANT',
+              description: assistantText
+                ? truncateText(assistantText)
+                : `Assistant error: ${assistantMsg.error}`,
+              metadata: {
+                text: assistantText || null,
+                parentToolUseId: assistantMsg.parent_tool_use_id,
+                error: assistantMsg.error ?? null,
+              },
+            });
+          }
 
           eventBus.emit('task:buildlog', {
             taskId: opts.taskId,
             event: { type: 'assistant', agentId: opts.agentId, content: assistantMsg },
           });
 
-          // Extract tool_use blocks for richer activity feed
-          const content = assistantMsg.message?.content;
-          if (Array.isArray(content)) {
-            for (const block of content) {
-              if (block.type === 'tool_use') {
-                eventBus.emit('task:buildlog', {
-                  taskId: opts.taskId,
-                  event: {
-                    type: 'tool_call',
-                    agentId: opts.agentId,
-                    tool_name: block.name,
-                    tool_use_id: block.id,
-                    timestamp: new Date().toISOString(),
-                  },
-                });
-              }
-            }
+          for (const block of extractToolUseBlocks(assistantMsg)) {
+            insertActivityLog({
+              taskId: opts.taskId,
+              agentId: opts.agentId,
+              actionType: 'SDK_TOOL_CALL',
+              description: summarizeToolUse(block.name, block.input),
+              metadata: {
+                toolName: block.name,
+                toolUseId: block.id,
+                parentToolUseId: assistantMsg.parent_tool_use_id,
+                input: block.input,
+              },
+            });
+
+            eventBus.emit('task:buildlog', {
+              taskId: opts.taskId,
+              event: {
+                type: 'tool_call',
+                agentId: opts.agentId,
+                tool_name: block.name,
+                tool_use_id: block.id,
+                timestamp: new Date().toISOString(),
+              },
+            });
           }
         }
 
@@ -186,6 +356,20 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
         // Tool progress -- emit structured activity to build log
         if (msg.type === 'tool_progress') {
           const toolMsg = msg as SDKToolProgressMessage;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_TOOL_PROGRESS',
+            description: `${toolMsg.tool_name} running`,
+            metadata: {
+              toolName: toolMsg.tool_name,
+              toolUseId: toolMsg.tool_use_id,
+              parentToolUseId: toolMsg.parent_tool_use_id,
+              elapsedTimeSeconds: toolMsg.elapsed_time_seconds,
+              taskId: toolMsg.task_id ?? null,
+            },
+          });
+
           eventBus.emit('task:buildlog', {
             taskId: opts.taskId,
             event: {
@@ -202,10 +386,15 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
         // Tool use summary -- log to activity_log
         if (msg.type === 'tool_use_summary') {
           const summaryMsg = msg as SDKToolUseSummaryMessage;
-          sqlite.prepare(`
-            INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
-            VALUES (?, ?, ?, 'SDK_TOOL_SUMMARY', ?, datetime('now'))
-          `).run(generateId('log'), opts.taskId, opts.agentId, summaryMsg.summary);
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_TOOL_SUMMARY',
+            description: summaryMsg.summary,
+            metadata: {
+              precedingToolUseIds: summaryMsg.preceding_tool_use_ids,
+            },
+          });
 
           // Also emit to buildlog for live UI
           eventBus.emit('task:buildlog', {
@@ -215,6 +404,84 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
               agentId: opts.agentId,
               summary: summaryMsg.summary,
               timestamp: new Date().toISOString(),
+            },
+          });
+        }
+
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'files_persisted') {
+          const filesMsg = msg as SDKFilesPersistedEvent;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_FILES_PERSISTED',
+            description: `Persisted ${filesMsg.files.length} file(s)`,
+            metadata: {
+              files: filesMsg.files,
+              failed: filesMsg.failed,
+              processedAt: filesMsg.processed_at,
+            },
+          });
+        }
+
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'hook_started') {
+          const hookMsg = msg as SDKHookStartedMessage;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_HOOK_STARTED',
+            description: `Hook started: ${hookMsg.hook_name}`,
+            metadata: {
+              hookId: hookMsg.hook_id,
+              hookEvent: hookMsg.hook_event,
+            },
+          });
+        }
+
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'hook_progress') {
+          const hookMsg = msg as SDKHookProgressMessage;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_HOOK_PROGRESS',
+            description: `Hook output: ${hookMsg.hook_name}`,
+            metadata: {
+              hookId: hookMsg.hook_id,
+              hookEvent: hookMsg.hook_event,
+              stdout: hookMsg.stdout,
+              stderr: hookMsg.stderr,
+              output: hookMsg.output,
+            },
+          });
+        }
+
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'hook_response') {
+          const hookMsg = msg as SDKHookResponseMessage;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_HOOK_RESPONSE',
+            description: `Hook ${hookMsg.outcome}: ${hookMsg.hook_name}`,
+            metadata: {
+              hookId: hookMsg.hook_id,
+              hookEvent: hookMsg.hook_event,
+              outcome: hookMsg.outcome,
+              exitCode: hookMsg.exit_code ?? null,
+              stdout: hookMsg.stdout,
+              stderr: hookMsg.stderr,
+              output: hookMsg.output,
+            },
+          });
+        }
+
+        if (msg.type === 'system' && 'subtype' in msg && msg.subtype === 'local_command_output') {
+          const localMsg = msg as SDKLocalCommandOutputMessage;
+          insertActivityLog({
+            taskId: opts.taskId,
+            agentId: opts.agentId,
+            actionType: 'SDK_LOCAL_COMMAND',
+            description: truncateText(normalizeWhitespace(localMsg.content)),
+            metadata: {
+              content: localMsg.content,
             },
           });
         }
@@ -265,6 +532,21 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
               durationMs: result.duration_ms,
             }, 'Agent invocation completed successfully');
 
+            insertActivityLog({
+              taskId: opts.taskId,
+              agentId: opts.agentId,
+              actionType: 'SDK_RESULT_SUCCESS',
+              description: `Completed in ${Math.round(result.duration_ms / 1000)}s across ${result.num_turns} turn(s)`,
+              metadata: {
+                sessionId,
+                totalCostUsd,
+                durationMs: result.duration_ms,
+                numTurns: result.num_turns,
+                stopReason: result.stop_reason,
+                result: result.result,
+              },
+            });
+
             return {
               sessionId,
               totalCostUsd,
@@ -279,6 +561,21 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
               errors: errorResult.errors,
               totalCostUsd: errorResult.total_cost_usd,
             }, 'Agent execution failed');
+
+            insertActivityLog({
+              taskId: opts.taskId,
+              agentId: opts.agentId,
+              actionType: 'SDK_RESULT_ERROR',
+              description: `Failed: ${errorResult.subtype}`,
+              metadata: {
+                subtype: errorResult.subtype,
+                errors: errorResult.errors,
+                durationMs: errorResult.duration_ms,
+                numTurns: errorResult.num_turns,
+                totalCostUsd: errorResult.total_cost_usd,
+              },
+            });
+
             throw new Error(`Agent execution failed: ${errorResult.subtype} - ${errorResult.errors.join(', ')}`);
           }
         }
