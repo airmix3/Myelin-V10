@@ -265,12 +265,18 @@ export function createInstallTools(ctx: ToolContext) {
       }
 
       // Install skill to dept skills directory
-      // skills.sh CLI format: npx skills add <owner/repo> --skill '<Skill Name>'
+      // skills.sh CLI: npx skills add <owner/repo> --skill '<Display Name>' --yes
+      // The --skill flag matches against SKILL.md frontmatter name (e.g., "SVG Logo Designer")
+      // not the directory name (e.g., "svg-logo-designer"). Convert kebab to title case.
+      const displayName = skillName
+        .split('-')
+        .map(w => w.charAt(0).toUpperCase() + w.slice(1))
+        .join(' ');
       const deptSkillsDir = resolve(DATA_DIR, 'departments', ctx.department, 'skills');
       mkdirSync(deptSkillsDir, { recursive: true });
 
       try {
-        execSync(`npx skills add ${ownerRepo} --skill '${skillName}'`, {
+        execSync(`npx skills add ${ownerRepo} --skill '${displayName}' --yes`, {
           cwd: deptSkillsDir,
           timeout: 30000,
           stdio: 'pipe',

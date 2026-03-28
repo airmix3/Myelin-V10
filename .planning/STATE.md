@@ -163,6 +163,7 @@ None yet.
 | 260328-e6x | Pass CEO-hinted skills/tools from plan to executing agent via desk CLAUDE.md | 2026-03-28 | ea73626 | [260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t](./quick/260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t/) |
 | 260328-euh | Generate README.md and commit vault data files to git | 2026-03-28 | 047866f | [260328-euh-generate-readme-md-and-commit-vault-data](./quick/260328-euh-generate-readme-md-and-commit-vault-data/) |
 | 260328-its | Show agent switch bounding boxes in build log for review handoffs | 2026-03-28 | ed37f54 | [260328-its-show-agent-switch-bounding-boxes-in-buil](./quick/260328-its-show-agent-switch-bounding-boxes-in-buil/) |
+| 260328-j0g | Fix skill install - skills CLI needs display name not directory name | 2026-03-28 | pending | [260328-j0g-fix-skill-install-skills-cli-needs-displ](./quick/260328-j0g-fix-skill-install-skills-cli-needs-displ/) |
 
 ## Session Continuity
 
