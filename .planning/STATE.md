@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-bxt
-last_updated: "2026-03-28T05:39:11.583Z"
+stopped_at: Completed quick/260328-c3k
+last_updated: "2026-03-28T05:47:54.495Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
@@ -122,6 +122,7 @@ Recent decisions affecting current work:
 - [Phase quick-260328-b2e]: Read-only projectRoot boundary for planning agents: isReadPathAllowed checks projectRoot for Read/Glob/Grep, isPathAllowed stays strict for Write/Edit/Bash
 - [Phase quick-260328-bjv]: SSE activity indicators use EventSource opened only during isLoading+taskId, formatToolName maps SDK tools to human labels
 - [Phase quick-260328-bxt]: FOLLOW-UP MODE prompt pattern: Task Context + Plan (2000 char) + History (last 20, 500 char each) + Message + Instructions
+- [Phase quick-260328-c3k]: settingSources: ['project'] is safe because data/CLAUDE.md project boundary prevents upward traversal to GSD root CLAUDE.md
 
 ### Pending Todos
 
@@ -152,10 +153,11 @@ None yet.
 | 260328-b2e | Fix planning agents not having read access to project source code | 2026-03-28 | 47e7eff | [260328-b2e-fix-planning-agents-not-having-proper-to](./quick/260328-b2e-fix-planning-agents-not-having-proper-to/) |
 | 260328-bjv | Add inline planning activity indicators and fix hardcoded port | 2026-03-28 | 11a10c6 | [260328-bjv-add-inline-planning-activity-indicators-](./quick/260328-bjv-add-inline-planning-activity-indicators-/) |
 | 260328-bxt | Include conversation history in deliverable chat for context-rich follow-up | 2026-03-28 | 0e64ea2 | [260328-bxt-include-conversation-history-in-delivera](./quick/260328-bxt-include-conversation-history-in-delivera/) |
+| 260328-c3k | Fix skills/tools not being used by agents - enable settingSources: ['project'] | 2026-03-28 | 7e120a9 | [260328-c3k-fix-skills-tools-not-being-used-by-agent](./quick/260328-c3k-fix-skills-tools-not-being-used-by-agent/) |
 
 ## Session Continuity
 
-Last session: 2026-03-28T05:39:02.683Z
-Stopped at: Completed quick/260328-bxt
+Last session: 2026-03-28T05:47:51.253Z
+Stopped at: Completed quick/260328-c3k
 Last activity: 2026-03-28
 Resume file: None
