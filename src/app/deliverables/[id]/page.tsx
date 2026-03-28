@@ -1,6 +1,13 @@
 import { prisma } from '@/lib/db';
+import { headers } from 'next/headers';
 import { notFound } from 'next/navigation';
 import WorkspaceClient from './WorkspaceClient';
+
+function isUsefulActivityLogEntry(entry: { actionType: string; description: string | null }): boolean {
+  if (entry.actionType !== 'SDK_ASSISTANT') return true;
+  const description = entry.description?.trim();
+  return Boolean(description && description !== 'Assistant message');
+}
 
 export default async function DeliverableWorkspacePage({ params }: { params: { id: string } }) {
   const deliverable = await prisma.deliverable.findUnique({
@@ -12,7 +19,10 @@ export default async function DeliverableWorkspacePage({ params }: { params: { i
   // Load chat history from JSONL via existing API (internal fetch)
   let chatMessages: Array<Record<string, unknown>> = [];
   try {
-    const chatRes = await fetch(`http://localhost:3000/api/tasks/${deliverable.taskId}/chat`, { cache: 'no-store' });
+    const headersList = headers();
+    const host = headersList.get('host') || 'localhost:3000';
+    const protocol = headersList.get('x-forwarded-proto') || 'http';
+    const chatRes = await fetch(`${protocol}://${host}/api/tasks/${deliverable.taskId}/chat`, { cache: 'no-store' });
     if (chatRes.ok) {
       const chatData = await chatRes.json();
       chatMessages = chatData.messages ?? [];
@@ -24,6 +34,7 @@ export default async function DeliverableWorkspacePage({ params }: { params: { i
     where: { taskId: deliverable.taskId },
     orderBy: { createdAt: 'asc' },
   });
+  const filteredActivityLog = activityLog.filter(isUsefulActivityLogEntry);
 
   // Load hire requests for approval cards
   const hireRequests = await prisma.hireRequest.findMany({
@@ -32,7 +43,7 @@ export default async function DeliverableWorkspacePage({ params }: { params: { i
 
   // Serialize dates for client component
   const serializedDeliverable = JSON.parse(JSON.stringify(deliverable));
-  const serializedActivityLog = JSON.parse(JSON.stringify(activityLog));
+  const serializedActivityLog = JSON.parse(JSON.stringify(filteredActivityLog));
   const serializedHireRequests = JSON.parse(JSON.stringify(hireRequests));
 
   return (
