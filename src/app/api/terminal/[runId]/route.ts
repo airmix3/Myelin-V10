@@ -10,6 +10,7 @@ import {
   removeListener,
 } from '@/lib/pty-manager';
 import { pauseRun, resumeRun } from '@/lib/worker';
+import { eventBus } from '@/lib/events';
 
 /**
  * GET /api/terminal/[runId] -- SSE stream that forwards PTY output to the client.
@@ -46,13 +47,40 @@ export async function GET(
 
   // Pause the SDK agent if it's running
   if (run.status === 'executing') {
-    await pauseRun(runId);
+    try {
+      await pauseRun(runId);
+    } catch (err) {
+      console.error('Failed to pause run:', err);
+    }
   }
 
-  // Spawn PTY if not already active
-  if (!isTerminalActive(runId)) {
-    spawnTerminal(runId, run.sessionId, run.workspaceCwd);
+  // Buffer early PTY output so nothing is lost before SSE listener attaches
+  const earlyBuffer: string[] = [];
+  let sseListener: ((data: string) => void) | null = null;
+
+  function bufferOrForward(data: string) {
+    if (sseListener) {
+      sseListener(data);
+    } else {
+      earlyBuffer.push(data);
+    }
   }
+
+  // Attach buffer listener BEFORE spawning PTY to catch all output
+  if (!isTerminalActive(runId)) {
+    // Pre-register the buffer listener on the pty-manager for this runId
+    // (addListener is a no-op until spawn creates the entry, so we spawn first
+    //  but with a data handler already wired into the PTY via the spawn itself)
+    try {
+      spawnTerminal(runId, run.sessionId, run.workspaceCwd);
+    } catch (err) {
+      console.error('Failed to spawn PTY:', err);
+      return NextResponse.json({ error: 'Failed to spawn terminal' }, { status: 500 });
+    }
+  }
+
+  // Immediately attach the buffer listener
+  addListener(runId, bufferOrForward);
 
   // Set up SSE stream
   const encoder = new TextEncoder();
@@ -67,6 +95,17 @@ export async function GET(
         }
       }
 
+      // Flush any buffered early output
+      for (const chunk of earlyBuffer) {
+        onData(chunk);
+      }
+      earlyBuffer.length = 0;
+
+      // Swap the buffer listener to the real SSE forwarder
+      removeListener(runId, bufferOrForward);
+      addListener(runId, onData);
+      sseListener = onData;
+
       function onTerminalExit(event: unknown) {
         const evt = event as { type: string; data: { runId: string } };
         if (evt.data?.runId === runId) {
@@ -78,17 +117,11 @@ export async function GET(
           }
           // Resume the SDK agent
           resumeRun(runId).catch(() => {});
-          // Clean up listeners
-          removeListener(runId, onData);
-          // eslint-disable-next-line @typescript-eslint/no-use-before-define
           cleanup();
         }
       }
 
-      addListener(runId, onData);
-
-      // Listen for terminal exit via eventBus
-      const { eventBus } = require('@/lib/events');
+      // Listen for terminal exit via eventBus (uses top-level import, not require)
       eventBus.on('event', onTerminalExit);
 
       function cleanup() {
