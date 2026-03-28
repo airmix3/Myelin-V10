@@ -22,7 +22,7 @@ interface GalleryItem {
 
 type TabType = 'tools' | 'skills';
 
-const TOOL_SOURCES = ['company', 'glama', 'composio'] as const;
+const TOOL_SOURCES = ['company', 'smithery'] as const;
 const SKILL_SOURCES = ['company', 'skillssh'] as const;
 
 export default function GalleryPanel({ taskId, department, onSelectionChange }: GalleryPanelProps) {

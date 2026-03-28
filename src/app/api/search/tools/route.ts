@@ -5,7 +5,7 @@ interface ToolResult {
   id: string;
   name: string;
   description: string;
-  source: 'company' | 'glama' | 'composio';
+  source: 'company' | 'smithery';
   stars?: number;
   department?: string;
   url?: string;
@@ -13,7 +13,7 @@ interface ToolResult {
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q') || '';
-  const sources = (request.nextUrl.searchParams.get('sources') || 'company,glama,composio').split(',');
+  const sources = (request.nextUrl.searchParams.get('sources') || 'company,smithery').split(',');
 
   const results: ToolResult[] = [];
   const sourceStatus: Record<string, 'ok' | 'unavailable'> = {};
@@ -40,75 +40,35 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 2. Glama (free, no auth — LOW confidence per Research, graceful fallback)
-  if (sources.includes('glama')) {
+  // 2. Smithery (public registry, no auth needed)
+  if (sources.includes('smithery')) {
     try {
       const controller = new AbortController();
       const timeout = setTimeout(() => controller.abort(), 5000);
       const res = await fetch(
-        `https://glama.ai/api/mcp/servers?search=${encodeURIComponent(query)}&limit=20`,
+        `https://registry.smithery.ai/servers?q=${encodeURIComponent(query)}&pageSize=20`,
         { signal: controller.signal },
       );
       clearTimeout(timeout);
       if (res.ok) {
         const data = await res.json();
-        // Adapt response shape — exact format unknown, handle gracefully
-        const items = Array.isArray(data) ? data : (data.servers || data.results || data.data || []);
-        for (const item of items.slice(0, 20)) {
+        const items = data.servers || [];
+        for (const item of items) {
           results.push({
-            id: `glama-${item.id || item.name}`,
-            name: item.name || item.title || 'Unknown',
+            id: `smithery-${item.qualifiedName}`,
+            name: item.displayName || item.qualifiedName,
             description: item.description || '',
-            source: 'glama',
-            stars: item.stars || item.weekly_downloads || 0,
-            url: item.url || item.homepage || undefined,
+            source: 'smithery',
+            stars: item.useCount || 0,
+            url: item.homepage || `https://smithery.ai/servers/${item.qualifiedName}`,
           });
         }
-        sourceStatus.glama = 'ok';
+        sourceStatus.smithery = 'ok';
       } else {
-        sourceStatus.glama = 'unavailable';
+        sourceStatus.smithery = 'unavailable';
       }
     } catch {
-      sourceStatus.glama = 'unavailable';
-    }
-  }
-
-  // 3. Composio (requires API key)
-  if (sources.includes('composio')) {
-    const apiKey = process.env.COMPOSIO_API_KEY;
-    if (!apiKey) {
-      sourceStatus.composio = 'unavailable';
-    } else {
-      try {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 5000);
-        const res = await fetch(
-          `https://backend.composio.dev/api/v3/toolkits?limit=20${query ? `&search=${encodeURIComponent(query)}` : ''}`,
-          {
-            headers: { 'x-api-key': apiKey },
-            signal: controller.signal,
-          },
-        );
-        clearTimeout(timeout);
-        if (res.ok) {
-          const data = await res.json();
-          const items = Array.isArray(data) ? data : (data.toolkits || data.results || data.items || []);
-          for (const item of items.slice(0, 20)) {
-            results.push({
-              id: `composio-${item.id || item.name}`,
-              name: item.name || item.title || 'Unknown',
-              description: item.description || '',
-              source: 'composio',
-              stars: item.stars || item.popularity || 0,
-            });
-          }
-          sourceStatus.composio = 'ok';
-        } else {
-          sourceStatus.composio = 'unavailable';
-        }
-      } catch {
-        sourceStatus.composio = 'unavailable';
-      }
+      sourceStatus.smithery = 'unavailable';
     }
   }
 
