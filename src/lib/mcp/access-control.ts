@@ -32,6 +32,8 @@ const TEMP_ALLOWED = [
   'mcp__myelin__promote_to_deliverable',
   'mcp__myelin__propose_skill',
   'mcp__myelin__submit_for_review',
+  'mcp__myelin__install_tool',
+  'mcp__myelin__install_skill',
 ];
 
 // Built-in Claude Code tools that access the filesystem
