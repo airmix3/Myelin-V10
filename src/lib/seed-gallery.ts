@@ -38,17 +38,57 @@ async function seedMcpServers(): Promise<void> {
 }
 
 /**
- * Seed skills from on-disk skills/ directory.
- * Reads each subdirectory's SKILL.md, parses YAML frontmatter for name+description.
+ * Seed skills from multiple on-disk sources:
+ * 1. data/departments/global/skills/ — global skills (department='global')
+ * 2. data/departments/cos/skills/ — Tamir-specific skills (department='cos')
+ * 3. data/departments/{tech,marketing,operations}/skills/ — department skills
+ * 4. skills/ (project root) — externally installed skills (department='external')
  */
 async function seedSkills(): Promise<void> {
-  const skillsDir = path.resolve(process.cwd(), 'skills');
+  const matter = (await import('gray-matter')).default;
+  const dataDir = path.resolve(process.cwd(), 'data');
+
+  // Seed global skills
+  await seedSkillsFromDir(
+    matter,
+    path.join(dataDir, 'departments', 'global', 'skills'),
+    'global',
+  );
+
+  // Seed cos skills (Tamir-specific, e.g. installer)
+  await seedSkillsFromDir(
+    matter,
+    path.join(dataDir, 'departments', 'cos', 'skills'),
+    'cos',
+  );
+
+  // Seed department-specific skills
+  for (const dept of ['tech', 'marketing', 'operations']) {
+    await seedSkillsFromDir(
+      matter,
+      path.join(dataDir, 'departments', dept, 'skills'),
+      dept,
+    );
+  }
+
+  // Seed externally installed skills from project root skills/
+  await seedSkillsFromDir(
+    matter,
+    path.resolve(process.cwd(), 'skills'),
+    'external',
+  );
+}
+
+async function seedSkillsFromDir(
+  matter: (input: string) => { data: Record<string, unknown>; content: string },
+  skillsDir: string,
+  department: string,
+): Promise<void> {
   if (!fs.existsSync(skillsDir)) {
-    log.debug('No skills/ directory found, skipping skill seeding');
+    log.debug({ skillsDir, department }, 'Skills directory not found, skipping');
     return;
   }
 
-  const matter = (await import('gray-matter')).default;
   const entries = fs.readdirSync(skillsDir, { withFileTypes: true });
 
   for (const entry of entries) {
@@ -62,12 +102,12 @@ async function seedSkills(): Promise<void> {
 
     const content = fs.readFileSync(skillMdPath, 'utf-8');
     const parsed = matter(content);
-    const name = parsed.data.name || entry.name;
-    const description = parsed.data.description || '';
+    const name = (parsed.data.name as string) || entry.name;
+    const description = (parsed.data.description as string) || '';
 
     // Upsert by name + department combination
     const existing = await prisma.skill.findFirst({
-      where: { name, department: 'cos' },
+      where: { name, department },
     });
 
     if (!existing) {
@@ -75,21 +115,21 @@ async function seedSkills(): Promise<void> {
         data: {
           id: generateId('skill'),
           name,
-          department: 'cos',
+          department,
           description,
           status: 'active',
           filePath: skillMdPath,
           proposedBy: 'system',
         },
       });
-      log.info({ name }, 'Seeded skill');
+      log.info({ name, department }, 'Seeded skill');
     } else {
       // Update description/filePath if changed
       await prisma.skill.update({
         where: { id: existing.id },
         data: { description, filePath: skillMdPath },
       });
-      log.debug({ name }, 'Skill already exists, updated metadata');
+      log.debug({ name, department }, 'Skill already exists, updated metadata');
     }
   }
 }
