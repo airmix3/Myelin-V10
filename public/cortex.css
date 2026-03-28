@@ -1304,7 +1304,7 @@ input[type="checkbox"] {
 
 .dashboard-hero {
   position: relative;
-  height: 400px;
+  min-height: 180px;
   overflow: hidden;
   border-radius: 0;
   margin: -20px -20px 0 -20px;
@@ -1317,7 +1317,7 @@ input[type="checkbox"] {
   left: 0;
   right: 0;
   height: 80px;
-  background: linear-gradient(to bottom, transparent, #090816);
+  background: linear-gradient(to bottom, transparent, #0a0a1a);
   z-index: 3;
   pointer-events: none;
 }
@@ -1327,7 +1327,7 @@ input[type="checkbox"] {
   inset: 0;
   width: 100%;
   height: 100%;
-  opacity: 0.7;
+  opacity: 0.8;
 }
 
 .dashboard-hero-overlay {
@@ -1339,7 +1339,7 @@ input[type="checkbox"] {
   justify-content: center;
   align-items: center;
   text-align: center;
-  padding: 40px 20px;
+  padding: 20px;
 }
 
 .dashboard-hero-title {
@@ -1356,9 +1356,9 @@ input[type="checkbox"] {
 }
 
 .dashboard-hero-subtitle {
-  font-size: 16px;
-  color: rgba(143,231,255,0.5);
-  letter-spacing: 0.4em;
+  font-size: 11px;
+  color: #a0a0d0;
+  letter-spacing: 0.15em;
   text-transform: uppercase;
   margin-bottom: 40px;
 }
@@ -1373,19 +1373,19 @@ input[type="checkbox"] {
 }
 
 .dashboard-hero-stat-value {
-  font-size: 36px;
+  font-size: 28px;
   font-weight: 900;
   color: #fff;
 }
 
-.stat-cyan .dashboard-hero-stat-value { color: #8FE7FF; text-shadow: 0 0 20px rgba(143,231,255,0.4); }
-.stat-blue .dashboard-hero-stat-value { color: #6496FF; text-shadow: 0 0 20px rgba(100,150,255,0.4); }
-.stat-mint .dashboard-hero-stat-value { color: #2EE6A6; text-shadow: 0 0 20px rgba(46,230,166,0.4); }
-.stat-magenta .dashboard-hero-stat-value { color: #FF64C8; text-shadow: 0 0 20px rgba(255,100,200,0.4); }
+.stat-accent .dashboard-hero-stat-value { color: #e94560; text-shadow: 0 0 20px rgba(233,69,96,0.4); }
+.stat-green .dashboard-hero-stat-value { color: #00d68f; text-shadow: 0 0 20px rgba(0,214,143,0.4); }
+.stat-blue .dashboard-hero-stat-value { color: #6496ff; text-shadow: 0 0 20px rgba(100,150,255,0.4); }
+.stat-amber .dashboard-hero-stat-value { color: #ffb347; text-shadow: 0 0 20px rgba(255,179,71,0.4); }
 
 .dashboard-hero-stat-label {
-  font-size: 11px;
-  color: rgba(255,255,255,0.35);
+  font-size: 10px;
+  color: #8080b0;
   text-transform: uppercase;
   letter-spacing: 0.15em;
   margin-top: 6px;
