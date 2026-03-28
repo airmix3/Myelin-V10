@@ -19,6 +19,14 @@ interface Activity {
   createdAt: string;
 }
 
+interface Deliverable {
+  id: string;
+  title: string;
+  department: string;
+  taskId: string | null;
+  createdAt: string;
+}
+
 interface DashboardClientProps {
   stats: {
     activeAgents: number;
@@ -28,6 +36,7 @@ interface DashboardClientProps {
   };
   agents: Agent[];
   initialActivities: Activity[];
+  inProgressDeliverables: Deliverable[];
 }
 
 function isUsefulActivity(activity: Activity): boolean {
@@ -67,7 +76,7 @@ function deptBadgeClass(dept: string): string {
   }
 }
 
-export default function DashboardClient({ stats, agents, initialActivities }: DashboardClientProps) {
+export default function DashboardClient({ stats, agents, initialActivities, inProgressDeliverables }: DashboardClientProps) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities.filter(isUsefulActivity));
   const [agentTimestamps, setAgentTimestamps] = useState<Record<string, number>>({});
   const [, setTick] = useState(0);
@@ -179,6 +188,31 @@ export default function DashboardClient({ stats, agents, initialActivities }: Da
             </div>
           )}
         </div>
+      </div>
+
+      {/* In-Progress Deliverables */}
+      <div className="card">
+        <div className="card-title">IN-PROGRESS DELIVERABLES</div>
+        {inProgressDeliverables.length === 0 ? (
+          <div style={{ color: 'var(--text-dim)' }}>No deliverables in progress</div>
+        ) : (
+          <div>
+            {inProgressDeliverables.map((d) => (
+              <div key={d.id} style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                <span className={deptBadgeClass(d.department)}>{d.department}</span>
+                <a
+                  href={`/deliverables/${d.id}`}
+                  style={{ color: 'var(--text-primary)', textDecoration: 'none', fontWeight: 500, flex: 1 }}
+                >
+                  {d.title}
+                </a>
+                <span style={{ fontSize: '11px', color: 'var(--text-dim)' }}>
+                  {formatRelativeTime(d.createdAt)}
+                </span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );
