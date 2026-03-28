@@ -1,19 +1,21 @@
 import { prisma } from '@/lib/db';
 import { NextRequest, NextResponse } from 'next/server';
+import { execSync } from 'child_process';
 
 interface SkillResult {
   id: string;
   name: string;
   description: string;
-  source: 'company' | 'clawhub';
+  source: 'company' | 'skillssh';
   department?: string;
   status?: string;
   stars?: number;
+  summary?: string;
 }
 
 export async function GET(request: NextRequest) {
   const query = request.nextUrl.searchParams.get('q') || '';
-  const sources = (request.nextUrl.searchParams.get('sources') || 'company,clawhub').split(',');
+  const sources = (request.nextUrl.searchParams.get('sources') || 'company,skillssh').split(',');
 
   const results: SkillResult[] = [];
   const sourceStatus: Record<string, 'ok' | 'unavailable'> = {};
@@ -36,6 +38,7 @@ export async function GET(request: NextRequest) {
           source: 'company',
           department: s.department,
           status: s.status,
+          summary: s.description || '',
         });
       }
       sourceStatus.company = 'ok';
@@ -44,34 +47,47 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // 2. ClawHub (domain doesn't resolve per Research — always unavailable in practice)
-  if (sources.includes('clawhub')) {
+  // 2. skills.sh via CLI (npx skills search)
+  if (sources.includes('skillssh')) {
     try {
-      const controller = new AbortController();
-      const timeout = setTimeout(() => controller.abort(), 5000);
-      const res = await fetch(
-        `https://hub.openclaw.ai/api/skills?q=${encodeURIComponent(query)}&limit=20`,
-        { signal: controller.signal },
-      );
-      clearTimeout(timeout);
-      if (res.ok) {
-        const data = await res.json();
-        const items = Array.isArray(data) ? data : (data.skills || data.results || []);
-        for (const item of items.slice(0, 20)) {
+      const raw = execSync(`npx skills search "${query.replace(/"/g, '\\"')}" 2>/dev/null`, {
+        encoding: 'utf-8',
+        timeout: 10000,
+      });
+
+      // Strip ANSI escape codes
+      const clean = raw.replace(/\x1b\[[0-9;]*m/g, '');
+
+      // Parse results: each result is a group of lines like:
+      //   owner/repo@skill-name   NNK installs
+      //   https://skills.sh/...
+      // Find lines matching the owner/repo@skill pattern
+      const lines = clean.split('\n').map(l => l.trim()).filter(Boolean);
+      for (const line of lines) {
+        const match = line.match(/^(\S+\/\S+)@(\S+)\s+([\d.]+[KkMm]?)\s+installs?$/);
+        if (match) {
+          const repo = match[1];
+          const skillName = match[2];
+          const installStr = match[3];
+
+          // Parse install count
+          let installs = parseFloat(installStr);
+          if (/[Kk]$/.test(installStr)) installs = parseFloat(installStr) * 1000;
+          else if (/[Mm]$/.test(installStr)) installs = parseFloat(installStr) * 1000000;
+
           results.push({
-            id: `clawhub-${item.id || item.name}`,
-            name: item.name || 'Unknown',
-            description: item.description || '',
-            source: 'clawhub',
-            stars: item.stars || 0,
+            id: `skillssh-${repo}@${skillName}`,
+            name: skillName,
+            description: repo,
+            source: 'skillssh',
+            stars: Math.round(installs),
           });
         }
-        sourceStatus.clawhub = 'ok';
-      } else {
-        sourceStatus.clawhub = 'unavailable';
       }
+
+      sourceStatus.skillssh = results.some(r => r.source === 'skillssh') ? 'ok' : 'ok';
     } catch {
-      sourceStatus.clawhub = 'unavailable';
+      sourceStatus.skillssh = 'unavailable';
     }
   }
 
