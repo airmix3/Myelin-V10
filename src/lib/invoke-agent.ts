@@ -194,7 +194,7 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     maxBudgetUsd: opts.maxBudgetUsd ?? 10,
     includePartialMessages: true,
     resume: opts.sessionId,
-    settingSources: [],
+    settingSources: ['project'],
     env: {
       ...process.env as Record<string, string>,
       CLAUDE_CODE_STREAM_CLOSE_TIMEOUT: '120000',
