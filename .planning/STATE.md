@@ -162,10 +162,11 @@ None yet.
 | 260328-cyc | Implement install_tool and install_skill MCP tools with dept head approval | 2026-03-28 | 5015eae | [260328-cyc-implement-install-tool-and-install-skill](./quick/260328-cyc-implement-install-tool-and-install-skill/) |
 | 260328-e6x | Pass CEO-hinted skills/tools from plan to executing agent via desk CLAUDE.md | 2026-03-28 | ea73626 | [260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t](./quick/260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t/) |
 | 260328-euh | Generate README.md and commit vault data files to git | 2026-03-28 | 047866f | [260328-euh-generate-readme-md-and-commit-vault-data](./quick/260328-euh-generate-readme-md-and-commit-vault-data/) |
+| 260328-its | Show agent switch bounding boxes in build log for review handoffs | 2026-03-28 | ed37f54 | [260328-its-show-agent-switch-bounding-boxes-in-buil](./quick/260328-its-show-agent-switch-bounding-boxes-in-buil/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T10:38:31.450Z
 Stopped at: Completed quick/260328-its
-Last activity: 2026-03-28 - Completed quick task 260328-euh: README.md + vault data committed
+Last activity: 2026-03-28 - Completed quick task 260328-its: agent switch bounding boxes in build log
 Resume file: None
