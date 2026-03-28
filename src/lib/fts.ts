@@ -79,6 +79,7 @@ export function searchDocuments(query: string, limit: number = 20): SearchResult
     FROM documents_fts
     JOIN documents d ON d.rowid = documents_fts.rowid
     WHERE documents_fts MATCH ?
+      AND d.source IN ('vault', 'knowledge')
     ORDER BY rank
     LIMIT ?
   `).all(query, limit) as SearchResult[];

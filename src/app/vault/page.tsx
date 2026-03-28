@@ -3,6 +3,7 @@ import VaultClient from './VaultClient';
 
 export default async function VaultPage() {
   const documents = await prisma.document.findMany({
+    where: { source: { in: ['vault', 'knowledge'] } },
     orderBy: { createdAt: 'desc' },
     select: {
       id: true,
