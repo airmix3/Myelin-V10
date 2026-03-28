@@ -48,6 +48,9 @@ export interface InvokeAgentOptions {
   /** Restrict available built-in tools. `[]` disables all built-in tools (LLM-only mode).
    *  Omit to use full Claude Code preset (default for execution runs). */
   tools?: string[] | { type: 'preset'; preset: 'claude_code' };
+  /** Project root path for read-only access during planning. Only set for planning invocations.
+   *  When provided, Read/Glob/Grep can access files under projectRoot (but Write/Edit/Bash cannot). */
+  projectRoot?: string;
 }
 
 export interface InvokeAgentResult {
@@ -178,6 +181,7 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
   const canUseTool = buildCanUseTool(opts.agentId, opts.department, {
     deskDir: opts.deskDir,
     delivDir: opts.delivDir,
+    projectRoot: opts.projectRoot,
   });
 
   log.info({ deskDir: opts.deskDir, sessionId: opts.sessionId ?? 'new' }, 'Starting agent invocation');

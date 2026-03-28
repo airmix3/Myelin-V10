@@ -94,6 +94,7 @@ export async function POST(
       manifestPath: tmpManifestPath,
       outputFormat: AGENT_TURN_SCHEMA,
       maxBudgetUsd: 2,
+      projectRoot: resolve(process.cwd()),
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
