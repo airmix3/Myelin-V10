@@ -1,7 +1,7 @@
 import { sqlite } from '@/lib/db';
-import { generateId } from '@/lib/id';
 import { eventBus } from '@/lib/events';
 import { logger } from '@/lib/logger';
+import { insertActivityLog } from '@/lib/activity-log';
 
 export type TaskState = 'submitted' | 'working' | 'input-required' | 'completed' | 'failed' | 'canceled';
 
@@ -73,17 +73,12 @@ export function transitionTask(
     };
   }
 
-  // Log to activity_log
-  // Prisma field names are camelCase (taskId, actionType, createdAt) -- no @map() overrides in schema
-  sqlite.prepare(`
-    INSERT INTO activity_log (id, taskId, actionType, description, metadata, createdAt)
-    VALUES (?, ?, 'TASK_TRANSITION', ?, ?, datetime('now'))
-  `).run(
-    generateId('log'),
+  insertActivityLog({
     taskId,
-    `${fromState} -> ${toState}`,
-    metadata ? JSON.stringify(metadata) : null
-  );
+    actionType: 'TASK_TRANSITION',
+    description: `${fromState} -> ${toState}`,
+    metadata,
+  });
 
   // Emit SSE event
   eventBus.emit('task:transition', {

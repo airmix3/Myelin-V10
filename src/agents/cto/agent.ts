@@ -1,11 +1,6 @@
 import { readFileSync } from 'fs';
-import { resolve, dirname } from 'path';
-import { fileURLToPath } from 'url';
-
-// Agent card metadata
+import { resolve } from 'path';
 import cardJson from './card.json';
-
-const __dirname = dirname(fileURLToPath(import.meta.url));
 
 export interface AgentConfig {
   agentId: string;
@@ -20,12 +15,9 @@ export interface AgentConfig {
 }
 
 export function getAgentConfig(): AgentConfig {
-  const soulMd = readFileSync(resolve(__dirname, 'soul.md'), 'utf-8');
   return {
     ...cardJson,
     role: cardJson.role as AgentConfig['role'],
-    soulMd,
+    soulMd: readFileSync(resolve(process.cwd(), 'src/agents/cto/soul.md'), 'utf-8'),
   };
 }
-
-export const agentConfig = getAgentConfig();

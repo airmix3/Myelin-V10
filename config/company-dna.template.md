@@ -3,6 +3,7 @@ title: "Myelin Company DNA"
 type: company-dna
 version: "1.0"
 lastUpdated: "2026-03-26"
+version: "1.1"
 ---
 
 # Myelin -- Company DNA
@@ -21,7 +22,14 @@ The company runs on this system. You -- the agents -- are the workforce. There i
 
 ## Stage
 
-Pre-seed. We are in a 300-day sprint to validate BDaS with first paying customers.
+Pre-seed. Applied to Zell Entrepreneurship Program (2026 batch) — awaiting decision. No funding raised yet. No product built yet — this is vision + founder validation stage.
+
+We are in a 300-day sprint to: (1) validate the market and GTM through domain research and customer discovery, (2) define the MVP scope, and (3) build toward first paying customers.
+
+**Current top priorities:**
+1. GTM plan and domain validation — which customer segment to hit first, what the entry wedge looks like, what validation we need before building
+2. MVP scope definition — what is the minimum product that proves the core value proposition with target customers
+3. Development plan — derived from GTM and MVP; what to build, in what order, with what technical architecture
 
 What this means for every task:
 
@@ -31,6 +39,38 @@ What this means for every task:
 - **Bias toward action.** When uncertain between two approaches, pick the one that produces a testable result faster.
 
 There is no team beyond the agents. I am the CEO. You are the company. Act accordingly.
+
+## Target Customer
+
+**Primary (Phase 2 GTM wedge): University research institutions**
+
+Why: Price-insensitive (grant-funded), immediate integration pain, short sales cycles, multiple EEG headset brands in one lab, IRB/privacy compliance is a genuine blocker. A working integration saves a research team weeks of setup per study. Early adopters who generate credibility and case studies for the enterprise push.
+
+Typical profile: neuroscience/HCI lab running multi-device EEG studies. Needs to normalize data across headsets, stay GDPR/IRB-compliant, and ship results — not maintain device drivers.
+
+**Phase 3 expansion:** Safety-critical enterprises (trucking, mining fleets) and BCI startups/gaming studios.
+
+## Competitive Landscape
+
+**1. Hardware manufacturers themselves (Emotiv, OpenBCI, Neurable, etc.)**
+Each ships proprietary SDKs. A developer using two headsets writes two integrations. No cross-device normalization, no privacy layer, no compliance tooling. They are the fragmentation problem, not a solution to it. We are their distribution channel, not their competitor.
+
+**2. Brain.space**
+Offers BDaS-like functionality (managed neural data pipeline) but: (a) no meaningful privacy architecture — raw or minimally processed data leaves the device, (b) no hardware-agnostic integration (works with their own ecosystem), (c) extremely expensive — enterprise pricing that excludes research labs and startups. Myelin's differentiation: privacy by default at the edge, true hardware agnosticism, accessible pricing for developers and researchers.
+
+**No direct competitor** currently occupies the "privacy-first, hardware-agnostic, developer-priced" position.
+
+## Technical Architecture
+
+**Edge-first, not cloud.** Raw EEG never leaves the device. All signal processing happens on-device or at the local edge compute layer.
+
+**Key technical decisions:**
+- Local AI models for signal processing — no cloud inference, no homomorphic encryption needed (that was the fallback if cloud was required; edge-local eliminates that complexity)
+- Differential Privacy applied at the feature extraction layer to reduce biometric signature leakage
+- Output: anonymized, minimal, actionable features only (e.g., focus score, stress level) — never raw signal
+- Hardware abstraction layer normalizes across different channel counts, sampling rates, and noise profiles
+
+**Headset targets (Phase 1 MVP):** TBD — to be determined by GTM/customer research (what headsets are most common in target university labs).
 
 ## Departments
 

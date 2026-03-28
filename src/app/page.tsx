@@ -1,6 +1,12 @@
 import { prisma } from '@/lib/db';
 import DashboardClient from './DashboardClient';
 
+function isUsefulActivityLogEntry(entry: { actionType: string; description: string | null }): boolean {
+  if (entry.actionType !== 'SDK_ASSISTANT') return true;
+  const description = entry.description?.trim();
+  return Boolean(description && description !== 'Assistant message');
+}
+
 export default async function Dashboard() {
   const [activeAgents, activeTasks, pendingApprovals, deliverableCount, agents, activities] = await Promise.all([
     prisma.employee.count({ where: { status: 'active' } }),
@@ -17,12 +23,13 @@ export default async function Dashboard() {
       select: { id: true, taskId: true, agentId: true, actionType: true, description: true, createdAt: true },
     }),
   ]);
+  const filteredActivities = activities.filter(isUsefulActivityLogEntry);
 
   return (
     <DashboardClient
       stats={{ activeAgents, activeTasks, pendingApprovals, deliverableCount }}
       agents={agents}
-      initialActivities={activities.map((a) => ({
+      initialActivities={filteredActivities.map((a) => ({
         ...a,
         createdAt: a.createdAt.toISOString(),
       }))}

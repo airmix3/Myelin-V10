@@ -19,6 +19,16 @@ interface WorkspaceClientProps {
 
 type TabId = 'deliverable' | 'agent-log' | 'build-log' | 'files';
 
+interface AgentLogEntry {
+  id: string;
+  taskId: string | null;
+  agentId: string | null;
+  actionType: string;
+  description: string | null;
+  metadata: string | null;
+  createdAt: string;
+}
+
 interface BuildLogEntry {
   type: string;
   agentId?: string;
@@ -31,6 +41,12 @@ interface BuildLogEntry {
   elapsed_time_seconds?: number;
   summary?: string;
   tool_use_id?: string;
+}
+
+function isUsefulActivityEntry(entry: Pick<AgentLogEntry, 'actionType' | 'description'>): boolean {
+  if (entry.actionType !== 'SDK_ASSISTANT') return true;
+  const description = entry.description?.trim();
+  return Boolean(description && description !== 'Assistant message');
 }
 
 export default function WorkspaceClient({
@@ -49,6 +65,7 @@ export default function WorkspaceClient({
     taskState === 'completed' && deliverable.primaryFile ? 'deliverable' : 'build-log';
 
   const [activeTab, setActiveTab] = useState<TabId>(defaultTab);
+  const [activityLogEntries, setActivityLogEntries] = useState<AgentLogEntry[]>(activityLog as unknown as AgentLogEntry[]);
   const [buildLogEntries, setBuildLogEntries] = useState<BuildLogEntry[]>([]);
   const [currentTaskState, setCurrentTaskState] = useState(taskState);
   const [currentTaskMetadata, setCurrentTaskMetadata] = useState<Record<string, unknown>>(taskMetadata);
@@ -73,9 +90,15 @@ export default function WorkspaceClient({
 
   // SSE subscriptions
   useSSE({
+    'task:activity': useCallback((data: Record<string, unknown>) => {
+      if (data.taskId !== taskId) return;
+      if (!isUsefulActivityEntry(data as unknown as AgentLogEntry)) return;
+      setActivityLogEntries(prev => prev.some(entry => entry.id === data.id) ? prev : [...prev, data as unknown as AgentLogEntry]);
+    }, [taskId]),
+
     'task:buildlog': useCallback((data: Record<string, unknown>) => {
       if (data.taskId !== taskId) return;
-      setBuildLogEntries(prev => [...prev, data as BuildLogEntry]);
+      setBuildLogEntries(prev => [...prev, data as unknown as BuildLogEntry]);
       // Files may have been created - bump refresh counter
       setFileRefreshCounter(prev => prev + 1);
     }, [taskId]),
@@ -177,7 +200,7 @@ export default function WorkspaceClient({
           )}
 
           {activeTab === 'agent-log' && (
-            <AgentLogPanel activityLog={activityLog as Array<{
+            <AgentLogPanel activityLog={activityLogEntries as Array<{
               id: string;
               taskId: string | null;
               agentId: string | null;

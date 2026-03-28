@@ -30,6 +30,12 @@ interface DashboardClientProps {
   initialActivities: Activity[];
 }
 
+function isUsefulActivity(activity: Activity): boolean {
+  if (activity.actionType !== 'SDK_ASSISTANT') return true;
+  const description = activity.description?.trim();
+  return Boolean(description && description !== 'Assistant message');
+}
+
 function formatRelativeTime(isoString: string): string {
   const now = Date.now();
   const then = new Date(isoString).getTime();
@@ -62,7 +68,7 @@ function deptBadgeClass(dept: string): string {
 }
 
 export default function DashboardClient({ stats, agents, initialActivities }: DashboardClientProps) {
-  const [activities, setActivities] = useState<Activity[]>(initialActivities);
+  const [activities, setActivities] = useState<Activity[]>(initialActivities.filter(isUsefulActivity));
   const [agentTimestamps, setAgentTimestamps] = useState<Record<string, number>>({});
   const [, setTick] = useState(0);
 
@@ -85,6 +91,7 @@ export default function DashboardClient({ stats, agents, initialActivities }: Da
       description: (data.description as string) || (data.message as string) || null,
       createdAt: new Date().toISOString(),
     };
+    if (!isUsefulActivity(activity)) return;
     setActivities((prev) => [activity, ...prev].slice(0, 10));
   }, []);
 

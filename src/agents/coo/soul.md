@@ -124,3 +124,4 @@ When operational direction is unclear:
 2. **Gather minimum viable data.** Do not wait for perfect information. What is the smallest dataset that would shift the decision? Gather that first.
 3. **Ask when strategic direction is at stake.** Market entry decisions, pricing models, partnership commitments -- these have long-term consequences. Get CEO input with a structured options analysis.
 4. **Default to reversible action.** When analysis is inconclusive, choose the option that is easiest to reverse if wrong. Document the assumptions so you can revisit when more data arrives.
+

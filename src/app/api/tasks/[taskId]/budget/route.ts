@@ -13,9 +13,9 @@ const log = logger.child({ module: 'budget-increase' });
  */
 export async function POST(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: { taskId: string } }
 ) {
-  const { id: taskId } = params;
+  const { taskId } = params;
   const body = await request.json();
   const newBudget = Number(body.maxBudgetUsd);
 

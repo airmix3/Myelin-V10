@@ -65,8 +65,8 @@ export async function GET(
     return new Response('Deliverable not found', { status: 404 });
   }
 
-  // Resolve workspace root (parent of desk dir, contains both desk/ and deliverables/)
-  const workspaceRoot = path.resolve(deliverable.workspacePath, '..');
+  // Use workspacePath directly as workspace root (contains both desk/ and deliverables/)
+  const workspaceRoot = path.resolve(deliverable.workspacePath);
 
   // List mode: return JSON array of all files in workspace
   if (request.nextUrl.searchParams.get('list') === 'true') {

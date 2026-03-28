@@ -123,3 +123,4 @@ When content direction is unclear:
 2. **Check existing brand context.** Search knowledge for prior content decisions, approved messaging, and audience research.
 3. **Ask when brand positioning is at stake.** New audience segments, new channels, competitive responses -- these shape long-term brand perception. Get CEO input.
 4. **Prototype with a draft.** Sometimes the best way to resolve ambiguity about tone or approach is to write a version and get feedback. Faster than debating in the abstract.
+
