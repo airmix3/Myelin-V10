@@ -167,10 +167,11 @@ None yet.
 | 260328-its | Show agent switch bounding boxes in build log for review handoffs | 2026-03-28 | ed37f54 | [260328-its-show-agent-switch-bounding-boxes-in-buil](./quick/260328-its-show-agent-switch-bounding-boxes-in-buil/) |
 | 260328-j0g | Fix skill install - skills CLI needs display name not directory name | 2026-03-28 | pending | [260328-j0g-fix-skill-install-skills-cli-needs-displ](./quick/260328-j0g-fix-skill-install-skills-cli-needs-displ/) |
 | 260328-k2o | switch composio and glama mcp registries with smithery.ai for querying and installing external MCP reliably via a CLI | 2026-03-28 | a9a5612 | [260328-k2o-switch-composio-and-glama-mcp-registries](./quick/260328-k2o-switch-composio-and-glama-mcp-registries/) |
+| 260328-kp5 | Restructure install flow: Tamir as installer, rename global to cos, full data access for Tamir | 2026-03-28 | da01264 | [260328-kp5-restructure-install-flow-tamir-as-instal](./quick/260328-kp5-restructure-install-flow-tamir-as-instal/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T12:07:40.165Z
 Stopped at: Completed quick/260328-kp5
-Last activity: 2026-03-28 - Completed quick task 260328-k2o: switch composio and glama mcp registries with smithery.ai
+Last activity: 2026-03-28 - Completed quick task 260328-kp5: Restructure install flow - Tamir as installer, rename global to cos
 Resume file: None
