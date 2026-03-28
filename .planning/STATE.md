@@ -159,10 +159,11 @@ None yet.
 | 260328-c6r | Fix deliverables incorrectly showing in Vault page - filter to vault+knowledge sources | 2026-03-28 | 352e5d2 | [260328-c6r-fix-deliverables-incorrectly-showing-in-](./quick/260328-c6r-fix-deliverables-incorrectly-showing-in-/) |
 | 260328-cjp | Fix Active Tasks count showing completed tasks | 2026-03-28 | 5e78774 | [260328-cjp-fix-active-tasks-count-showing-completed](./quick/260328-cjp-fix-active-tasks-count-showing-completed/) |
 | 260328-cyc | Implement install_tool and install_skill MCP tools with dept head approval | 2026-03-28 | 5015eae | [260328-cyc-implement-install-tool-and-install-skill](./quick/260328-cyc-implement-install-tool-and-install-skill/) |
+| 260328-e6x | Pass CEO-hinted skills/tools from plan to executing agent via desk CLAUDE.md | 2026-03-28 | ea73626 | [260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t](./quick/260328-e6x-pass-ceo-hinted-skills-tools-from-plan-t/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T07:17:08.197Z
 Stopped at: Completed quick/260328-e6x
-Last activity: 2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks
+Last activity: 2026-03-28 - Completed quick task 260328-e6x: pass CEO-hinted skills/tools to agent CLAUDE.md
 Resume file: None

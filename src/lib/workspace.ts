@@ -95,13 +95,17 @@ export function createTaskWorkspace(
 
   // Write minimal CLAUDE.md as pointer file
   const constraintsSection = constraints ? `\n## Constraints\n\n${constraints}\n` : '';
+  const hasHints = hintsSection.length > 0;
+  const planInstruction = hasHints
+    ? 'After installing CEO-selected tools/skills above, read `PLAN.md` in this directory for your full task plan.'
+    : 'Your complete task plan is in `PLAN.md` in this directory. Read it first before doing anything else.';
   const claudeMd = `# Task: ${taskId}
 
 ## Department: ${department}
-
+${hintsSection}
 ## Instructions
 
-Your complete task plan is in \`PLAN.md\` in this directory. Read it first before doing anything else.
+${planInstruction}
 
 You have access to MCP tools for shared resources:
 - \`read_memory\` / \`write_memory\` — Your personal memory
@@ -109,7 +113,7 @@ You have access to MCP tools for shared resources:
 - \`promote_to_deliverable\` — Move files to deliverables
 - \`file_to_vault\` — Save important files to vault
 - \`submit_for_review\` — Submit work for supervisor review
-${hintsSection}
+
 All your work must stay within this directory. Do not try to access files outside your workspace.
 ${constraintsSection}`;
   writeFileSync(join(deskDir, 'CLAUDE.md'), claudeMd, 'utf-8');
