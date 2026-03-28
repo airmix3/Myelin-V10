@@ -1091,3 +1091,22 @@ input[type="checkbox"] {
   color: var(--amber);
   flex: 1;
 }
+
+/* 24. Search page
+   ========================================================================== */
+
+.search-section { margin-bottom: 24px; }
+.search-section-title {
+  font-size: 11px;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border);
+}
+.search-result-count {
+  font-size: 11px;
+  color: var(--text-dim);
+  margin-bottom: 16px;
+}
