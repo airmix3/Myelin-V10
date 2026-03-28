@@ -5,7 +5,7 @@
       "Read(*)",
       "Write(*)",
       "Edit(*)",
-      "mcp__myelin__*"
+      "mcp__cortex__*"
     ],
     "deny": []
   }
