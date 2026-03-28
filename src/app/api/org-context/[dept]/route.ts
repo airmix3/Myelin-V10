@@ -69,5 +69,31 @@ export async function GET(request: NextRequest, { params }: { params: { dept: st
     orderBy: { createdAt: 'desc' },
   });
 
-  return NextResponse.json({ employees, agentMemories, agentCards, knowledgeFiles, skills });
+  // Scan for installed tools in data/departments/{dept}/tools/
+  const toolsDir = join(DATA_DIR, 'departments', dept, 'tools');
+  const tools: Array<{ name: string; directory: string; description?: string }> = [];
+  if (existsSync(toolsDir)) {
+    for (const entry of readdirSync(toolsDir, { withFileTypes: true })) {
+      if (!entry.isDirectory()) continue;
+      const toolDir = join(toolsDir, entry.name);
+      const tool: { name: string; directory: string; description?: string } = {
+        name: entry.name,
+        directory: toolDir,
+      };
+      // Try to read package.json for description
+      const pkgPath = join(toolDir, 'package.json');
+      if (existsSync(pkgPath)) {
+        try {
+          const pkg = JSON.parse(readFileSync(pkgPath, 'utf-8'));
+          if (pkg.description) tool.description = pkg.description;
+          if (pkg.name) tool.name = pkg.name;
+        } catch {
+          // Skip invalid package.json
+        }
+      }
+      tools.push(tool);
+    }
+  }
+
+  return NextResponse.json({ employees, agentMemories, agentCards, knowledgeFiles, skills, tools });
 }
