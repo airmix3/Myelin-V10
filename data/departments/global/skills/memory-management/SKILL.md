@@ -1,5 +1,6 @@
 ---
 name: memory-management
+description: "Persistent agent memory journal using MEMORY.md. Use at the start of every task to load prior context (recent projects, conventions, goals) and at the end to record new knowledge, patterns, or outcomes worth remembering across invocations."
 status: active
 scope: global
 version: "1.0"

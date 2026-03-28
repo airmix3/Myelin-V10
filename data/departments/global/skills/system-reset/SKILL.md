@@ -1,5 +1,6 @@
 ---
 name: system-reset
+description: "Safely reset the system to a clean state while preserving vault documents, approved skills, and permanent employees. Use only when the CEO explicitly requests a system reset, clean slate, or fresh start through Tamir — this is a destructive admin operation, not a business task."
 status: active
 scope: global
 version: "1.0"

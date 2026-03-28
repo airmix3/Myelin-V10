@@ -1,5 +1,6 @@
 ---
 name: installer
+description: "Install MCP tool servers via Smithery CLI and skill packages via skills.sh CLI into department directories. Use when agents request new tools or skills mid-task and their department head has approved the installation — handles pre-install checks, execution, and post-install verification."
 status: active
 scope: global
 version: "1.0"

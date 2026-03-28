@@ -1,5 +1,6 @@
 ---
 name: skill-extractor
+description: "Extract reusable patterns from completed work into shareable skills. Use when you discover a novel tool combination, reusable workflow, domain insight, API integration pattern, or content template during task execution or supervisor review that would save time on similar future tasks."
 status: active
 scope: global
 version: "1.0"

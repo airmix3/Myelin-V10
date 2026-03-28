@@ -1,5 +1,6 @@
 ---
 name: skill-tool-manager
+description: "Manage installed skills and tools across departments — refresh (re-install/update to latest) or remove (uninstall and clean up). Use when the gallery UI triggers a refresh or remove action on a department's installed skill or tool."
 status: active
 scope: global
 version: "1.0"
