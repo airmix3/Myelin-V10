@@ -164,10 +164,11 @@ None yet.
 | 260328-euh | Generate README.md and commit vault data files to git | 2026-03-28 | 047866f | [260328-euh-generate-readme-md-and-commit-vault-data](./quick/260328-euh-generate-readme-md-and-commit-vault-data/) |
 | 260328-its | Show agent switch bounding boxes in build log for review handoffs | 2026-03-28 | ed37f54 | [260328-its-show-agent-switch-bounding-boxes-in-buil](./quick/260328-its-show-agent-switch-bounding-boxes-in-buil/) |
 | 260328-j0g | Fix skill install - skills CLI needs display name not directory name | 2026-03-28 | pending | [260328-j0g-fix-skill-install-skills-cli-needs-displ](./quick/260328-j0g-fix-skill-install-skills-cli-needs-displ/) |
+| 260328-k2o | switch composio and glama mcp registries with smithery.ai for querying and installing external MCP reliably via a CLI | 2026-03-28 | a9a5612 | [260328-k2o-switch-composio-and-glama-mcp-registries](./quick/260328-k2o-switch-composio-and-glama-mcp-registries/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T11:32:41.979Z
 Stopped at: Completed quick/260328-k2o
-Last activity: 2026-03-28 - Completed quick task 260328-its: agent switch bounding boxes in build log
+Last activity: 2026-03-28 - Completed quick task 260328-k2o: switch composio and glama mcp registries with smithery.ai
 Resume file: None
