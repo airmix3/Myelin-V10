@@ -49,12 +49,19 @@ interface KnowledgeFile {
   content: string;
 }
 
+interface DeptTool {
+  name: string;
+  directory: string;
+  description?: string;
+}
+
 interface DeptData {
   employees: EmployeeData[];
   agentMemories: Record<string, string>;
   agentCards: Record<string, AgentCard>;
   knowledgeFiles: KnowledgeFile[];
   skills: SkillData[];
+  tools: DeptTool[];
 }
 
 const DEPT_TABS = [
@@ -98,6 +105,8 @@ export default function OrgContextPage() {
   const [expandedTasks, setExpandedTasks] = useState<Set<string>>(new Set());
   const [dismissConfirm, setDismissConfirm] = useState<string | null>(null);
   const dismissTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [galleryTab, setGalleryTab] = useState<'skills' | 'tools'>('skills');
+  const [actionLoading, setActionLoading] = useState<string | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -140,6 +149,52 @@ export default function OrgContextPage() {
       if (refreshRes.ok) setData(await refreshRes.json());
     }
     setDismissConfirm(null);
+  }
+
+  async function handleSkillRefresh(skillId: string) {
+    setActionLoading(`skill-refresh-${skillId}`);
+    try {
+      await fetch(`/api/org-context/${activeDept}/skills/${skillId}/refresh`, { method: 'POST' });
+      const res = await fetch(`/api/org-context/${activeDept}`);
+      if (res.ok) setData(await res.json());
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleSkillRemove(skillId: string) {
+    if (!confirm('Remove this skill from the department?')) return;
+    setActionLoading(`skill-remove-${skillId}`);
+    try {
+      await fetch(`/api/org-context/${activeDept}/skills/${skillId}/remove`, { method: 'POST' });
+      const res = await fetch(`/api/org-context/${activeDept}`);
+      if (res.ok) setData(await res.json());
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleToolRefresh(toolName: string) {
+    setActionLoading(`tool-refresh-${toolName}`);
+    try {
+      await fetch(`/api/org-context/${activeDept}/tools/${toolName}/refresh`, { method: 'POST' });
+      const res = await fetch(`/api/org-context/${activeDept}`);
+      if (res.ok) setData(await res.json());
+    } finally {
+      setActionLoading(null);
+    }
+  }
+
+  async function handleToolRemove(toolName: string) {
+    if (!confirm('Remove this tool from the department?')) return;
+    setActionLoading(`tool-remove-${toolName}`);
+    try {
+      await fetch(`/api/org-context/${activeDept}/tools/${toolName}/remove`, { method: 'POST' });
+      const res = await fetch(`/api/org-context/${activeDept}`);
+      if (res.ok) setData(await res.json());
+    } finally {
+      setActionLoading(null);
+    }
   }
 
   function renderMarkdown(md: string): string {
@@ -246,51 +301,280 @@ export default function OrgContextPage() {
             {/* Tools + Skills Gallery */}
             <div className="card" style={{ marginTop: '16px' }}>
               <div className="card-title">Tools + Skills Gallery</div>
-              {data.skills.length === 0 ? (
-                <div style={{ color: 'var(--text-dim)' }}>
-                  <p>No skills registered</p>
-                  <p style={{ fontSize: '11px' }}>Skills are proposed by agents after completing tasks and approved by department heads.</p>
-                </div>
-              ) : (
-                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(190px, 1fr))', gap: '12px', marginTop: '8px' }}>
-                  {data.skills.map(skill => (
-                    <div key={skill.id} className="gallery-card">
-                      <div style={{ fontWeight: 700, marginBottom: '4px' }}>{skill.name}</div>
-                      {skill.description && (
-                        <p style={{ fontSize: '11px', color: 'var(--text-dim)', marginBottom: '8px' }}>{skill.description}</p>
-                      )}
-                      <span className={skillStatusBadgeClass(skill.status)}>{skill.status}</span>
-                      {skill.proposedBy && (
-                        <span style={{ fontSize: '11px', color: 'var(--text-dim)', marginLeft: '8px' }}>
-                          by {skill.proposedBy}
-                        </span>
-                      )}
-                      {skill.status === 'pending' && (
-                        <div style={{ marginTop: '8px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+
+              {/* Sub-tabs */}
+              <div style={{ display: 'flex', gap: '0', marginBottom: '12px', marginTop: '8px' }}>
+                <button
+                  onClick={() => setGalleryTab('skills')}
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    border: '1px solid var(--border)',
+                    borderRadius: '6px 0 0 6px',
+                    cursor: 'pointer',
+                    background: galleryTab === 'skills' ? 'var(--bg-tertiary)' : 'transparent',
+                    color: galleryTab === 'skills' ? 'var(--text-primary)' : 'var(--text-dim)',
+                  }}
+                >
+                  Skills ({data.skills.length})
+                </button>
+                <button
+                  onClick={() => setGalleryTab('tools')}
+                  style={{
+                    padding: '6px 16px',
+                    fontSize: '12px',
+                    fontWeight: 600,
+                    border: '1px solid var(--border)',
+                    borderLeft: 'none',
+                    borderRadius: '0 6px 6px 0',
+                    cursor: 'pointer',
+                    background: galleryTab === 'tools' ? 'var(--bg-tertiary)' : 'transparent',
+                    color: galleryTab === 'tools' ? 'var(--text-primary)' : 'var(--text-dim)',
+                  }}
+                >
+                  Tools ({data.tools?.length ?? 0})
+                </button>
+              </div>
+
+              {/* Skills tab */}
+              {galleryTab === 'skills' && (
+                data.skills.length === 0 ? (
+                  <div style={{ color: 'var(--text-dim)' }}>
+                    <p>No skills installed</p>
+                    <p style={{ fontSize: '11px' }}>Skills are proposed by agents after completing tasks and approved by department heads.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                    {data.skills.map(skill => (
+                      <div
+                        key={skill.id}
+                        style={{
+                          padding: '16px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          position: 'relative',
+                        }}
+                      >
+                        {/* Action icons */}
+                        <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '4px' }}>
                           <button
-                            className="btn-approve btn-sm"
-                            onClick={() => handleSkillAction(skill.id, 'approve')}
+                            onClick={() => handleSkillRefresh(skill.id)}
+                            disabled={actionLoading === `skill-refresh-${skill.id}`}
+                            title="Refresh skill"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              background: 'var(--bg-tertiary)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '50%',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--text-dim)',
+                              opacity: actionLoading?.startsWith(`skill-refresh-${skill.id}`) ? 0.5 : 1,
+                            }}
                           >
-                            Approve
+                            {actionLoading === `skill-refresh-${skill.id}` ? '...' : '\u27F3'}
                           </button>
                           <button
-                            className="btn btn-sm"
-                            onClick={() => handleSkillAction(skill.id, 'submit-to-ceo')}
+                            onClick={() => handleSkillRemove(skill.id)}
+                            disabled={actionLoading === `skill-remove-${skill.id}`}
+                            title="Remove skill"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              background: 'var(--bg-tertiary)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '50%',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--text-dim)',
+                              opacity: actionLoading?.startsWith(`skill-remove-${skill.id}`) ? 0.5 : 1,
+                            }}
+                            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--red, #e55)'; }}
+                            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-dim)'; }}
                           >
-                            Submit to CEO
-                          </button>
-                          <button
-                            className="btn-cancel btn-sm"
-                            onClick={() => handleSkillAction(skill.id, 'dismiss')}
-                            style={dismissConfirm === skill.id ? { color: 'var(--red)', fontWeight: 700 } : undefined}
-                          >
-                            {dismissConfirm === skill.id ? 'Confirm Dismiss' : 'Dismiss'}
+                            {actionLoading === `skill-remove-${skill.id}` ? '...' : '\u00D7'}
                           </button>
                         </div>
-                      )}
-                    </div>
-                  ))}
-                </div>
+
+                        {/* Icon */}
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: DEPT_COLORS[activeDept] || 'var(--text-dim)',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontWeight: 700,
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                        }}>
+                          {skill.name.charAt(0).toUpperCase()}
+                        </div>
+
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                          {skill.name}
+                        </div>
+                        {skill.description && (
+                          <p style={{
+                            fontSize: '11px',
+                            color: 'var(--text-dim)',
+                            marginBottom: '8px',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}>
+                            {skill.description}
+                          </p>
+                        )}
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center', flexWrap: 'wrap' }}>
+                          <span className={skillStatusBadgeClass(skill.status)}>{skill.status}</span>
+                          <span style={{ fontSize: '9px', color: 'var(--text-dim)', background: 'var(--bg-tertiary)', padding: '1px 6px', borderRadius: '4px' }}>
+                            {activeDept}
+                          </span>
+                        </div>
+
+                        {skill.status === 'pending' && (
+                          <div style={{ marginTop: '8px', display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                            <button className="btn-approve btn-sm" onClick={() => handleSkillAction(skill.id, 'approve')}>Approve</button>
+                            <button className="btn btn-sm" onClick={() => handleSkillAction(skill.id, 'submit-to-ceo')}>Submit to CEO</button>
+                            <button
+                              className="btn-cancel btn-sm"
+                              onClick={() => handleSkillAction(skill.id, 'dismiss')}
+                              style={dismissConfirm === skill.id ? { color: 'var(--red)', fontWeight: 700 } : undefined}
+                            >
+                              {dismissConfirm === skill.id ? 'Confirm Dismiss' : 'Dismiss'}
+                            </button>
+                          </div>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )
+              )}
+
+              {/* Tools tab */}
+              {galleryTab === 'tools' && (
+                (!data.tools || data.tools.length === 0) ? (
+                  <div style={{ color: 'var(--text-dim)' }}>
+                    <p>No tools installed</p>
+                    <p style={{ fontSize: '11px' }}>Tools are MCP servers installed via Smithery for agent use.</p>
+                  </div>
+                ) : (
+                  <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '12px' }}>
+                    {data.tools.map(tool => (
+                      <div
+                        key={tool.name}
+                        style={{
+                          padding: '16px',
+                          background: 'var(--bg-secondary)',
+                          border: '1px solid var(--border)',
+                          borderRadius: '8px',
+                          position: 'relative',
+                        }}
+                      >
+                        {/* Action icons */}
+                        <div style={{ position: 'absolute', top: '8px', right: '8px', display: 'flex', gap: '4px' }}>
+                          <button
+                            onClick={() => handleToolRefresh(tool.name)}
+                            disabled={actionLoading === `tool-refresh-${tool.name}`}
+                            title="Refresh tool"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              background: 'var(--bg-tertiary)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '50%',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--text-dim)',
+                              opacity: actionLoading === `tool-refresh-${tool.name}` ? 0.5 : 1,
+                            }}
+                          >
+                            {actionLoading === `tool-refresh-${tool.name}` ? '...' : '\u27F3'}
+                          </button>
+                          <button
+                            onClick={() => handleToolRemove(tool.name)}
+                            disabled={actionLoading === `tool-remove-${tool.name}`}
+                            title="Remove tool"
+                            style={{
+                              width: '24px',
+                              height: '24px',
+                              background: 'var(--bg-tertiary)',
+                              border: '1px solid var(--border)',
+                              borderRadius: '50%',
+                              cursor: 'pointer',
+                              fontSize: '12px',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              color: 'var(--text-dim)',
+                              opacity: actionLoading === `tool-remove-${tool.name}` ? 0.5 : 1,
+                            }}
+                            onMouseEnter={(e) => { (e.target as HTMLElement).style.color = 'var(--red, #e55)'; }}
+                            onMouseLeave={(e) => { (e.target as HTMLElement).style.color = 'var(--text-dim)'; }}
+                          >
+                            {actionLoading === `tool-remove-${tool.name}` ? '...' : '\u00D7'}
+                          </button>
+                        </div>
+
+                        {/* Icon */}
+                        <div style={{
+                          width: '32px',
+                          height: '32px',
+                          borderRadius: '8px',
+                          background: '#888',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          color: '#fff',
+                          fontWeight: 700,
+                          fontSize: '14px',
+                          marginBottom: '8px',
+                        }}>
+                          {tool.name.charAt(0).toUpperCase()}
+                        </div>
+
+                        <div style={{ fontSize: '13px', fontWeight: 700, color: 'var(--text-primary)', marginBottom: '4px' }}>
+                          {tool.name}
+                        </div>
+                        {tool.description && (
+                          <p style={{
+                            fontSize: '11px',
+                            color: 'var(--text-dim)',
+                            marginBottom: '8px',
+                            display: '-webkit-box',
+                            WebkitLineClamp: 2,
+                            WebkitBoxOrient: 'vertical',
+                            overflow: 'hidden',
+                          }}>
+                            {tool.description}
+                          </p>
+                        )}
+                        <div style={{ display: 'flex', gap: '4px', alignItems: 'center' }}>
+                          <span className="badge-active">installed</span>
+                          <span style={{ fontSize: '9px', color: 'var(--text-dim)', background: 'var(--bg-tertiary)', padding: '1px 6px', borderRadius: '4px' }}>
+                            {activeDept}
+                          </span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )
               )}
             </div>
           </div>
