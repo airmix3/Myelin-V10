@@ -8,7 +8,7 @@ function isUsefulActivityLogEntry(entry: { actionType: string; description: stri
 }
 
 export default async function Dashboard() {
-  const [activeAgents, activeTasks, pendingApprovals, deliverableCount, agents, activities, inProgressDeliverables] = await Promise.all([
+  const [activeAgents, activeTasks, pendingApprovals, deliverableCount, agents, activities, inProgressDeliverables, pendingEscalationCount, recentEscalations] = await Promise.all([
     prisma.employee.count({ where: { status: 'active' } }),
     prisma.task.count({ where: { state: { in: ['submitted', 'working', 'input-required'] } } }),
     prisma.hireRequest.count({ where: { status: 'pending' } }),
@@ -28,6 +28,13 @@ export default async function Dashboard() {
       orderBy: { createdAt: 'desc' },
       take: 10,
     }),
+    prisma.escalation.count({ where: { status: 'pending' } }),
+    prisma.escalation.findMany({
+      where: { status: 'pending' },
+      include: { task: { select: { title: true, department: true } } },
+      orderBy: { createdAt: 'desc' },
+      take: 3,
+    }),
   ]);
   const filteredActivities = activities.filter(isUsefulActivityLogEntry);
 
@@ -42,6 +49,16 @@ export default async function Dashboard() {
       inProgressDeliverables={inProgressDeliverables.map((d) => ({
         ...d,
         createdAt: d.createdAt.toISOString(),
+      }))}
+      pendingEscalationCount={pendingEscalationCount}
+      recentEscalations={recentEscalations.map((e) => ({
+        id: e.id,
+        type: e.type,
+        urgency: e.urgency,
+        summary: e.summary,
+        agentId: e.agentId,
+        createdAt: e.createdAt.toISOString(),
+        task: e.task,
       }))}
     />
   );

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import dynamic from 'next/dynamic';
+import Link from 'next/link';
 import { useSSE } from '@/components/useSSE';
 import NeuralHero from './components/NeuralHero';
 
@@ -31,6 +32,16 @@ interface Deliverable {
   createdAt: string;
 }
 
+interface EscalationPreview {
+  id: string;
+  type: string;
+  urgency: string;
+  summary: string;
+  agentId: string;
+  createdAt: string;
+  task: { title: string; department: string };
+}
+
 interface DashboardClientProps {
   stats: {
     activeAgents: number;
@@ -41,6 +52,8 @@ interface DashboardClientProps {
   agents: Agent[];
   initialActivities: Activity[];
   inProgressDeliverables: Deliverable[];
+  pendingEscalationCount: number;
+  recentEscalations: EscalationPreview[];
 }
 
 function isUsefulActivity(activity: Activity): boolean {
@@ -84,11 +97,13 @@ function badgeLabel(actionType: string): string {
   }
 }
 
-export default function DashboardClient({ stats, agents, initialActivities, inProgressDeliverables }: DashboardClientProps) {
+export default function DashboardClient({ stats, agents, initialActivities, inProgressDeliverables, pendingEscalationCount, recentEscalations }: DashboardClientProps) {
   const [activities, setActivities] = useState<Activity[]>(initialActivities.filter(isUsefulActivity));
   const [agentTimestamps, setAgentTimestamps] = useState<Record<string, number>>({});
   const [, setTick] = useState(0);
   const activityBodyRef = useRef<HTMLDivElement>(null);
+  const [escCount, setEscCount] = useState(pendingEscalationCount);
+  const [escPreviews, setEscPreviews] = useState<EscalationPreview[]>(recentEscalations);
 
   // Update dot colors every 10 seconds
   useEffect(() => {
@@ -134,6 +149,19 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
       const agentId = data.agentId as string;
       if (agentId) updateAgentTimestamp(agentId, Date.now());
     },
+    'escalation:created': (data) => {
+      setEscCount((c) => c + 1);
+      const preview: EscalationPreview = {
+        id: (data.escalationId as string) || String(Date.now()),
+        type: (data.type as string) || 'custom',
+        urgency: (data.urgency as string) || 'normal',
+        summary: (data.summary as string) || '',
+        agentId: (data.agentId as string) || '',
+        createdAt: new Date().toISOString(),
+        task: { title: '', department: '' },
+      };
+      setEscPreviews((prev) => [preview, ...prev].slice(0, 3));
+    },
   });
 
   // Suppress unused variable warnings — these are passed as props and used implicitly
@@ -150,6 +178,24 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
 
   return (
     <div>
+      {/* 0. Escalation Banner */}
+      {escCount > 0 && (
+        <div className="escalation-banner">
+          <span className="escalation-banner-icon">{'\u26A0'}</span>
+          <span className="escalation-banner-count">{escCount} escalation{escCount !== 1 ? 's' : ''} pending</span>
+          <div className="escalation-preview-cards">
+            {escPreviews.map((esc) => (
+              <div key={esc.id} className="escalation-preview-card">
+                <span className={`esc-type-badge esc-type-${esc.type}`}>{esc.type}</span>
+                <span className="esc-preview-agent">{esc.agentId}</span>
+                <span className="esc-preview-summary">{esc.summary.substring(0, 80)}</span>
+              </div>
+            ))}
+          </div>
+          <Link href="/escalations" className="escalation-banner-link">View All</Link>
+        </div>
+      )}
+
       {/* 1. Neural Hero */}
       <NeuralHero title="MYELIN v3" subtitle="The Cortex" stats={heroStats} />
 
