@@ -5,7 +5,7 @@ milestone_name: milestone
 status: Milestone complete
 stopped_at: Completed quick/260328-vh6
 last_updated: "2026-03-28T19:42:06.502Z"
-last_activity: "2026-03-28 - Completed quick task 260328-tvl: Fix org graph hierarchical layout, activity logs, Take Control button"
+last_activity: "2026-03-28 - Completed quick task 260328-vh6: Remove autonomy level bar from planning screen"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -178,10 +178,11 @@ None yet.
 | 260328-txi | Show in-progress deliverables list on dashboard | 2026-03-28 | 53576c0 | [260328-txi-show-in-progress-deliverables-list-on-da](./quick/260328-txi-show-in-progress-deliverables-list-on-da/) |
 | 260328-ol3 | Add interactive company org graph with employee nodes, task overlay with live logs, and Take His Role button for CEO to take over agent sessions via web-based Claude Code | 2026-03-28 | 6beabc2 | [260328-ol3-add-interactive-company-org-graph-with-e](./quick/260328-ol3-add-interactive-company-org-graph-with-e/) |
 | 260328-tvl | Fix org graph: hierarchical layout, activity logs from agent log source, and add Take Control button | 2026-03-28 | 953fe96 | [260328-tvl-fix-org-graph-hierarchical-layout-activi](./quick/260328-tvl-fix-org-graph-hierarchical-layout-activi/) |
+| 260328-vh6 | Remove autonomy level bar from planning screen | 2026-03-28 | bb93c52 | [260328-vh6-remove-autonomy-level-bar-from-planning-](./quick/260328-vh6-remove-autonomy-level-bar-from-planning-/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T19:42:06.492Z
 Stopped at: Completed quick/260328-vh6
-Last activity: 2026-03-28 - Completed quick task 260328-tvl: Fix org graph hierarchical layout, activity logs, Take Control button
+Last activity: 2026-03-28 - Completed quick task 260328-vh6: Remove autonomy level bar from planning screen
 Resume file: None
