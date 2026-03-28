@@ -24,6 +24,7 @@ export interface ChatPanelProps {
   onRouteSelect: (agentId: string) => void;
   isLoading: boolean;
   placeholder?: string;
+  activityText?: string;
 }
 
 const AVATAR_COLORS: Record<string, string> = {
@@ -63,6 +64,7 @@ export default function ChatPanel({
   onRouteSelect,
   isLoading,
   placeholder,
+  activityText,
 }: ChatPanelProps) {
   const [inputValue, setInputValue] = useState('');
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -147,7 +149,7 @@ export default function ChatPanel({
         {isLoading && (
           <div className="msg agent">
             <div className="avatar" style={{ backgroundColor: '#666' }}>...</div>
-            <div className="bubble" style={{ opacity: 0.6 }}>Thinking...</div>
+            <div className="bubble" style={{ opacity: 0.6 }}>{activityText || 'Thinking...'}</div>
           </div>
         )}
 
