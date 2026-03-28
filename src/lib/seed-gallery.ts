@@ -67,7 +67,7 @@ async function seedSkills(): Promise<void> {
 
     // Upsert by name + department combination
     const existing = await prisma.skill.findFirst({
-      where: { name, department: 'global' },
+      where: { name, department: 'cos' },
     });
 
     if (!existing) {
@@ -75,7 +75,7 @@ async function seedSkills(): Promise<void> {
         data: {
           id: generateId('skill'),
           name,
-          department: 'global',
+          department: 'cos',
           description,
           status: 'active',
           filePath: skillMdPath,

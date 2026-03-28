@@ -74,7 +74,7 @@ export async function register() {
         const docId = generateId('doc');
         sqlite.prepare(`
           INSERT INTO documents (id, title, content, source, department, filedBy, filePath, createdAt, updatedAt)
-          VALUES (?, ?, ?, 'vault', 'global', 'system', ?, datetime('now'), datetime('now'))
+          VALUES (?, ?, ?, 'vault', 'cos', 'system', ?, datetime('now'), datetime('now'))
         `).run(docId, parsed.data.title || 'Myelin Company DNA', parsed.content, dnaTarget);
 
         log.info({ docId }, 'Company DNA indexed in documents table + FTS5');
@@ -119,7 +119,7 @@ export async function register() {
               title,
               content: raw,
               source: 'vault',
-              department: 'global',
+              department: 'cos',
               filedBy: 'system',
               filePath,
             },

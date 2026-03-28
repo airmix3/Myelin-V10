@@ -43,7 +43,7 @@ export async function POST(
       id: employeeId,
       name: hireRequest.employeeName,
       role: 'temp',
-      department: task?.department ?? 'global',
+      department: task?.department ?? 'cos',
       agentId,
       status: 'active',
       budgetLimit: 5.0,  // Lower budget for temps per AGENT-06

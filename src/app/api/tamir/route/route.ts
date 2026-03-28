@@ -25,7 +25,7 @@ export async function POST(request: NextRequest) {
   // For planning invocations, use a temporary desk context
   // Planning turns don't need a full workspace -- use the planning desk
   // and provide dummy delivDir/manifestPath since planning doesn't produce deliverables
-  const tamirDeskDir = join(DATA_DIR, 'departments', 'global', 'planning-desk');
+  const tamirDeskDir = join(DATA_DIR, 'departments', 'cos');
   mkdirSync(join(tamirDeskDir, 'chat'), { recursive: true });
   const tmpDelivDir = join(DATA_DIR, 'tmp', taskId);
   mkdirSync(tmpDelivDir, { recursive: true });

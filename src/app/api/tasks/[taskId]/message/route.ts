@@ -47,7 +47,10 @@ export async function POST(
 
   // Invoke agent with AGENT_TURN_SCHEMA (per D-06)
   const runId = generateId('run');
-  const planningDeskDir = join(DATA_DIR, 'departments', task.department, 'planning-desk');
+  // Tamir lives flat in cos/ -- no planning-desk subdirectory
+  const planningDeskDir = agentId === 'tamir'
+    ? join(DATA_DIR, 'departments', 'cos')
+    : join(DATA_DIR, 'departments', task.department, 'planning-desk');
   mkdirSync(join(planningDeskDir, 'chat'), { recursive: true });
   const tmpDelivDir = join(DATA_DIR, 'tmp', params.taskId);
   mkdirSync(tmpDelivDir, { recursive: true });

@@ -3,7 +3,7 @@ import { generateId } from '@/lib/id';
 import { logger } from '@/lib/logger';
 
 const EXECUTIVES = [
-  { agentId: 'tamir', name: 'Tamir', department: 'global', budgetLimit: 50.0 },
+  { agentId: 'tamir', name: 'Tamir', department: 'cos', budgetLimit: 50.0 },
   { agentId: 'cto', name: 'CTO', department: 'tech', budgetLimit: 25.0 },
   { agentId: 'cmo', name: 'CMO', department: 'marketing', budgetLimit: 25.0 },
   { agentId: 'coo', name: 'COO', department: 'operations', budgetLimit: 25.0 },

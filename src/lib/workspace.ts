@@ -3,7 +3,7 @@ import { join, resolve } from 'path';
 import { logger } from '@/lib/logger';
 
 const DATA_DIR = resolve(process.cwd(), 'data');
-const DEPARTMENTS = ['tech', 'marketing', 'operations', 'global'] as const;
+const DEPARTMENTS = ['tech', 'marketing', 'operations', 'cos'] as const;
 export type Department = typeof DEPARTMENTS[number];
 
 export { DEPARTMENTS };
@@ -49,17 +49,17 @@ export function createTaskWorkspace(
 
   // Symlink active department skills into desk/.claude/skills/
   const deptSkillsSource = join(DATA_DIR, 'departments', department, 'skills');
-  const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+  const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
   const deptSkillsTarget = join(skillsDir, department);
-  const globalSkillsTarget = join(skillsDir, 'global');
+  const cosSkillsTarget = join(skillsDir, 'cos');
 
   if (existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
     try { symlinkSync(deptSkillsSource, deptSkillsTarget, 'junction'); }
     catch (err) { log.warn({ err, source: deptSkillsSource }, 'Failed to symlink dept skills'); }
   }
-  if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
-    try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
-    catch (err) { log.warn({ err, source: globalSkillsSource }, 'Failed to symlink global skills'); }
+  if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
+    try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
+    catch (err) { log.warn({ err, source: cosSkillsSource }, 'Failed to symlink cos skills'); }
   }
 
   // Write plan to separate PLAN.md (per D-06)
@@ -131,6 +131,17 @@ ${constraintsSection}`;
 export function ensureManagerDesks(): void {
   const log = logger.child({ module: 'workspace' });
   for (const dept of DEPARTMENTS) {
+    // Department tools directory
+    const toolsDir = join(DATA_DIR, 'departments', dept, 'tools');
+    mkdirSync(toolsDir, { recursive: true });
+
+    // Department skills directory
+    const skillsDir = join(DATA_DIR, 'departments', dept, 'skills');
+    mkdirSync(skillsDir, { recursive: true });
+
+    // Tamir lives flat in cos/ -- no manager-desk subdirectory needed
+    if (dept === 'cos') continue;
+
     // Manager desk directory
     const managerDesk = join(DATA_DIR, 'departments', dept, 'manager-desk');
     const settingsDir = join(managerDesk, '.claude');
@@ -160,14 +171,6 @@ a tool or skill installation request from one of your agents.
 - Use web search to check the package if needed
 - Respond with APPROVED or REJECTED and your reasoning
 `, 'utf-8');
-
-    // Department tools directory
-    const toolsDir = join(DATA_DIR, 'departments', dept, 'tools');
-    mkdirSync(toolsDir, { recursive: true });
-
-    // Department skills directory
-    const skillsDir = join(DATA_DIR, 'departments', dept, 'skills');
-    mkdirSync(skillsDir, { recursive: true });
   }
   log.info('Manager desks and dept tool/skill directories ensured for all departments');
 }
@@ -175,6 +178,69 @@ a tool or skill installation request from one of your agents.
 export function ensurePlanningDesks(): void {
   const log = logger.child({ module: 'workspace' });
   for (const dept of DEPARTMENTS) {
+    // Tamir lives flat in cos/ -- no planning-desk subdirectory
+    if (dept === 'cos') {
+      const cosDir = join(DATA_DIR, 'departments', 'cos');
+      const skillsDir = join(cosDir, '.claude', 'skills');
+      const chatDir = join(cosDir, 'chat');
+      mkdirSync(skillsDir, { recursive: true });
+      mkdirSync(chatDir, { recursive: true });
+
+      const settingsPath = join(cosDir, '.claude', 'settings.json');
+      writeFileSync(settingsPath, JSON.stringify({
+        permissions: {
+          allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+          deny: [],
+        },
+      }, null, 2), 'utf-8');
+
+      writeFileSync(join(cosDir, 'CLAUDE.md'), `# Tamir — Chief of Staff (cos)
+
+## Mode
+
+You are in PLANNING MODE. Help the CEO plan a task. Do NOT execute anything.
+Ask clarifying questions, gather information using your tools, then produce a detailed plan when ready.
+
+## Available Tools
+
+You have MCP tools available during planning. USE THEM to research and inform your plans:
+
+### Research & Memory
+- \`read_memory\` — Read your persistent memory (past projects, conventions, notes)
+- \`write_memory\` — Save important context to your memory for future reference
+- \`read_knowledge\` — Read department knowledge base files
+- \`write_knowledge\` — Add to department knowledge base
+- \`search_knowledge\` — Full-text search across department knowledge
+
+### Organization
+- \`get_dept_status\` — Check active tasks and employee counts across departments
+- \`read_inbox\` — Check your notification inbox
+
+### Other (available but typically used during execution)
+- \`promote_to_deliverable\` — Move files to deliverables (execution phase)
+- \`file_to_vault\` — Save files to company vault (execution phase)
+- \`submit_for_review\` — Submit work for review (execution phase)
+- \`propose_skill\` — Propose a reusable skill (execution phase)
+- \`hire_employee\` — Request a temp hire (execution phase)
+
+## Built-in Tools
+
+You have full access to Claude's built-in tools (Read, Write, Bash, Edit, Glob, Grep, WebSearch, etc.).
+Use these tools to research the codebase before planning.
+
+Do NOT use built-in tools to modify production code during planning. Planning mode is for research and plan creation only.
+
+## Planning Guidelines
+
+- Use built-in tools (Read, Glob, Grep) and \`read_memory\` to research the codebase before planning
+- Use \`search_knowledge\` to find relevant department knowledge
+- Use \`get_dept_status\` to understand current workload before scoping
+- Ask the CEO clarifying questions when requirements are ambiguous
+- Produce a detailed plan with clear steps when you have enough information
+`, 'utf-8');
+      continue;
+    }
+
     const planningDesk = join(DATA_DIR, 'departments', dept, 'planning-desk');
     const skillsDir = join(planningDesk, '.claude', 'skills');
     const chatDir = join(planningDesk, 'chat');
@@ -190,16 +256,16 @@ export function ensurePlanningDesks(): void {
       },
     }, null, 2), 'utf-8');
 
-    const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
-    const globalSkillsTarget = join(skillsDir, 'global');
-    if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
-      try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
-      catch (err) { log.warn({ err, dept }, 'Failed to symlink global skills to planning desk'); }
+    const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
+    const cosSkillsTarget = join(skillsDir, 'cos');
+    if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
+      try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
+      catch (err) { log.warn({ err, dept }, 'Failed to symlink cos skills to planning desk'); }
     }
 
     const deptSkillsSource = join(DATA_DIR, 'departments', dept, 'skills');
     const deptSkillsTarget = join(skillsDir, dept);
-    if (dept !== 'global' && existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
+    if (existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
       try { symlinkSync(deptSkillsSource, deptSkillsTarget, 'junction'); }
       catch (err) { log.warn({ err, dept }, 'Failed to symlink dept skills to planning desk'); }
     }
