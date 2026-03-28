@@ -147,6 +147,7 @@ None yet.
 | 260328-9l3 | Fix 200s agent timeout - remove hardcoded CLAUDE_CODE_USE_BEDROCK=1 (user has OAuth) | 2026-03-28 | pending | [260328-9l3-fix-slow-agent-invocations-remove-hard](./quick/260328-9l3-fix-slow-agent-invocations-remove-hard/) |
 | 260328-9r1 | Enable all gallery sources by default, replace ClawHub with skills.sh, show summaries | 2026-03-28 | 6884968 | [260328-9r1-enable-all-gallery-sources-by-default-re](./quick/260328-9r1-enable-all-gallery-sources-by-default-re/) |
 | 260328-b1z | Fix sandbox bypass - switch permissionMode to acceptEdits so canUseTool runs | 2026-03-28 | pending | [260328-b1z-fix-sandbox-bypass-switch-permissionmode](./quick/260328-b1z-fix-sandbox-bypass-switch-permissionmode/) |
+| 260328-b2e | Fix planning agents not having read access to project source code | 2026-03-28 | 47e7eff | [260328-b2e-fix-planning-agents-not-having-proper-to](./quick/260328-b2e-fix-planning-agents-not-having-proper-to/) |
 
 ## Session Continuity
 
