@@ -186,6 +186,14 @@ export function ensurePlanningDesks(): void {
       mkdirSync(skillsDir, { recursive: true });
       mkdirSync(chatDir, { recursive: true });
 
+      // Symlink cos/skills into Tamir's .claude/skills/cos for skill discovery
+      const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
+      const cosSkillsTarget = join(skillsDir, 'cos');
+      if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
+        try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
+        catch (err) { log.warn({ err }, 'Failed to symlink cos skills to Tamir desk'); }
+      }
+
       const settingsPath = join(cosDir, '.claude', 'settings.json');
       writeFileSync(settingsPath, JSON.stringify({
         permissions: {
