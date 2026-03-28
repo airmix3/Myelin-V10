@@ -1298,3 +1298,195 @@ input[type="checkbox"] {
   padding: 0;
   overflow: hidden;
 }
+
+/* 26. Dashboard Redesign
+   ========================================================================== */
+
+.dashboard-hero {
+  position: relative;
+  height: 350px;
+  overflow: hidden;
+  border-radius: 0;
+  margin: -20px -20px 0 -20px;
+}
+
+.dashboard-hero canvas {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0.7;
+}
+
+.dashboard-hero-overlay {
+  position: relative;
+  z-index: 2;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  padding: 40px 20px;
+}
+
+.dashboard-hero-title {
+  font-size: 48px;
+  font-weight: 900;
+  letter-spacing: 0.15em;
+  color: #fff;
+  text-shadow: 0 0 40px rgba(143,231,255,0.3), 0 0 80px rgba(100,150,255,0.15);
+  margin-bottom: 4px;
+}
+
+.dashboard-hero-subtitle {
+  font-size: 14px;
+  color: var(--text-dim);
+  letter-spacing: 0.3em;
+  text-transform: uppercase;
+  margin-bottom: 32px;
+}
+
+.dashboard-hero-stats {
+  display: flex;
+  gap: 40px;
+}
+
+.dashboard-hero-stat {
+  text-align: center;
+}
+
+.dashboard-hero-stat-value {
+  font-size: 28px;
+  font-weight: 900;
+  color: #fff;
+  text-shadow: 0 0 20px rgba(143,231,255,0.2);
+}
+
+.dashboard-hero-stat-label {
+  font-size: 10px;
+  color: var(--text-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-top: 4px;
+}
+
+.dashboard-org-section {
+  position: relative;
+  margin-top: 0;
+}
+
+.dashboard-org-section .org-graph-container {
+  height: auto;
+  min-height: 500px;
+  max-height: calc(100vh - 200px);
+}
+
+.activity-overlay {
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 360px;
+  max-height: 400px;
+  background: rgba(9,8,22,0.85);
+  border: 1px solid rgba(100,150,255,0.15);
+  border-radius: 6px;
+  backdrop-filter: blur(8px);
+  z-index: 50;
+  display: flex;
+  flex-direction: column;
+  font-family: var(--font);
+  overflow: hidden;
+}
+
+.activity-overlay-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px;
+  border-bottom: 1px solid rgba(100,150,255,0.1);
+  font-size: 10px;
+  letter-spacing: 0.15em;
+  color: #6496FF;
+  text-transform: uppercase;
+  font-weight: 700;
+}
+
+.activity-overlay-header .blink-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: #00d68f;
+  animation: blink 1.5s ease-in-out infinite;
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.3; }
+}
+
+.activity-overlay-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 8px 0;
+  font-size: 11px;
+}
+
+.activity-overlay-body::-webkit-scrollbar {
+  width: 4px;
+}
+
+.activity-overlay-body::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.activity-overlay-body::-webkit-scrollbar-thumb {
+  background: rgba(100,150,255,0.2);
+  border-radius: 2px;
+}
+
+.activity-entry {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 3px 14px;
+  line-height: 1.4;
+}
+
+.activity-entry:hover {
+  background: rgba(100,150,255,0.05);
+}
+
+.activity-ts {
+  color: #555;
+  font-size: 10px;
+  flex-shrink: 0;
+}
+
+.activity-badge {
+  font-size: 9px;
+  font-weight: 700;
+  padding: 1px 5px;
+  border-radius: 3px;
+  flex-shrink: 0;
+  text-transform: uppercase;
+}
+
+.activity-badge-tool { background: rgba(46,230,166,0.15); color: #2EE6A6; }
+.activity-badge-assistant { background: rgba(100,150,255,0.15); color: #6496FF; }
+.activity-badge-transition { background: rgba(255,100,200,0.15); color: #FF64C8; }
+.activity-badge-default { background: rgba(255,179,71,0.15); color: #FFB347; }
+
+.activity-desc {
+  color: var(--text-dim);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 1;
+}
+
+.activity-agent {
+  color: #8FE7FF;
+  font-size: 10px;
+  flex-shrink: 0;
+}
