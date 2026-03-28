@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-9r1
-last_updated: "2026-03-28T04:06:56.470Z"
+stopped_at: Completed quick/260328-b2e
+last_updated: "2026-03-28T05:04:55.958Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
@@ -119,6 +119,7 @@ Recent decisions affecting current work:
 - [Phase 06]: Filesystem boundary check runs before MCP role-based checks in canUseTool pipeline
 - [Phase 06]: Bash tool scans for absolute paths via regex rather than blocking all bash commands (per D-08)
 - [Phase quick-260328-9r1]: skills.sh integrated via CLI (npx skills search) with execSync and 10s timeout
+- [Phase quick-260328-b2e]: Read-only projectRoot boundary for planning agents: isReadPathAllowed checks projectRoot for Read/Glob/Grep, isPathAllowed stays strict for Write/Edit/Bash
 
 ### Pending Todos
 
@@ -149,7 +150,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-28T04:06:55.557Z
-Stopped at: Completed quick/260328-9r1
+Last session: 2026-03-28T05:04:51.438Z
+Stopped at: Completed quick/260328-b2e
 Last activity: 2026-03-28
 Resume file: None
