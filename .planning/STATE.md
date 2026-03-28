@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-cjp
-last_updated: "2026-03-28T06:05:22.718Z"
-last_activity: 2026-03-28
+stopped_at: Completed quick/260328-cyc
+last_updated: "2026-03-28T06:44:49.444Z"
+last_activity: "2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -123,6 +123,7 @@ Recent decisions affecting current work:
 - [Phase quick-260328-bjv]: SSE activity indicators use EventSource opened only during isLoading+taskId, formatToolName maps SDK tools to human labels
 - [Phase quick-260328-bxt]: FOLLOW-UP MODE prompt pattern: Task Context + Plan (2000 char) + History (last 20, 500 char each) + Message + Instructions
 - [Phase quick-260328-c3k]: settingSources: ['project'] is safe because data/CLAUDE.md project boundary prevents upward traversal to GSD root CLAUDE.md
+- [Phase quick-260328-cyc]: Query registry pattern: Map<runId, queryRef> for install tool hot-reload via setMcpServers
 
 ### Pending Todos
 
@@ -156,10 +157,11 @@ None yet.
 | 260328-c3k | Fix skills/tools not being used by agents - enable settingSources: ['project'] | 2026-03-28 | 7e120a9 | [260328-c3k-fix-skills-tools-not-being-used-by-agent](./quick/260328-c3k-fix-skills-tools-not-being-used-by-agent/) |
 | 260328-c6r | Fix deliverables incorrectly showing in Vault page - filter to vault+knowledge sources | 2026-03-28 | 352e5d2 | [260328-c6r-fix-deliverables-incorrectly-showing-in-](./quick/260328-c6r-fix-deliverables-incorrectly-showing-in-/) |
 | 260328-cjp | Fix Active Tasks count showing completed tasks | 2026-03-28 | 5e78774 | [260328-cjp-fix-active-tasks-count-showing-completed](./quick/260328-cjp-fix-active-tasks-count-showing-completed/) |
+| 260328-cyc | Implement install_tool and install_skill MCP tools with dept head approval | 2026-03-28 | 5015eae | [260328-cyc-implement-install-tool-and-install-skill](./quick/260328-cyc-implement-install-tool-and-install-skill/) |
 
 ## Session Continuity
 
-Last session: 2026-03-28T06:05:22.716Z
-Stopped at: Completed quick/260328-cjp
+Last session: 2026-03-28T06:44:35.339Z
+Stopped at: Completed quick/260328-cyc
 Last activity: 2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks
 Resume file: None
