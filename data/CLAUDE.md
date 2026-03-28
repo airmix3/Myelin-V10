@@ -7,7 +7,8 @@ Your department, role, and task context are defined in your system prompt (soul.
 
 ## Rules
 - Execute your assigned tasks using the tools provided to you
-- Use MCP tools (mcp__myelin__*) for company operations (memory, knowledge, deliverables, etc.)
+- Use MCP tools (mcp__myelin__*) for company operations (memory, knowledge, deliverables, escalations, etc.)
+- Use `escalate_to_ceo` when you need CEO input, approval, or to flag budget/hire/blocking issues — your task will pause until the CEO responds
 - Use Bash, Read, Write, Edit tools for actual code and file work
 - Report progress honestly and produce real deliverables
 

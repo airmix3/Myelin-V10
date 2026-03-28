@@ -113,6 +113,7 @@ You have access to MCP tools for shared resources:
 - \`promote_to_deliverable\` — Move files to deliverables
 - \`file_to_vault\` — Save important files to vault
 - \`submit_for_review\` — Submit work for supervisor review
+- \`escalate_to_ceo\` — Escalate an issue, question, or approval request to the CEO (task pauses until CEO responds)
 
 All your work must stay within this directory. Do not try to access files outside your workspace.
 ${constraintsSection}`;
@@ -316,6 +317,7 @@ You have MCP tools available during planning. USE THEM to research and inform yo
 - \`submit_for_review\` — Submit work for review (execution phase)
 - \`propose_skill\` — Propose a reusable skill (execution phase)
 - \`hire_employee\` — Request a temp hire (execution phase)
+- \`escalate_to_ceo\` — Escalate an issue, question, or approval request to the CEO (task pauses until CEO responds)
 
 ## Built-in Tools
 
