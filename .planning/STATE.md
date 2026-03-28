@@ -5,7 +5,7 @@ milestone_name: milestone
 status: Milestone complete
 stopped_at: Completed quick/260328-ofg
 last_updated: "2026-03-28T14:42:23.383Z"
-last_activity: "2026-03-28 - Completed quick task 260328-lt5: Restore global skills directory as canonical source"
+last_activity: "2026-03-28 - Completed quick task 260328-ofg: Department skills and tools gallery UI with refresh/remove actions via CoS"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -173,10 +173,11 @@ None yet.
 | 260328-kp5 | Restructure install flow: Tamir as installer, rename global to cos, full data access for Tamir | 2026-03-28 | da01264 | [260328-kp5-restructure-install-flow-tamir-as-instal](./quick/260328-kp5-restructure-install-flow-tamir-as-instal/) |
 | 260328-l84 | Create Tamir installer skill and enrich install_tool/install_skill prompts with full context | 2026-03-28 | 26e5d53 | [260328-l84-create-tamir-installer-skill-and-enrich-](./quick/260328-l84-create-tamir-installer-skill-and-enrich-/) |
 | 260328-lt5 | Restore global/ skills directory as canonical source, separate from cos/ Tamir-specific skills | 2026-03-28 | 97744cc | [260328-lt5-restore-global-skills-directory-as-canon](./quick/260328-lt5-restore-global-skills-directory-as-canon/) |
+| 260328-ofg | Department skills and tools gallery UI with refresh/remove actions via CoS | 2026-03-28 | b90d7f5 | [260328-ofg-department-skills-and-tools-gallery-ui-w](./quick/260328-ofg-department-skills-and-tools-gallery-ui-w/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T14:42:20.239Z
 Stopped at: Completed quick/260328-ofg
-Last activity: 2026-03-28 - Completed quick task 260328-lt5: Restore global skills directory as canonical source
+Last activity: 2026-03-28 - Completed quick task 260328-ofg: Department skills and tools gallery UI with refresh/remove actions via CoS
 Resume file: None
