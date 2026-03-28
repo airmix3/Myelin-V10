@@ -194,10 +194,11 @@ None yet.
 | 260329-0ea | Copy myelin-v3 neural brain canvas animation to NeuralHero | 2026-03-29 | cb0a183 | [260329-0ea-copy-myelin-v3-neural-brain-canvas-anima](./quick/260329-0ea-copy-myelin-v3-neural-brain-canvas-anima/) |
 | 260329-0g7 | Rename system from Myelin to Cortex across code, UI, MCP tools, and agent configs | 2026-03-29 | c9d38d1 | [260329-0g7-rename-system-from-myelin-to-cortex-acro](./quick/260329-0g7-rename-system-from-myelin-to-cortex-acro/) |
 | 260329-0ma | Audit and fix Myelin-to-Cortex rename inconsistencies | 2026-03-29 | a16a27e | [260329-0ma-audit-and-fix-myelin-to-cortex-rename-in](./quick/260329-0ma-audit-and-fix-myelin-to-cortex-rename-in/) |
+| 260329-0r9 | Make dept heads approve all skills by default - permissive approval policy | 2026-03-28 | pending | [260329-0r9-make-dept-heads-approve-all-skills-by-de](./quick/260329-0r9-make-dept-heads-approve-all-skills-by-de/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T21:26:45.533Z
 Stopped at: Completed quick/260329-0ma
-Last activity: 2026-03-29 - Completed quick task 260329-0ma: Audit and fix Myelin-to-Cortex rename inconsistencies
+Last activity: 2026-03-29 - Completed quick task 260329-0r9: Make dept heads approve all skills by default
 Resume file: None
