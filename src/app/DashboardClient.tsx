@@ -197,7 +197,7 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
       )}
 
       {/* 1. Neural Hero */}
-      <NeuralHero title="MYELIN v10" subtitle="The Cortex" stats={heroStats} />
+      <NeuralHero title='CORTEX' subtitle="AI OPERATING SYSTEM · STATEFUL AGENT NETWORK" stats={heroStats} />
 
       {/* 2. Org Graph Section with Activity Overlay */}
       <div className="dashboard-org-section">

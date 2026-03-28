@@ -7,7 +7,7 @@
  *
  * Run: npx tsx scripts/validate-concurrent-isolation.ts
  */
-import { buildMyelinMcpServer } from '../src/lib/mcp/server';
+import { buildCortexMcpServer } from '../src/lib/mcp/server';
 import { createToolContext } from '../src/lib/mcp/tool-context';
 import { mkdirSync, rmSync, readFileSync } from 'fs';
 import { resolve } from 'path';
@@ -51,8 +51,8 @@ async function main() {
   });
 
   // Create two MCP servers with different contexts
-  const serverA = buildMyelinMcpServer(ctxCTO);
-  const serverB = buildMyelinMcpServer(ctxCMO);
+  const serverA = buildCortexMcpServer(ctxCTO);
+  const serverB = buildCortexMcpServer(ctxCMO);
 
   console.log('1. Created two MCP servers with distinct ToolContexts');
   console.log(`   Server A: agentId=test-cto, department=tech`);
