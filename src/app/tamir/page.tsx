@@ -5,6 +5,19 @@ import { useRouter } from 'next/navigation';
 import ChatPanel, { ChatMessage, RoutingButton } from '@/components/ChatPanel';
 import CanvasPanel from '@/components/CanvasPanel';
 
+function formatToolName(toolName: string): string {
+  const toolLabels: Record<string, string> = {
+    Read: 'reading a file',
+    Write: 'writing a file',
+    Edit: 'editing a file',
+    Bash: 'running a command',
+    Grep: 'searching code',
+    Glob: 'finding files',
+    WebFetch: 'fetching a webpage',
+  };
+  return toolLabels[toolName] || `using ${toolName.toLowerCase()}`;
+}
+
 export default function TamirPage() {
   const router = useRouter();
   const [messages, setMessages] = useState<ChatMessage[]>([]);
@@ -18,6 +31,33 @@ export default function TamirPage() {
   const [department, setDepartment] = useState<string>('');
   const [cancelPending, setCancelPending] = useState(false);
   const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const [activityText, setActivityText] = useState<string | null>(null);
+
+  // SSE connection for live activity indicators during planning waits
+  useEffect(() => {
+    if (!isLoading || !taskId) {
+      setActivityText(null);
+      return;
+    }
+    const es = new EventSource('/api/sse');
+    es.addEventListener('task:buildlog', (e) => {
+      try {
+        const payload = JSON.parse(e.data);
+        if (payload.taskId !== taskId) return;
+        const evt = payload.event;
+        if (evt.type === 'tool_call') {
+          const label = formatToolName(evt.tool_name);
+          setActivityText(`${evt.agentId.toUpperCase()} is ${label}...`);
+        } else if (evt.type === 'tool_activity') {
+          const label = formatToolName(evt.tool_name);
+          setActivityText(`${evt.agentId.toUpperCase()} is ${label}... (${Math.round(evt.elapsed_time_seconds)}s)`);
+        } else if (evt.type === 'tool_summary') {
+          setActivityText(evt.summary);
+        }
+      } catch { /* ignore malformed events */ }
+    });
+    return () => es.close();
+  }, [isLoading, taskId]);
 
   // Page rehydration (D-16, D-17)
   useEffect(() => {
@@ -355,6 +395,7 @@ export default function TamirPage() {
             onRouteSelect={handleRouteSelect}
             isLoading={isLoading}
             placeholder="What would you like to get done?"
+            activityText={activityText ?? undefined}
           />
         </div>
       ) : (
@@ -368,6 +409,7 @@ export default function TamirPage() {
               onRouteSelect={handleRouteSelect}
               isLoading={isLoading}
               placeholder="Continue the conversation..."
+              activityText={activityText ?? undefined}
             />
           </div>
           <div className="split-canvas">
