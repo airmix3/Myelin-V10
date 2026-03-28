@@ -9,6 +9,7 @@ const NAV_ITEMS = [
   { href: '/deliverables', label: 'Deliverables', icon: '\u25CE' },
   { href: '/org-context', label: 'Org Context', icon: '\u25C6' },
   { href: '/vault', label: 'Vault', icon: '\u2B21' },
+  { href: '/search', label: 'Search', icon: '\u2315' },
   { href: '/settings', label: 'Settings', icon: '\u2699' },
 ];
 

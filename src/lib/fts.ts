@@ -86,6 +86,26 @@ export function searchDocuments(query: string, limit: number = 20): SearchResult
 }
 
 /**
+ * BM25-ranked full-text search across ALL document sources (vault, knowledge, deliverable).
+ * Returns results with highlighted snippets and optional full content.
+ */
+export function searchAllDocuments(query: string, limit: number = 50): (SearchResult & { content?: string })[] {
+  if (!query.trim()) return [];
+
+  return sqlite.prepare(`
+    SELECT
+      d.id, d.title, d.source, d.department, d.content,
+      snippet(documents_fts, 1, '<mark>', '</mark>', '...', 32) as snippet,
+      bm25(documents_fts, 5.0, 1.0) as rank
+    FROM documents_fts
+    JOIN documents d ON d.rowid = documents_fts.rowid
+    WHERE documents_fts MATCH ?
+    ORDER BY rank
+    LIMIT ?
+  `).all(query, limit) as (SearchResult & { content?: string })[];
+}
+
+/**
  * Manual FTS5 indexing for cases where triggers don't fire
  * (e.g., first-boot DNA copy, documents inserted before triggers existed).
  */
