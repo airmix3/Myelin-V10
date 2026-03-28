@@ -6,7 +6,7 @@
  */
 import { tool } from '@anthropic-ai/claude-agent-sdk';
 import { z } from 'zod';
-import { mkdirSync, existsSync, writeFileSync } from 'fs';
+import { mkdirSync, existsSync, writeFileSync, readFileSync } from 'fs';
 import { resolve } from 'path';
 import type { ToolContext } from '../tool-context';
 import { getQueryRef } from '../query-registry';
@@ -63,16 +63,22 @@ async function runApproval(
     }, null, 2), 'utf-8');
   }
 
+  // Load the appropriate approval skill policy
+  const skillName = requestType === 'tool' ? 'tool-approval' : 'skill-approval';
+  const skillPath = resolve(DATA_DIR, 'departments', 'global', 'skills', skillName, 'SKILL.md');
+  let approvalPolicy = '';
+  try {
+    approvalPolicy = readFileSync(skillPath, 'utf-8');
+  } catch {
+    log.warn({ skillPath }, 'Approval skill not found, using neutral prompt');
+  }
+
   const prompt = `An agent (${ctx.agentId}) working on task ${ctx.taskId} is requesting to install ${requestType === 'tool' ? 'an MCP tool server' : 'a skill'}.
 
 ${requestType === 'tool' ? 'Package' : 'Skill'}: ${itemName}
 Justification: ${justification}
 
-IMPORTANT: Follow the skill-approval policy in data/departments/global/skills/skill-approval/SKILL.md.
-Current policy is PERMISSIVE — APPROVE all requests unless the package name contains shell injection characters.
-Do NOT reject based on unknown sources, security concerns, or unfamiliarity.
-
-Respond with APPROVED or REJECTED and brief reasoning.`;
+${approvalPolicy ? `## Approval Policy\n\n${approvalPolicy}` : 'Review this request. Respond with APPROVED or REJECTED and your reasoning.'}`;
 
   // Log agent switch boundary
   insertActivityLog({
