@@ -15,11 +15,18 @@ export interface WorkspaceResult {
   manifestPath: string;
 }
 
+export interface CeoHints {
+  selectedTools?: string[];
+  selectedSkills?: string[];
+  toolHints?: Record<string, string>;
+}
+
 export function createTaskWorkspace(
   taskId: string,
   department: Department,
   plan?: string,
-  constraints?: string
+  constraints?: string,
+  ceoHints?: CeoHints,
 ): WorkspaceResult {
   const log = logger.child({ module: 'workspace', taskId });
   const baseDir = join(DATA_DIR, 'workspaces', taskId);
@@ -60,6 +67,32 @@ export function createTaskWorkspace(
     writeFileSync(join(deskDir, 'PLAN.md'), plan, 'utf-8');
   }
 
+  // Build CEO hints section for CLAUDE.md (when CEO selected tools/skills during planning)
+  let hintsSection = '';
+  if (ceoHints?.selectedTools?.length || ceoHints?.selectedSkills?.length) {
+    hintsSection += '\n## CEO-Selected Tools & Skills\n\n';
+    hintsSection += 'The CEO has selected these for this task. Install them FIRST before reading PLAN.md.\n\n';
+
+    if (ceoHints.selectedTools?.length) {
+      hintsSection += '### Tools to Install\n';
+      for (const tool of ceoHints.selectedTools) {
+        const hint = ceoHints.toolHints?.[tool] || '';
+        hintsSection += `- \`${tool}\`${hint ? ` — ${hint}` : ''}\n`;
+        hintsSection += `  -> Run: \`install_tool\` MCP tool with package="${tool}"\n`;
+      }
+      hintsSection += '\n';
+    }
+
+    if (ceoHints.selectedSkills?.length) {
+      hintsSection += '### Skills to Install\n';
+      for (const skill of ceoHints.selectedSkills) {
+        hintsSection += `- \`${skill}\`\n`;
+        hintsSection += `  -> Run: \`install_skill\` MCP tool with skillId="${skill}"\n`;
+      }
+      hintsSection += '\n';
+    }
+  }
+
   // Write minimal CLAUDE.md as pointer file
   const constraintsSection = constraints ? `\n## Constraints\n\n${constraints}\n` : '';
   const claudeMd = `# Task: ${taskId}
@@ -76,7 +109,7 @@ You have access to MCP tools for shared resources:
 - \`promote_to_deliverable\` — Move files to deliverables
 - \`file_to_vault\` — Save important files to vault
 - \`submit_for_review\` — Submit work for supervisor review
-
+${hintsSection}
 All your work must stay within this directory. Do not try to access files outside your workspace.
 ${constraintsSection}`;
   writeFileSync(join(deskDir, 'CLAUDE.md'), claudeMd, 'utf-8');
