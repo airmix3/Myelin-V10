@@ -32,6 +32,11 @@ interface OrgEdge {
   to: string;
 }
 
+function isDeptHead(emp: { role: string; agentId: string | null }): boolean {
+  const role = emp.role.trim().toLowerCase();
+  return (role === 'department head' || role === 'dept_head') && emp.agentId !== 'tamir';
+}
+
 const DEPT_COLORS: Record<string, string> = {
   tech: '#6496ff',
   marketing: '#ff64c8',
@@ -136,7 +141,7 @@ export async function GET() {
       if (emp.agentId === 'tamir') {
         // Tamir reports to CEO
         edges.push({ from: 'ceo', to: emp.id });
-      } else if (emp.role === 'Department Head' || emp.role === 'dept_head') {
+      } else if (isDeptHead(emp)) {
         // Dept heads report to Tamir
         if (tamir) {
           edges.push({ from: tamir.id, to: emp.id });
@@ -146,7 +151,7 @@ export async function GET() {
       } else {
         // Temp employees report to their dept head
         const deptHead = employees.find(
-          e => e.department === emp.department && (e.role === 'Department Head' || e.role === 'dept_head')
+          e => e.department === emp.department && isDeptHead(e)
         );
         if (deptHead) {
           edges.push({ from: deptHead.id, to: emp.id });
