@@ -271,12 +271,13 @@ export function createInstallTools(ctx: ToolContext) {
         };
       }
 
-      // Skills are filesystem-based (loaded by Claude via .claude/skills/ symlinks)
-      // No setMcpServers needed
+      // Return the symlinked path so the agent knows where to find the skill
+      const skillPath = resolve(ctx.deskDir, '.claude', 'skills', ctx.department, skill_name);
+
       return {
         content: [{
           type: 'text' as const,
-          text: `Skill '${skill_name}' APPROVED and installed to ${deptSkillsDir}. The skill is now available in your skills directory.\n\nDept head reasoning: ${approval.reasoning}`,
+          text: `Skill '${skill_name}' APPROVED and installed.\nAvailable at: ${skillPath}\n\nDept head reasoning: ${approval.reasoning}`,
         }],
       };
     },
