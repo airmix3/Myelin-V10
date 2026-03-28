@@ -91,6 +91,50 @@ ${constraintsSection}`;
   return { baseDir, deskDir, delivDir, manifestPath };
 }
 
+export function ensureManagerDesks(): void {
+  const log = logger.child({ module: 'workspace' });
+  for (const dept of DEPARTMENTS) {
+    // Manager desk directory
+    const managerDesk = join(DATA_DIR, 'departments', dept, 'manager-desk');
+    const settingsDir = join(managerDesk, '.claude');
+    mkdirSync(settingsDir, { recursive: true });
+
+    // Write settings.json for project boundary
+    const settingsPath = join(settingsDir, 'settings.json');
+    writeFileSync(settingsPath, JSON.stringify({
+      permissions: {
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+        deny: [],
+      },
+    }, null, 2), 'utf-8');
+
+    // Write CLAUDE.md for manager desk
+    writeFileSync(join(managerDesk, 'CLAUDE.md'), `# Manager Desk: ${dept}
+
+## Role
+
+You are a department head running an approval review. You have been asked to evaluate
+a tool or skill installation request from one of your agents.
+
+## Instructions
+
+- Review the installation request carefully
+- Verify the package/skill is safe and appropriate
+- Use web search to check the package if needed
+- Respond with APPROVED or REJECTED and your reasoning
+`, 'utf-8');
+
+    // Department tools directory
+    const toolsDir = join(DATA_DIR, 'departments', dept, 'tools');
+    mkdirSync(toolsDir, { recursive: true });
+
+    // Department skills directory
+    const skillsDir = join(DATA_DIR, 'departments', dept, 'skills');
+    mkdirSync(skillsDir, { recursive: true });
+  }
+  log.info('Manager desks and dept tool/skill directories ensured for all departments');
+}
+
 export function ensurePlanningDesks(): void {
   const log = logger.child({ module: 'workspace' });
   for (const dept of DEPARTMENTS) {

@@ -32,6 +32,7 @@ async function main() {
   // Create two distinct ToolContexts
   const ctxCTO = createToolContext({
     taskId: 'test-task-cto',
+    runId: 'run-test-cto',
     agentId: 'test-cto',
     department: 'tech',
     deskDir: '/tmp/test-desk-cto',
@@ -41,6 +42,7 @@ async function main() {
 
   const ctxCMO = createToolContext({
     taskId: 'test-task-cmo',
+    runId: 'run-test-cmo',
     agentId: 'test-cmo',
     department: 'marketing',
     deskDir: '/tmp/test-desk-cmo',

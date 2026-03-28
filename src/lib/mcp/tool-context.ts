@@ -4,6 +4,7 @@
  */
 export interface ToolContext {
   taskId: string;
+  runId: string;
   agentId: string;
   department: string;
   deskDir: string;
@@ -13,6 +14,7 @@ export interface ToolContext {
 
 export function createToolContext(opts: {
   taskId: string;
+  runId: string;
   agentId: string;
   department: string;
   deskDir: string;

@@ -30,6 +30,7 @@ import { generateId } from '@/lib/id';
 import { logger } from '@/lib/logger';
 import { withAgentObservation } from '@/lib/langfuse';
 import { insertActivityLog } from '@/lib/activity-log';
+import { registerQueryRef, unregisterQueryRef } from '@/lib/mcp/query-registry';
 
 export interface InvokeAgentOptions {
   taskId: string;
@@ -164,6 +165,7 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
   // 1. Create per-invocation ToolContext (closure-bound isolation)
   const ctx = createToolContext({
     taskId: opts.taskId,
+    runId: opts.runId,
     agentId: opts.agentId,
     department: opts.department,
     deskDir: opts.deskDir,
@@ -227,8 +229,12 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
     async () => {
       const q = query({ prompt: opts.prompt, options: queryOptions });
 
+      // Register query ref for hot-reload access (e.g., install_tool's setMcpServers)
+      registerQueryRef(opts.runId, q);
+
       let sessionId = '';
 
+      try {
       // 6. Iterate the async generator
       const seenTypes = new Set<string>();
       for await (const msg of q) {
@@ -582,6 +588,9 @@ export async function invokeAgent(opts: InvokeAgentOptions): Promise<InvokeAgent
 
       // Should not reach here -- query should always end with a result message
       throw new Error('Query ended without result message');
+      } finally {
+        unregisterQueryRef(opts.runId);
+      }
     },
   );
 }

@@ -18,7 +18,7 @@ export async function register() {
     // Dynamic imports to keep edge runtime clean
     const { initFTS5 } = await import('./lib/fts');
     const { startWorkerLoop } = await import('./lib/worker');
-    const { ensurePlanningDesks } = await import('./lib/workspace');
+    const { ensurePlanningDesks, ensureManagerDesks } = await import('./lib/workspace');
     const { sqlite } = await import('./lib/db');
     const { generateId } = await import('./lib/id');
     const { logger } = await import('./lib/logger');
@@ -43,6 +43,14 @@ export async function register() {
       log.info('Planning desks ensured');
     } catch (err) {
       log.error({ err }, 'Planning desk creation failed');
+    }
+
+    // 2.5. Ensure manager desks and dept tool/skill directories
+    try {
+      ensureManagerDesks();
+      log.info('Manager desks ensured');
+    } catch (err) {
+      log.error({ err }, 'Manager desk creation failed');
     }
 
     // 3. Copy company DNA on first boot (FOUND-08)
