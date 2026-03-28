@@ -53,24 +53,12 @@ export type CanUseToolFn = (
 ) => Promise<{ behavior: 'allow' } | { behavior: 'deny'; message: string }>;
 
 /**
- * Check whether a target path falls within workspace boundaries (write access).
+ * Check whether a target path falls within workspace boundaries.
  * Resolves relative paths against deskDir (the CWD for agent execution).
  */
 function isPathAllowed(targetPath: string, boundaries: { deskDir: string; delivDir: string }): boolean {
   const absPath = resolve(boundaries.deskDir, targetPath);
   return absPath.startsWith(boundaries.deskDir) || absPath.startsWith(boundaries.delivDir);
-}
-
-/**
- * Check whether a target path falls within read-only boundaries.
- * Allows deskDir + delivDir + projectRoot (if provided).
- * Used for Read, Glob, Grep — read-only tools that need project-wide access during planning.
- */
-function isReadPathAllowed(targetPath: string, boundaries: { deskDir: string; delivDir: string; projectRoot?: string }): boolean {
-  const absPath = resolve(boundaries.deskDir, targetPath);
-  if (absPath.startsWith(boundaries.deskDir) || absPath.startsWith(boundaries.delivDir)) return true;
-  if (boundaries.projectRoot && absPath.startsWith(boundaries.projectRoot)) return true;
-  return false;
 }
 
 /**
@@ -90,7 +78,7 @@ function extractAbsolutePathsFromCommand(command: string): string[] {
 export function buildCanUseTool(
   agentId: string,
   _department: string,
-  workspaceBoundaries?: { deskDir: string; delivDir: string; projectRoot?: string },
+  workspaceBoundaries?: { deskDir: string; delivDir: string },
 ): CanUseToolFn {
   const isTamir = agentId === 'tamir';
   const isDeptHead = ['cto', 'cmo', 'coo'].includes(agentId);
@@ -101,21 +89,10 @@ export function buildCanUseTool(
   return async (toolName: string, input: Record<string, unknown>) => {
     // --- Filesystem boundary enforcement (built-in tools only) ---
     if (workspaceBoundaries && !toolName.startsWith('mcp__')) {
-      // Read — required file_path, uses read-only boundary (allows projectRoot)
-      if (toolName === 'Read') {
-        const targetPath = input.file_path as string | undefined;
-        if (targetPath && !isReadPathAllowed(targetPath, workspaceBoundaries)) {
-          log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
-          return {
-            behavior: 'deny',
-            message: `Access denied: ${toolName} cannot access '${targetPath}' — outside workspace boundary. Use MCP tools (read_memory, read_knowledge, search_knowledge) to access shared resources.`,
-          };
-        }
-      }
-
-      // Write, Edit — required file_path, strict workspace only (no projectRoot)
-      if (toolName === 'Write' || toolName === 'Edit') {
-        const targetPath = input.file_path as string | undefined;
+      // Read, Write, Edit — required file_path
+      const filePathKey = FILE_PATH_TOOLS[toolName];
+      if (filePathKey) {
+        const targetPath = input[filePathKey] as string | undefined;
         if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
           log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
@@ -125,11 +102,11 @@ export function buildCanUseTool(
         }
       }
 
-      // Glob, Grep — optional path, uses read-only boundary (allows projectRoot)
+      // Glob, Grep — optional path (no path = CWD-relative, which is fine)
       const optPathKey = OPTIONAL_PATH_TOOLS[toolName];
       if (optPathKey) {
         const targetPath = input[optPathKey] as string | undefined;
-        if (targetPath && !isReadPathAllowed(targetPath, workspaceBoundaries)) {
+        if (targetPath && !isPathAllowed(targetPath, workspaceBoundaries)) {
           log.warn({ toolName, targetPath, deskDir: workspaceBoundaries.deskDir }, 'DENIED: path outside workspace');
           return {
             behavior: 'deny',
