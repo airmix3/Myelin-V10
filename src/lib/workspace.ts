@@ -146,7 +146,8 @@ export function ensureManagerDesks(): void {
     // Manager desk directory
     const managerDesk = join(DATA_DIR, 'departments', dept, 'manager-desk');
     const settingsDir = join(managerDesk, '.claude');
-    mkdirSync(settingsDir, { recursive: true });
+    const mgrSkillsDir = join(managerDesk, '.claude', 'skills');
+    mkdirSync(mgrSkillsDir, { recursive: true });
 
     // Write settings.json for project boundary
     const settingsPath = join(settingsDir, 'settings.json');
@@ -157,20 +158,22 @@ export function ensureManagerDesks(): void {
       },
     }, null, 2), 'utf-8');
 
+    // Symlink global skills into manager desk so approval policies are discoverable
+    const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+    const globalSkillsTarget = join(mgrSkillsDir, 'global');
+    if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+      try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+      catch { /* already exists or race */ }
+    }
+
     // Write CLAUDE.md for manager desk
     writeFileSync(join(managerDesk, 'CLAUDE.md'), `# Manager Desk: ${dept}
 
 ## Role
 
-You are a department head running an approval review. You have been asked to evaluate
-a tool or skill installation request from one of your agents.
+You are a department head. This workspace is used when you are invoked for management tasks such as approval reviews.
 
-## Instructions
-
-- Review the installation request carefully
-- Verify the package/skill is safe and appropriate
-- Use web search to check the package if needed
-- Respond with APPROVED or REJECTED and your reasoning
+Check your skills (.claude/skills/) for relevant policies before making decisions.
 `, 'utf-8');
   }
   log.info('Manager desks and dept tool/skill directories ensured for all departments');
