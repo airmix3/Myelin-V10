@@ -30,6 +30,16 @@ export function createTaskWorkspace(
   mkdirSync(skillsDir, { recursive: true });
   mkdirSync(delivDir, { recursive: true });
 
+  // Write desk-level settings.json to anchor project boundary at desk/
+  // This prevents the agent subprocess from walking up to data/ or repo root
+  const settingsPath = join(deskDir, '.claude', 'settings.json');
+  writeFileSync(settingsPath, JSON.stringify({
+    permissions: {
+      allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+      deny: [],
+    },
+  }, null, 2), 'utf-8');
+
   // Symlink active department skills into desk/.claude/skills/
   const deptSkillsSource = join(DATA_DIR, 'departments', department, 'skills');
   const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
@@ -89,6 +99,15 @@ export function ensurePlanningDesks(): void {
     const chatDir = join(planningDesk, 'chat');
     mkdirSync(skillsDir, { recursive: true });
     mkdirSync(chatDir, { recursive: true });
+
+    // Write desk-level settings.json to anchor project boundary at planning desk
+    const settingsPath = join(planningDesk, '.claude', 'settings.json');
+    writeFileSync(settingsPath, JSON.stringify({
+      permissions: {
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__myelin__*'],
+        deny: [],
+      },
+    }, null, 2), 'utf-8');
 
     const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
     const globalSkillsTarget = join(skillsDir, 'global');
