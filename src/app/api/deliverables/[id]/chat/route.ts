@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma, sqlite } from '@/lib/db';
-import { appendFileSync } from 'fs';
+import { appendFileSync, existsSync, readFileSync } from 'fs';
 import { orchestrator } from '@/lib/orchestrator';
 import { logger } from '@/lib/logger';
 
@@ -56,12 +56,31 @@ export async function POST(
       'SELECT workspaceCwd FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1'
     ).get(task.id) as { workspaceCwd: string | null } | undefined;
 
+    // Build context-rich prompt for follow-up chat
+    const chatHistory = task.chatFilePath && existsSync(task.chatFilePath)
+      ? readFileSync(task.chatFilePath, 'utf-8').trim().split('\n').filter(Boolean).slice(-20).map(l => {
+          try {
+            const e = JSON.parse(l) as { role: string; content?: string; planMarkdown?: string; turnType?: string };
+            if (e.planMarkdown) return `${e.role === 'user' ? 'CEO' : 'Agent'}: [plan attached]`;
+            return `${e.role === 'user' ? 'CEO' : 'Agent'}: ${(e.content || '').substring(0, 500)}`;
+          } catch { return ''; }
+        }).filter(Boolean).join('\n')
+      : '';
+
+    const enrichedPrompt = [
+      `## Task Context\n**Title:** ${task.title}\n**Description:** ${task.description || task.title}`,
+      task.planMarkdown ? `## Approved Plan\n${task.planMarkdown.substring(0, 2000)}` : '',
+      chatHistory ? `## Conversation History\n${chatHistory}` : '',
+      `## CEO's Latest Message\n${message}`,
+      `\n## Instructions\nYou are in FOLLOW-UP MODE. The task has been planned and executed. The CEO is asking a follow-up question about the deliverable or requesting changes. Answer based on the task context, plan, and conversation history above. Be specific and actionable.`,
+    ].filter(Boolean).join('\n\n');
+
     const deskDir = latestRun?.workspaceCwd ?? '';
     const result = await orchestrator.invoke({
       taskId: task.id,
       runId: `chat_${Date.now()}`,
       agentId: task.currentActorId,
-      prompt: message,
+      prompt: enrichedPrompt,
       deskDir,
       delivDir: deliverable.workspacePath ? `${deliverable.workspacePath}/../deliverables` : '',
       manifestPath: deliverable.manifestPath ?? '',
