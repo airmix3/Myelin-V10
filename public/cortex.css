@@ -1304,10 +1304,22 @@ input[type="checkbox"] {
 
 .dashboard-hero {
   position: relative;
-  height: 350px;
+  height: 400px;
   overflow: hidden;
   border-radius: 0;
   margin: -20px -20px 0 -20px;
+}
+
+.dashboard-hero::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent, #090816);
+  z-index: 3;
+  pointer-events: none;
 }
 
 .dashboard-hero canvas {
@@ -1333,23 +1345,27 @@ input[type="checkbox"] {
 .dashboard-hero-title {
   font-size: 48px;
   font-weight: 900;
-  letter-spacing: 0.15em;
-  color: #fff;
-  text-shadow: 0 0 40px rgba(143,231,255,0.3), 0 0 80px rgba(100,150,255,0.15);
+  letter-spacing: 0.2em;
+  background: linear-gradient(135deg, #fff 0%, #8FE7FF 50%, #6496FF 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  text-shadow: none;
+  filter: drop-shadow(0 0 60px rgba(143,231,255,0.4)) drop-shadow(0 0 120px rgba(100,150,255,0.2));
   margin-bottom: 4px;
 }
 
 .dashboard-hero-subtitle {
-  font-size: 14px;
-  color: var(--text-dim);
-  letter-spacing: 0.3em;
+  font-size: 16px;
+  color: rgba(143,231,255,0.5);
+  letter-spacing: 0.4em;
   text-transform: uppercase;
-  margin-bottom: 32px;
+  margin-bottom: 40px;
 }
 
 .dashboard-hero-stats {
   display: flex;
-  gap: 40px;
+  gap: 56px;
 }
 
 .dashboard-hero-stat {
@@ -1357,18 +1373,22 @@ input[type="checkbox"] {
 }
 
 .dashboard-hero-stat-value {
-  font-size: 28px;
+  font-size: 36px;
   font-weight: 900;
   color: #fff;
-  text-shadow: 0 0 20px rgba(143,231,255,0.2);
 }
 
+.stat-cyan .dashboard-hero-stat-value { color: #8FE7FF; text-shadow: 0 0 20px rgba(143,231,255,0.4); }
+.stat-blue .dashboard-hero-stat-value { color: #6496FF; text-shadow: 0 0 20px rgba(100,150,255,0.4); }
+.stat-mint .dashboard-hero-stat-value { color: #2EE6A6; text-shadow: 0 0 20px rgba(46,230,166,0.4); }
+.stat-magenta .dashboard-hero-stat-value { color: #FF64C8; text-shadow: 0 0 20px rgba(255,100,200,0.4); }
+
 .dashboard-hero-stat-label {
-  font-size: 10px;
-  color: var(--text-dim);
+  font-size: 11px;
+  color: rgba(255,255,255,0.35);
   text-transform: uppercase;
-  letter-spacing: 0.1em;
-  margin-top: 4px;
+  letter-spacing: 0.15em;
+  margin-top: 6px;
 }
 
 .dashboard-org-section {

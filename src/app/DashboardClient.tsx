@@ -142,10 +142,10 @@ export default function DashboardClient({ stats, agents, initialActivities, inPr
   void inProgressDeliverables;
 
   const heroStats = [
-    { label: 'Agents', value: stats.activeAgents },
-    { label: 'Tasks', value: stats.activeTasks },
-    { label: 'Approvals', value: stats.pendingApprovals },
-    { label: 'Deliverables', value: stats.deliverableCount },
+    { label: 'Agents', value: stats.activeAgents, color: 'cyan' },
+    { label: 'Tasks', value: stats.activeTasks, color: 'blue' },
+    { label: 'Approvals', value: stats.pendingApprovals, color: 'magenta' },
+    { label: 'Deliverables', value: stats.deliverableCount, color: 'mint' },
   ];
 
   return (

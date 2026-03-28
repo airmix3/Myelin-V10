@@ -5,7 +5,7 @@ import { useRef, useEffect } from 'react';
 interface NeuralHeroProps {
   title: string;
   subtitle?: string;
-  stats: { label: string; value: string | number }[];
+  stats: { label: string; value: string | number; color?: string }[];
 }
 
 // Neon palette
@@ -267,7 +267,7 @@ export default function NeuralHero({ title, subtitle, stats }: NeuralHeroProps) 
         {subtitle && <div className="dashboard-hero-subtitle">{subtitle}</div>}
         <div className="dashboard-hero-stats">
           {stats.map((s) => (
-            <div key={s.label} className="dashboard-hero-stat">
+            <div key={s.label} className={`dashboard-hero-stat stat-${s.color || 'cyan'}`}>
               <div className="dashboard-hero-stat-value">{s.value}</div>
               <div className="dashboard-hero-stat-label">{s.label}</div>
             </div>
