@@ -1,11 +1,11 @@
 import path from 'path';
-import { appendFileSync } from 'fs';
+import { appendFileSync, existsSync, readFileSync } from 'fs';
 import { sqlite } from '@/lib/db';
-import { generateId } from '@/lib/id';
 import { eventBus } from '@/lib/events';
 import { logger } from '@/lib/logger';
 import { orchestrator } from '@/lib/orchestrator';
 import { transitionTask } from '@/lib/state-machine';
+import { insertActivityLog } from '@/lib/activity-log';
 import {
   WORKER_POLL_INTERVAL_MS,
   WORKER_HEARTBEAT_INTERVAL_MS,
@@ -45,6 +45,32 @@ export function recoverStaleRuns(): void {
         WHERE id = ? AND state IN ('working', 'submitted')
       `).run(run.taskId);
     }
+  }
+
+  // One-time fix: transition tasks stuck in 'working' whose runs are all completed
+  const stuckTasks = sqlite.prepare(`
+    SELECT DISTINCT t.id FROM tasks t
+    WHERE t.state = 'working'
+    AND NOT EXISTS (
+      SELECT 1 FROM task_runs tr
+      WHERE tr.taskId = t.id AND tr.status IN ('queued', 'executing')
+    )
+    AND EXISTS (
+      SELECT 1 FROM task_runs tr
+      WHERE tr.taskId = t.id AND tr.status = 'completed'
+    )
+  `).all() as Array<{ id: string }>;
+
+  for (const task of stuckTasks) {
+    sqlite.prepare(`
+      UPDATE tasks SET state = 'completed', updatedAt = datetime('now')
+      WHERE id = ? AND state = 'working'
+    `).run(task.id);
+    log.info({ taskId: task.id }, 'Fixed stuck working task with completed runs');
+  }
+
+  if (stuckTasks.length > 0) {
+    log.info({ count: stuckTasks.length }, 'Fixed stuck working tasks on startup');
   }
 }
 
@@ -141,11 +167,13 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
   // Emit worker claim event
   eventBus.emit('worker:claim', { runId, taskId, employeeId });
 
-  // Log to activity_log
-  sqlite.prepare(`
-    INSERT INTO activity_log (id, taskId, agentId, actionType, description, createdAt)
-    VALUES (?, ?, ?, 'WORKER_CLAIM', ?, datetime('now'))
-  `).run(generateId('log'), taskId, employeeId, `Run ${runId} claimed by worker`);
+  insertActivityLog({
+    taskId,
+    agentId: employeeId,
+    actionType: 'WORKER_CLAIM',
+    description: `Run ${runId} claimed by worker`,
+    metadata: { runId, employeeId },
+  });
 
   try {
     // Look up the task for context
@@ -229,6 +257,24 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       SET status = 'completed', completedAt = datetime('now')
       WHERE id = ?
     `).run(runId);
+
+    // Update deliverable status + primaryFile from manifest when run completes
+    try {
+      const manifestJson = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf-8')) : null;
+      const primaryFile = manifestJson?.primaryFile ?? null;
+      sqlite.prepare(`
+        UPDATE deliverables SET status = 'completed', primaryFile = COALESCE(?, primaryFile), updatedAt = datetime('now')
+        WHERE taskId = ? AND status = 'in-progress'
+      `).run(primaryFile, taskId);
+    } catch {
+      sqlite.prepare(`
+        UPDATE deliverables SET status = 'completed', updatedAt = datetime('now')
+        WHERE taskId = ? AND status = 'in-progress'
+      `).run(taskId);
+    }
+
+    // Transition parent task to completed
+    transitionTask(taskId, 'working', 'completed');
 
     // Emit completion event
     eventBus.emit('agent:completed', { taskId, runId, agentId, costUsd: result.totalCostUsd });
