@@ -50,6 +50,7 @@ model Task {
   deliverables       Deliverable[]
   costEvents         CostEvent[]
   hireRequests       HireRequest[]
+  escalations        Escalation[]
 
   @@map("tasks")
 }
@@ -123,6 +124,26 @@ model CostEvent {
   task        Task     @relation(fields: [taskId], references: [id])
 
   @@map("cost_events")
+}
+
+model Escalation {
+  id          String   @id
+  taskId      String
+  agentId     String
+  type        String                       // clarification | hire_approval | budget_increase | custom
+  urgency     String   @default("normal")  // low | normal | high | critical
+  status      String   @default("pending") // pending | responded | resolved | dismissed
+  summary     String
+  reason      String?
+  context     String?                      // JSON: type-specific fields
+  response    String?
+  resolution  String?                      // approved | declined | answered | custom
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+  task        Task     @relation(fields: [taskId], references: [id])
+
+  @@map("escalations")
 }
 
 model Skill {

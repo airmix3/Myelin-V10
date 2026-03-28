@@ -14,6 +14,7 @@ import { createSkillTools } from './tools/skills';
 import { createInboxTools } from './tools/inbox';
 import { createHireTools } from './tools/hire';
 import { createInstallTools } from './tools/install';
+import { createEscalateTools } from './tools/escalate';
 
 export function buildMyelinMcpServer(ctx: ToolContext) {
   const memoryTools = createMemoryTools(ctx);
@@ -25,6 +26,7 @@ export function buildMyelinMcpServer(ctx: ToolContext) {
   const inboxTools = createInboxTools(ctx);
   const hireTools = createHireTools(ctx);
   const installTools = createInstallTools(ctx);
+  const escalateTools = createEscalateTools(ctx);
 
   return createSdkMcpServer({
     name: 'myelin',
@@ -38,6 +40,7 @@ export function buildMyelinMcpServer(ctx: ToolContext) {
       ...inboxTools,
       ...hireTools,
       ...installTools,
+      ...escalateTools,
     ],
   });
 }
