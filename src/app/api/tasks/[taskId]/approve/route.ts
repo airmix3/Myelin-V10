@@ -39,11 +39,19 @@ export async function POST(
   }
 
   const fullPlan = plan + (claudeMdExtra || '');
+  const ceoHints = (config.selectedTools?.length || config.selectedSkills?.length)
+    ? {
+        selectedTools: config.selectedTools as string[] | undefined,
+        selectedSkills: config.selectedSkills as string[] | undefined,
+        toolHints: config.toolHints as Record<string, string> | undefined,
+      }
+    : undefined;
   const workspace = createTaskWorkspace(
     params.taskId,
     task.department as Department,
     fullPlan,
     constraints,
+    ceoHints,
   );
 
   // Create Deliverable record
