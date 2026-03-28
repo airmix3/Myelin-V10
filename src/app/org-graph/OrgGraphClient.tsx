@@ -1,6 +1,9 @@
 'use client';
 
 import { useState, useEffect, useRef, useCallback } from 'react';
+import dynamic from 'next/dynamic';
+
+const TerminalOverlay = dynamic(() => import('./TerminalOverlay'), { ssr: false });
 
 interface ActiveTask {
   taskId: string;
@@ -523,23 +526,13 @@ export default function OrgGraphClient() {
         )}
       </div>
 
-      {/* Terminal overlay (wired in Task 2) */}
+      {/* Terminal overlay for CEO session takeover */}
       {activeTerminal && (
-        <div style={{
-          position: 'fixed', inset: 0, zIndex: 200,
-          background: 'rgba(0,0,0,0.9)', display: 'flex',
-          flexDirection: 'column', alignItems: 'center', justifyContent: 'center',
-          color: 'var(--text)',
-        }}>
-          <p>Terminal overlay loading... (requires node-pty, Task 2)</p>
-          <button
-            className="btn-cancel"
-            style={{ marginTop: '16px' }}
-            onClick={handleTerminalClose}
-          >
-            Close
-          </button>
-        </div>
+        <TerminalOverlay
+          runId={activeTerminal.runId}
+          agentName={selectedNode?.name}
+          onClose={handleTerminalClose}
+        />
       )}
     </div>
   );

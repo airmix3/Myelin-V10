@@ -12,11 +12,52 @@ import {
   WORKER_STALE_THRESHOLD_S,
   WORKER_MAX_CONCURRENT,
 } from '@/lib/config';
+import { abortQuery } from '@/lib/query-abort';
 
 const log = logger.child({ module: 'worker' });
 
 // Track active runs for heartbeat
 const activeRuns = new Map<string, NodeJS.Timeout>();
+
+// Track paused runs (CEO terminal takeover)
+const pausedRuns = new Set<string>();
+
+/**
+ * Pause a running SDK agent to allow CEO terminal takeover.
+ * Aborts the SDK query loop and marks the run as paused.
+ */
+export async function pauseRun(runId: string): Promise<void> {
+  log.info({ runId }, 'Pausing run for CEO takeover');
+  pausedRuns.add(runId);
+
+  // Abort the SDK query loop gracefully
+  abortQuery(runId);
+
+  // Mark run as paused in DB
+  sqlite.prepare(
+    "UPDATE task_runs SET status = 'paused' WHERE id = ? AND status IN ('executing', 'queued')"
+  ).run(runId);
+
+  // Emit event
+  eventBus.emit('worker:pause', { runId });
+}
+
+/**
+ * Resume a paused run after CEO exits the terminal.
+ * Re-queues the run so the worker picks it up with the stored sessionId.
+ */
+export async function resumeRun(runId: string): Promise<void> {
+  log.info({ runId }, 'Resuming run after CEO exit');
+  pausedRuns.delete(runId);
+
+  // Re-queue so the worker picks it up again (sessionId persists for resume)
+  sqlite.prepare(
+    "UPDATE task_runs SET status = 'queued' WHERE id = ? AND status = 'paused'"
+  ).run(runId);
+
+  // Emit event
+  eventBus.emit('worker:resume', { runId });
+}
 
 /**
  * Called once on server startup (per D-12).
@@ -107,17 +148,39 @@ function getActiveRunCount(): number {
  */
 function claimNextRun(): Record<string, unknown> | null {
   // Optimistic lock: UPDATE WHERE status='queued' AND id=(subselect oldest queued)
-  const claimed = sqlite.prepare(`
-    UPDATE task_runs
-    SET status = 'executing', claimedAt = datetime('now'), heartbeatAt = datetime('now')
-    WHERE id = (
-      SELECT id FROM task_runs
-      WHERE status = 'queued'
-      ORDER BY createdAt ASC
-      LIMIT 1
-    ) AND status = 'queued'
-    RETURNING *
-  `).get() as Record<string, unknown> | undefined;
+  // Skip runs that are in the pausedRuns set (CEO terminal takeover in progress)
+  const pausedIds = Array.from(pausedRuns);
+  let query: string;
+  if (pausedIds.length > 0) {
+    const placeholders = pausedIds.map(() => '?').join(',');
+    query = `
+      UPDATE task_runs
+      SET status = 'executing', claimedAt = datetime('now'), heartbeatAt = datetime('now')
+      WHERE id = (
+        SELECT id FROM task_runs
+        WHERE status = 'queued' AND id NOT IN (${placeholders})
+        ORDER BY createdAt ASC
+        LIMIT 1
+      ) AND status = 'queued'
+      RETURNING *
+    `;
+  } else {
+    query = `
+      UPDATE task_runs
+      SET status = 'executing', claimedAt = datetime('now'), heartbeatAt = datetime('now')
+      WHERE id = (
+        SELECT id FROM task_runs
+        WHERE status = 'queued'
+        ORDER BY createdAt ASC
+        LIMIT 1
+      ) AND status = 'queued'
+      RETURNING *
+    `;
+  }
+  const claimed = (pausedIds.length > 0
+    ? sqlite.prepare(query).get(...pausedIds)
+    : sqlite.prepare(query).get()
+  ) as Record<string, unknown> | undefined;
 
   return claimed || null;
 }
