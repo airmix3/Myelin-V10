@@ -176,16 +176,27 @@ export function createInstallTools(ctx: ToolContext) {
       const tamirAgent = orch.getAgent('tamir');
       const tamirSoulMd = tamirAgent?.soulMd ?? '';
 
-      const installPrompt = `Install the MCP tool server "${package_name}" to the ${ctx.department} department's tools directory.
+      const installPrompt = `You are performing a TOOL INSTALLATION. Follow your installer skill procedure.
 
-Target directory: ${deptToolsDir}
+## Context
+- Requesting agent: ${ctx.agentId} (department: ${ctx.department})
+- Task: ${ctx.taskId}
+- Justification: ${justification}
+- Approved by: ${getDeptHeadId(ctx.department)} (department head)
+- Approval reasoning: ${approval.reasoning}
 
-Steps:
-1. Initialize package.json in the target directory if it doesn't exist
-2. Run: npx @smithery/cli mcp add ${package_name} --client claude-code
-3. Run the command in the target directory: ${deptToolsDir}
+## Installation Details
+- Package: ${package_name}
+- Type: MCP tool server (Smithery)
+- Target directory: ${deptToolsDir}
+- Command: npx @smithery/cli mcp add ${package_name} --client claude-code
 
-Report success or failure.`;
+## Instructions
+1. cd to the target directory
+2. Ensure package.json exists (run npm init -y if not)
+3. Run the install command
+4. Verify success: exit code 0, package appears in package.json or node_modules
+5. Report result clearly — success with what was installed, or failure with exact error`;
 
       insertActivityLog({
         taskId: ctx.taskId,
@@ -338,16 +349,26 @@ Report success or failure.`;
       const tamirAgent = orch.getAgent('tamir');
       const tamirSoulMd = tamirAgent?.soulMd ?? '';
 
-      const installPrompt = `Install the skill "${skill_id}" (display name: "${displayName}") to the ${ctx.department} department's skills directory.
+      const installPrompt = `You are performing a SKILL INSTALLATION. Follow your installer skill procedure.
 
-Target directory: ${deptSkillsDir}
-Owner/Repo: ${ownerRepo}
-Skill name: ${displayName}
+## Context
+- Requesting agent: ${ctx.agentId} (department: ${ctx.department})
+- Task: ${ctx.taskId}
+- Justification: ${justification}
+- Approved by: ${getDeptHeadId(ctx.department)} (department head)
+- Approval reasoning: ${approval.reasoning}
 
-Run: npx skills add ${ownerRepo} --skill '${displayName}' --yes
-Run the command in the target directory: ${deptSkillsDir}
+## Installation Details
+- Skill: ${skill_id} (display name: "${displayName}")
+- Owner/Repo: ${ownerRepo}
+- Target directory: ${deptSkillsDir}
+- Command: npx skills add ${ownerRepo} --skill '${displayName}' --yes
 
-Report success or failure.`;
+## Instructions
+1. cd to the target directory
+2. Run the install command
+3. Verify success: exit code 0, new directory with SKILL.md exists
+4. Report result clearly — success with skill path, or failure with exact error`;
 
       insertActivityLog({
         taskId: ctx.taskId,
