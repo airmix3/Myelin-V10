@@ -11,6 +11,7 @@ import { sqlite } from '@/lib/db';
 import { transitionTask } from '@/lib/state-machine';
 import { eventBus } from '@/lib/events';
 import { generateId } from '@/lib/id';
+import { insertActivityLog } from '@/lib/activity-log';
 import type { ToolContext } from '../tool-context';
 
 interface TaskRow {
@@ -83,6 +84,15 @@ export function createReviewTools(ctx: ToolContext) {
         reviewerAgentId: task.supervisorAgentId,
       });
 
+      // Emit agent switch for build log bounding box
+      insertActivityLog({
+        taskId: ctx.taskId,
+        agentId: ctx.agentId,
+        actionType: 'AGENT_SWITCH_START',
+        description: `Submitting for review by ${task.supervisorAgentId}`,
+        metadata: { fromAgent: ctx.agentId, toAgent: task.supervisorAgentId, reason: 'submit_for_review' },
+      });
+
       // Enqueue supervisor task_run so worker picks up the review
       const supervisorEmployee = findEmployeeByAgentId(task.supervisorAgentId);
       if (supervisorEmployee) {
@@ -129,6 +139,15 @@ export function createReviewTools(ctx: ToolContext) {
       ).get(ctx.taskId) as { supervisorAgentId: string | null } | undefined;
 
       if (taskForExtraction?.supervisorAgentId) {
+        // Emit agent switch for build log bounding box
+        insertActivityLog({
+          taskId: ctx.taskId,
+          agentId: ctx.agentId,
+          actionType: 'AGENT_SWITCH_START',
+          description: `Skill extraction by ${taskForExtraction.supervisorAgentId}`,
+          metadata: { fromAgent: ctx.agentId, toAgent: taskForExtraction.supervisorAgentId, reason: 'skill_extraction' },
+        });
+
         const supervisorEmployee = findEmployeeByAgentId(taskForExtraction.supervisorAgentId);
         if (supervisorEmployee) {
           const prevRun = findLatestRun(ctx.taskId);
@@ -176,6 +195,15 @@ export function createReviewTools(ctx: ToolContext) {
         taskId: ctx.taskId,
         action: 'changes_requested',
         feedback: args.feedback,
+      });
+
+      // Emit agent switch for build log bounding box
+      insertActivityLog({
+        taskId: ctx.taskId,
+        agentId: ctx.agentId,
+        actionType: 'AGENT_SWITCH_START',
+        description: `Requesting changes from ${task.executorAgentId}`,
+        metadata: { fromAgent: ctx.agentId, toAgent: task.executorAgentId, reason: 'request_changes' },
       });
 
       // Enqueue executor task_run with session resume (D-02)
