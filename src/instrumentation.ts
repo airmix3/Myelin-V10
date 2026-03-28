@@ -92,25 +92,40 @@ export async function register() {
       const vaultDir = path.resolve(process.cwd(), 'data', 'vault');
       if (fs.existsSync(vaultDir)) {
         const vaultFiles = fs.readdirSync(vaultDir).filter((f: string) => f.endsWith('.md') && f !== '.gitkeep');
-        const matter = await import('gray-matter');
+        const { prisma } = await import('./lib/db');
+
+        // Get all existing vault docs by filename (not absolute path, which varies per machine)
+        const existingDocs = await prisma.document.findMany({
+          where: { source: 'vault' },
+          select: { filePath: true },
+        });
+        const indexedFiles = new Set(existingDocs.map(d => d.filePath ? path.basename(d.filePath) : ''));
 
         for (const file of vaultFiles) {
+          if (indexedFiles.has(file)) continue;
+
           const filePath = path.join(vaultDir, file);
-          // Check if already indexed by filePath
-          const existing = sqlite.prepare('SELECT id FROM documents WHERE filePath = ?').get(filePath);
-          if (existing) continue;
+          const raw = fs.readFileSync(filePath, 'utf-8');
 
-          const content = fs.readFileSync(filePath, 'utf-8');
-          const parsed = matter.default(content);
-          const title = parsed.data.title || file.replace(/\.md$/, '').replace(/-/g, ' ');
+          // Extract title from frontmatter or filename
+          let title = file.replace(/\.md$/, '').replace(/-/g, ' ');
+          const titleMatch = raw.match(/^title:\s*["']?(.+?)["']?\s*$/m);
+          if (titleMatch) title = titleMatch[1];
+
           const docId = generateId('doc');
+          await prisma.document.create({
+            data: {
+              id: docId,
+              title,
+              content: raw,
+              source: 'vault',
+              department: 'global',
+              filedBy: 'system',
+              filePath,
+            },
+          });
 
-          sqlite.prepare(`
-            INSERT INTO documents (id, title, content, source, department, filedBy, filePath, createdAt, updatedAt)
-            VALUES (?, ?, ?, 'vault', 'global', 'system', ?, datetime('now'), datetime('now'))
-          `).run(docId, title, parsed.content, filePath);
-
-          log.info({ docId, file }, 'Vault file indexed on startup');
+          log.info({ docId, file, title }, 'Vault file indexed on startup');
         }
       }
     } catch (err) {
