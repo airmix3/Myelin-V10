@@ -68,12 +68,12 @@ export const orchestrator: AgentOrchestrator = globalForOrch.__orchestrator ??= 
  * Uses dynamic imports since agent.ts files use import.meta.url + readFileSync.
  */
 export async function initOrchestrator(): Promise<void> {
-  const { agentConfig: tamirConfig } = await import('@/agents/tamir/agent');
-  const { agentConfig: ctoConfig } = await import('@/agents/cto/agent');
-  const { agentConfig: cmoConfig } = await import('@/agents/cmo/agent');
-  const { agentConfig: cooConfig } = await import('@/agents/coo/agent');
+  const { getAgentConfig: getTamir } = await import('@/agents/tamir/agent');
+  const { getAgentConfig: getCto } = await import('@/agents/cto/agent');
+  const { getAgentConfig: getCmo } = await import('@/agents/cmo/agent');
+  const { getAgentConfig: getCoo } = await import('@/agents/coo/agent');
 
-  for (const config of [tamirConfig, ctoConfig, cmoConfig, cooConfig]) {
+  for (const config of [getTamir(), getCto(), getCmo(), getCoo()]) {
     orchestrator.register({
       agentId: config.agentId,
       name: config.name,
