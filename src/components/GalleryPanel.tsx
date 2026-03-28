@@ -17,12 +17,13 @@ interface GalleryItem {
   department?: string;
   status?: string;
   url?: string;
+  summary?: string;
 }
 
 type TabType = 'tools' | 'skills';
 
 const TOOL_SOURCES = ['company', 'glama', 'composio'] as const;
-const SKILL_SOURCES = ['company', 'clawhub'] as const;
+const SKILL_SOURCES = ['company', 'skillssh'] as const;
 
 export default function GalleryPanel({ taskId, department, onSelectionChange }: GalleryPanelProps) {
   const [activeTab, setActiveTab] = useState<TabType>('tools');
@@ -30,15 +31,16 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
   const [items, setItems] = useState<GalleryItem[]>([]);
   const [loading, setLoading] = useState(false);
   const [sourceStatus, setSourceStatus] = useState<Record<string, 'ok' | 'unavailable'>>({});
-  const [activeSources, setActiveSources] = useState<string[]>(['company']);
+  const [activeSources, setActiveSources] = useState<string[]>([...TOOL_SOURCES]);
   const [selectedTools, setSelectedTools] = useState<string[]>([]);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [toolHints, setToolHints] = useState<Record<string, string>>({});
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Reset sources when tab changes
+  // Reset sources to ALL for the new tab when tab changes
   useEffect(() => {
-    setActiveSources(['company']);
+    const sources = activeTab === 'tools' ? [...TOOL_SOURCES] : [...SKILL_SOURCES];
+    setActiveSources(sources);
     setItems([]);
     setSourceStatus({});
   }, [activeTab]);
@@ -255,12 +257,28 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
                     color: 'var(--text-dim)',
                     overflow: 'hidden',
                     display: '-webkit-box',
-                    WebkitLineClamp: 2,
+                    WebkitLineClamp: 1,
                     WebkitBoxOrient: 'vertical',
                   }}
                 >
                   {item.description}
                 </div>
+                {item.summary && (
+                  <div
+                    className="gallery-card-summary"
+                    style={{
+                      fontSize: '11px',
+                      color: 'var(--text-secondary)',
+                      marginTop: '4px',
+                      overflow: 'hidden',
+                      display: '-webkit-box',
+                      WebkitLineClamp: 3,
+                      WebkitBoxOrient: 'vertical',
+                    }}
+                  >
+                    {item.summary}
+                  </div>
+                )}
                 <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: '6px', fontSize: '10px', color: 'var(--text-dim)' }}>
                   {item.stars != null && item.stars > 0 && <span>{item.stars} stars</span>}
                   <span className="badge" style={{ fontSize: '9px' }}>{item.source}</span>
