@@ -155,10 +155,11 @@ None yet.
 | 260328-bxt | Include conversation history in deliverable chat for context-rich follow-up | 2026-03-28 | 0e64ea2 | [260328-bxt-include-conversation-history-in-delivera](./quick/260328-bxt-include-conversation-history-in-delivera/) |
 | 260328-c3k | Fix skills/tools not being used by agents - enable settingSources: ['project'] | 2026-03-28 | 7e120a9 | [260328-c3k-fix-skills-tools-not-being-used-by-agent](./quick/260328-c3k-fix-skills-tools-not-being-used-by-agent/) |
 | 260328-c6r | Fix deliverables incorrectly showing in Vault page - filter to vault+knowledge sources | 2026-03-28 | 352e5d2 | [260328-c6r-fix-deliverables-incorrectly-showing-in-](./quick/260328-c6r-fix-deliverables-incorrectly-showing-in-/) |
+| 260328-cjp | Fix Active Tasks count showing completed tasks | 2026-03-28 | 5e78774 | [260328-cjp-fix-active-tasks-count-showing-completed](./quick/260328-cjp-fix-active-tasks-count-showing-completed/) |
 
 ## Session Continuity
 
 Last session: 2026-03-28T06:05:22.716Z
 Stopped at: Completed quick/260328-cjp
-Last activity: 2026-03-28
+Last activity: 2026-03-28 - Completed quick task 260328-cjp: fix Active Tasks count showing completed tasks
 Resume file: None
