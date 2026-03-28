@@ -179,11 +179,12 @@ None yet.
 | 260328-ol3 | Add interactive company org graph with employee nodes, task overlay with live logs, and Take His Role button for CEO to take over agent sessions via web-based Claude Code | 2026-03-28 | 6beabc2 | [260328-ol3-add-interactive-company-org-graph-with-e](./quick/260328-ol3-add-interactive-company-org-graph-with-e/) |
 | 260328-tvl | Fix org graph: hierarchical layout, activity logs from agent log source, and add Take Control button | 2026-03-28 | 953fe96 | [260328-tvl-fix-org-graph-hierarchical-layout-activi](./quick/260328-tvl-fix-org-graph-hierarchical-layout-activi/) |
 | 260328-vh6 | Remove autonomy level bar from planning screen | 2026-03-28 | bb93c52 | [260328-vh6-remove-autonomy-level-bar-from-planning-](./quick/260328-vh6-remove-autonomy-level-bar-from-planning-/) |
-| 260328-vll | Fix Take His Role black screen - eventBus require path and PTY output race condition | 2026-03-28 | pending | [260328-vll-fix-take-his-role-black-screen-eventbus-](./quick/260328-vll-fix-take-his-role-black-screen-eventbus-/) |
+| 260328-vll | Fix Take His Role black screen - eventBus require path and PTY output race condition | 2026-03-28 | 579c848 | [260328-vll-fix-take-his-role-black-screen-eventbus-](./quick/260328-vll-fix-take-his-role-black-screen-eventbus-/) |
+| 260328-vpf | Fix agent showing idle in org graph when improving a completed deliverable | 2026-03-28 | pending | [260328-vpf-fix-agent-showing-idle-in-org-graph-when](./quick/260328-vpf-fix-agent-showing-idle-in-org-graph-when/) |
 
 ## Session Continuity
 
-Last session: 2026-03-28T19:45:07.245Z
-Stopped at: Completed quick/260328-vll
-Last activity: 2026-03-28 - Completed quick task 260328-vll: Fix Take His Role black screen
+Last session: 2026-03-28T19:49:42.353Z
+Stopped at: Completed quick/260328-vpf
+Last activity: 2026-03-28 - Completed quick task 260328-vpf: Fix agent idle in org graph when improving deliverable
 Resume file: None

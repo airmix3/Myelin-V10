@@ -71,14 +71,16 @@ export async function GET() {
 
     for (const emp of employees) {
       // Fetch active tasks for this employee via task_runs join
+      // Include any task with an executing/queued run (not just by task state)
+      // so "improve deliverable" runs on completed tasks still show as active
       const activeTaskRows = sqlite.prepare(`
         SELECT t.id as taskId, t.title, t.state,
-               tr.id as runId, tr.sessionId, tr.workspaceCwd
+               tr.id as runId, tr.sessionId, tr.workspaceCwd, tr.status as runStatus
         FROM task_runs tr
         INNER JOIN tasks t ON t.id = tr.taskId
         WHERE tr.employeeId = ?
-          AND t.state IN ('submitted', 'working', 'input-required')
-        ORDER BY t.createdAt DESC
+          AND (tr.status IN ('executing', 'queued') OR t.state IN ('submitted', 'working', 'input-required'))
+        ORDER BY tr.claimedAt DESC
       `).all(emp.id) as Array<{
         taskId: string;
         title: string;
@@ -86,10 +88,19 @@ export async function GET() {
         runId: string | null;
         sessionId: string | null;
         workspaceCwd: string | null;
+        runStatus: string | null;
       }>;
 
+      // Deduplicate by taskId (a task may have multiple runs — keep the most recent)
+      const seen = new Set<string>();
+      const dedupedRows = activeTaskRows.filter(r => {
+        if (seen.has(r.taskId)) return false;
+        seen.add(r.taskId);
+        return true;
+      });
+
       // Attach recent activity_log entries to each active task
-      const activeTasks = activeTaskRows.map(task => {
+      const activeTasks = dedupedRows.map(task => {
         const rawActivity = sqlite.prepare(`
           SELECT id, actionType, description, createdAt
           FROM activity_log
