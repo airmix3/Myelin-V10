@@ -127,9 +127,9 @@ export function createInstallTools(ctx: ToolContext) {
 
   const installTool = tool(
     'install_tool',
-    'Request installation of an npm MCP tool server package. Triggers department head approval, installs on approval, and hot-reloads into your current session.',
+    'Request installation of an MCP tool server via Smithery. Triggers department head approval, installs on approval, and hot-reloads into your current session.',
     {
-      package_name: z.string().describe('npm package name of the MCP server to install (e.g., "@anthropic/mcp-server-fetch")'),
+      package_name: z.string().describe('Smithery qualified name (e.g., "github", "exa") or npm package name of the MCP server to install'),
       justification: z.string().describe('Why you need this tool — what task requirement it fulfills'),
     },
     async (args) => {
@@ -172,17 +172,17 @@ export function createInstallTools(ctx: ToolContext) {
       }
 
       try {
-        execSync(`npm install ${package_name}`, {
+        execSync(`npx @smithery/cli mcp add ${package_name} --client claude-code`, {
           cwd: deptToolsDir,
           timeout: 60000,
           stdio: 'pipe',
         });
       } catch (installErr) {
-        log.error({ err: installErr, package_name }, 'npm install failed');
+        log.error({ err: installErr, package_name }, 'Smithery CLI install failed');
         return {
           content: [{
             type: 'text' as const,
-            text: `Tool installation APPROVED but npm install failed: ${String(installErr)}`,
+            text: `Tool installation APPROVED but Smithery install failed: ${String(installErr)}`,
           }],
         };
       }
@@ -194,9 +194,8 @@ export function createInstallTools(ctx: ToolContext) {
         try {
           const result = await q.setMcpServers({
             [package_name]: {
-              type: 'stdio',
-              command: 'npx',
-              args: [package_name],
+              type: 'url',
+              url: `https://server.smithery.ai/${package_name}`,
             },
           });
           hotReloadMsg = `\nHot-reloaded: added ${result.added?.length ?? 0} server(s).`;
