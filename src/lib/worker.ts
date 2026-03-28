@@ -280,6 +280,18 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
     eventBus.emit('agent:completed', { taskId, runId, agentId, costUsd: result.totalCostUsd });
 
     runLog.info({ runId, taskId, costUsd: result.totalCostUsd }, 'Run completed');
+
+    // Emit AGENT_SWITCH_END if this run was by a non-executor agent (review handoff)
+    const executorAgentId = task.executorAgentId as string | null;
+    if (executorAgentId && agentId !== executorAgentId) {
+      insertActivityLog({
+        taskId,
+        agentId,
+        actionType: 'AGENT_SWITCH_END',
+        description: `Returned from ${agentId}`,
+        metadata: { fromAgent: agentId, toAgent: executorAgentId },
+      });
+    }
   } catch (err) {
     runLog.error({ err, runId, taskId }, 'Run execution failed');
 
@@ -289,6 +301,19 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       SET status = 'failed', failedAt = datetime('now'), failureReason = ?
       WHERE id = ?
     `).run(err instanceof Error ? err.message : 'unknown_error', runId);
+
+    // Emit AGENT_SWITCH_END on failure too, so bounded region closes
+    const failedEmployee = sqlite.prepare('SELECT agentId FROM employees WHERE id = ?').get(employeeId) as { agentId: string } | undefined;
+    const failedTask = sqlite.prepare('SELECT executorAgentId FROM tasks WHERE id = ?').get(taskId) as { executorAgentId: string | null } | undefined;
+    if (failedEmployee && failedTask?.executorAgentId && failedEmployee.agentId !== failedTask.executorAgentId) {
+      insertActivityLog({
+        taskId,
+        agentId: failedEmployee.agentId,
+        actionType: 'AGENT_SWITCH_END',
+        description: `Returned from ${failedEmployee.agentId} (failed)`,
+        metadata: { fromAgent: failedEmployee.agentId, toAgent: failedTask.executorAgentId },
+      });
+    }
 
     // Check for budget exceeded -- transition to input-required instead of failed (INT-02, D-07)
     const errMsg = err instanceof Error ? err.message : '';
