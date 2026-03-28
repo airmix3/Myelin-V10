@@ -98,7 +98,8 @@ echo ""
 # ── 4. Initialize database ──────────────────────────
 
 echo "Initializing database..."
-npx prisma migrate deploy 2>/dev/null || npx prisma migrate dev --name init
+npx prisma generate
+npx prisma migrate deploy
 info "Database initialized"
 
 echo ""
