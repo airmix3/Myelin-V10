@@ -4,12 +4,38 @@ A TypeScript/Next.js operating system for running a one-person company with auto
 
 This is not a chatbot. It is a functioning company with hierarchy, budgets, skills, deliverables, task state machines, and accountability. Every task flows through planning, approval, execution, supervisor review, and delivery.
 
+## Requirements
+
+### Required
+
+| Dependency | Version | Purpose |
+|-----------|---------|---------|
+| Node.js | 20+ | Runtime |
+| pnpm | 10+ | Package manager |
+| Claude Code | latest | Agent SDK runtime (`@anthropic-ai/claude-agent-sdk` spawns Claude Code subprocesses) |
+
+Claude Code must be installed and accessible. Set `CLAUDE_CODE_PATH` in `.env` to the binary path, or ensure `claude` is on your `PATH`.
+
+### LLM Provider (one required)
+
+| Provider | Env vars needed |
+|----------|----------------|
+| Anthropic API | `ANTHROPIC_API_KEY` |
+| AWS Bedrock | `CLAUDE_CODE_USE_BEDROCK=1`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, `AWS_REGION` |
+| Claude OAuth | Log in via `claude` CLI -- no env vars needed |
+
+### Optional
+
+| Service | Env vars | Purpose |
+|---------|----------|---------|
+| Langfuse | `LANGFUSE_PUBLIC_KEY`, `LANGFUSE_SECRET_KEY`, `LANGFUSE_BASE_URL` | Agent observability -- traces, cost tracking, prompt analytics. Free tier at cloud.langfuse.com. Disabled if keys not set. |
+| Composio | `COMPOSIO_API_KEY` | Tool gallery search (third-party MCP tool discovery). Disabled if key not set. |
+
 ## Platform
 
-- **Runtime:** Node.js 20+ (persistent, self-hosted -- not serverless)
 - **OS:** Linux, macOS, WSL2
-- **LLM:** Claude via Anthropic API or AWS Bedrock
-- **Database:** SQLite (local file, no external services)
+- **Runtime:** Persistent self-hosted Node.js (not serverless, not edge)
+- **Database:** SQLite (local file, zero external services)
 
 ## Stack
 
@@ -23,44 +49,32 @@ This is not a chatbot. It is a functioning company with hierarchy, budgets, skil
 | Styling | Custom CSS variables (no frameworks) |
 | Package Manager | pnpm |
 
-## Installation
+## Setup
+
+Run the setup script from the repo root:
 
 ```bash
-git clone <repo-url> myelin-v10
-cd myelin-v10
+./setup.sh
+```
+
+This will check prerequisites, install dependencies, configure `.env`, initialize the database, and create runtime directories.
+
+### Manual setup
+
+If you prefer to set up manually:
+
+```bash
+# 1. Install dependencies
 pnpm install
-```
 
-### Configure environment
+# 2. Create .env from template
+cp .env.example .env
+# Edit .env with your API keys
 
-Copy `.env.example` to `.env` (or create `.env`) and set your LLM provider:
-
-```bash
-# Option A: Anthropic API directly
-ANTHROPIC_API_KEY=sk-ant-...
-
-# Option B: AWS Bedrock
-CLAUDE_CODE_USE_BEDROCK=1
-AWS_ACCESS_KEY_ID=...
-AWS_SECRET_ACCESS_KEY=...
-AWS_REGION=us-east-1
-```
-
-Set the path to the Claude Code binary (required by the Agent SDK):
-
-```bash
-CLAUDE_CODE_PATH=/path/to/claude
-```
-
-### Initialize database
-
-```bash
+# 3. Initialize database
 npx prisma migrate deploy
-```
 
-### Run
-
-```bash
+# 4. Start
 pnpm dev
 ```
 
