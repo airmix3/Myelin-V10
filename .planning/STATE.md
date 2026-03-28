@@ -3,8 +3,8 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260328-1qu
-last_updated: "2026-03-27T22:22:21.392Z"
+stopped_at: Completed quick/260328-9r1
+last_updated: "2026-03-28T04:06:56.470Z"
 last_activity: 2026-03-28
 progress:
   total_phases: 6
@@ -118,6 +118,7 @@ Recent decisions affecting current work:
 - [Phase 06]: CLAUDE.md is minimal pointer with MCP tool list; plan content in separate PLAN.md
 - [Phase 06]: Filesystem boundary check runs before MCP role-based checks in canUseTool pipeline
 - [Phase 06]: Bash tool scans for absolute paths via regex rather than blocking all bash commands (per D-08)
+- [Phase quick-260328-9r1]: skills.sh integrated via CLI (npx skills search) with execSync and 10s timeout
 
 ### Pending Todos
 
@@ -143,10 +144,11 @@ None yet.
 | 260328-1iv | Give planning agents full tool access by removing tools:[] restriction | 2026-03-28 | 72073cf | [260328-1iv-give-planning-agents-full-tool-access-re](./quick/260328-1iv-give-planning-agents-full-tool-access-re/) |
 | 260328-1qu | Fix skills and MCP tools not browsable in gallery during planning | 2026-03-28 | 73f739e | [260328-1qu-fix-skills-and-mcp-tools-not-browsable-d](./quick/260328-1qu-fix-skills-and-mcp-tools-not-browsable-d/) |
 | 260328-9l3 | Fix 200s agent timeout - remove hardcoded CLAUDE_CODE_USE_BEDROCK=1 (user has OAuth) | 2026-03-28 | pending | [260328-9l3-fix-slow-agent-invocations-remove-hard](./quick/260328-9l3-fix-slow-agent-invocations-remove-hard/) |
+| 260328-9r1 | Enable all gallery sources by default, replace ClawHub with skills.sh, show summaries | 2026-03-28 | 6884968 | [260328-9r1-enable-all-gallery-sources-by-default-re](./quick/260328-9r1-enable-all-gallery-sources-by-default-re/) |
 
 ## Session Continuity
 
-Last session: 2026-03-27T22:22:21.390Z
-Stopped at: Completed quick/260328-1qu
+Last session: 2026-03-28T04:06:55.557Z
+Stopped at: Completed quick/260328-9r1
 Last activity: 2026-03-28
 Resume file: None
