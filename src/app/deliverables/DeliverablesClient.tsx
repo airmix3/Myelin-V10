@@ -33,6 +33,7 @@ function statusBadgeClass(status: string): string {
     case 'in-progress': return 'badge-pending';
     case 'completed': return 'badge-done';
     case 'reviewed': return 'badge-active';
+    case 'failed': return 'badge-fail';
     default: return 'badge-pending';
   }
 }
