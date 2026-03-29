@@ -75,6 +75,16 @@ export function createDeliverableTools(ctx: ToolContext) {
 
       writeFileSync(ctx.manifestPath, JSON.stringify(manifest, null, 2), 'utf-8');
 
+      // Update deliverable DB record with latest primaryFile
+      try {
+        await prisma.deliverable.updateMany({
+          where: { taskId: ctx.taskId },
+          data: { primaryFile: manifest.primaryFile },
+        });
+      } catch {
+        // Non-fatal — manifest is the source of truth, DB is for display
+      }
+
       // Index to FTS5 via documents table
       await prisma.document.create({
         data: {
