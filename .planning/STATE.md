@@ -3,9 +3,9 @@ gsd_state_version: 1.0
 milestone: v1.0
 milestone_name: milestone
 status: Milestone complete
-stopped_at: Completed quick/260329-0g7
-last_updated: "2026-03-28T21:25:26.461Z"
-last_activity: "2026-03-29 - Completed quick task 260329-0ea: Copy myelin-v3 neural brain canvas animation to dashboard hero"
+stopped_at: Completed quick/260329-hkk
+last_updated: "2026-03-29T09:45:31.583Z"
+last_activity: "2026-03-29 - Completed quick task 260329-fy1: Fix follow-up conversation thread continuity"
 progress:
   total_phases: 6
   completed_phases: 5
@@ -137,6 +137,7 @@ Recent decisions affecting current work:
 - [Phase quick-260328-x40]: Escalation pipeline follows hire.ts pattern: MCP tool creates record + transitions to input-required, CEO respond/resolve re-queues agent run with session resume
 - [Phase quick-260329-0ea]: V3 canvas animation ported: setTimeout firing chain replaces frame-count, single gradient glow replaces 3-layer system, stat colors use v3 palette (accent/green/blue/amber)
 - [Phase quick-260329-0g7]: Product identity renamed from Myelin to Cortex; company references preserved; DB filename myelin.db kept unchanged
+- [Phase quick-260329-hkk]: Card click opens detail overlay instead of toggling selection; select/deselect in overlay for info-first UX
 
 ### Pending Todos
 
@@ -201,7 +202,7 @@ None yet.
 
 ## Session Continuity
 
-Last session: 2026-03-29T08:28:51.440Z
-Stopped at: Completed quick/260329-fy1
+Last session: 2026-03-29T09:45:30.622Z
+Stopped at: Completed quick/260329-hkk
 Last activity: 2026-03-29 - Completed quick task 260329-fy1: Fix follow-up conversation thread continuity
 Resume file: None
