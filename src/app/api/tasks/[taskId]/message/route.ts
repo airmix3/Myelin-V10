@@ -91,6 +91,10 @@ export async function POST(
     ].filter(Boolean).join('\n\n');
   }
 
+  // Resume existing planning session if available (keeps same conversation thread)
+  const taskMetadata = task.metadata ? JSON.parse(task.metadata as string) : {};
+  const planningSessionId = taskMetadata.planningSessionId as string | undefined;
+
   let result;
   try {
     result = await orchestrator.invoke({
@@ -103,10 +107,20 @@ export async function POST(
       manifestPath: tmpManifestPath,
       outputFormat: AGENT_TURN_SCHEMA,
       maxBudgetUsd: 2,
+      sessionId: planningSessionId,
     });
   } catch (err) {
     const msg = err instanceof Error ? err.message : String(err);
     return NextResponse.json({ error: `Agent invocation failed: ${msg}` }, { status: 500 });
+  }
+
+  // Store sessionId for conversation continuity on next planning turn
+  if (result.sessionId) {
+    const updatedMeta = { ...taskMetadata, planningSessionId: result.sessionId };
+    await prisma.task.update({
+      where: { id: params.taskId },
+      data: { metadata: JSON.stringify(updatedMeta) },
+    });
   }
 
   // Prefer structured_output; fall back to parsing result.result as JSON

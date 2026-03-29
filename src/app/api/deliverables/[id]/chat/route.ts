@@ -60,10 +60,10 @@ export async function POST(
       return NextResponse.json({ error: `Agent ${task.currentActorId} not found` }, { status: 404 });
     }
 
-    // Get workspace paths from latest task_run
+    // Get workspace paths and sessionId from latest task_run for conversation continuity
     const latestRun = sqlite.prepare(
-      'SELECT workspaceCwd FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1'
-    ).get(task.id) as { workspaceCwd: string | null } | undefined;
+      'SELECT workspaceCwd, sessionId FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1'
+    ).get(task.id) as { workspaceCwd: string | null; sessionId: string | null } | undefined;
 
     // Build context-rich prompt for follow-up chat
     const chatHistory = task.chatFilePath && existsSync(task.chatFilePath)
@@ -93,7 +93,15 @@ export async function POST(
       deskDir,
       delivDir: deliverable.workspacePath ? `${deliverable.workspacePath}/../deliverables` : '',
       manifestPath: deliverable.manifestPath ?? '',
+      sessionId: latestRun?.sessionId ?? undefined,
     });
+
+    // Store sessionId on latest task_run for conversation continuity
+    if (result.sessionId) {
+      sqlite.prepare(
+        'UPDATE task_runs SET sessionId = ? WHERE id = (SELECT id FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1)'
+      ).run(result.sessionId, task.id);
+    }
 
     // Append agent response to JSONL
     const agentEntry = {
