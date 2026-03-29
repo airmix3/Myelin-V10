@@ -6,7 +6,6 @@ import WorkspaceChatPanel from '@/components/WorkspaceChatPanel';
 import MetadataBar from '@/components/MetadataBar';
 import DeliverablePanel from '@/components/DeliverablePanel';
 import AgentLogPanel from '@/components/AgentLogPanel';
-import BuildLogPanel from '@/components/BuildLogPanel';
 import FilesPanel from '@/components/FilesPanel';
 
 interface WorkspaceClientProps {
@@ -17,7 +16,7 @@ interface WorkspaceClientProps {
   hireRequests: Array<Record<string, unknown>>;
 }
 
-type TabId = 'deliverable' | 'agent-log' | 'build-log' | 'files';
+type TabId = 'deliverable' | 'agent-log' | 'files';
 
 interface AgentLogEntry {
   id: string;
@@ -27,20 +26,6 @@ interface AgentLogEntry {
   description: string | null;
   metadata: string | null;
   createdAt: string;
-}
-
-interface BuildLogEntry {
-  type: string;
-  agentId?: string;
-  content?: unknown;
-  message?: string;
-  timestamp?: string;
-  attempt?: number;
-  retry_delay_ms?: number;
-  tool_name?: string;
-  elapsed_time_seconds?: number;
-  summary?: string;
-  tool_use_id?: string;
 }
 
 function isUsefulActivityEntry(entry: Pick<AgentLogEntry, 'actionType' | 'description'>): boolean {
@@ -57,18 +42,13 @@ export default function WorkspaceClient({
   hireRequests: initialHireRequests,
 }: WorkspaceClientProps) {
   const taskId = task.id as string;
-  const taskState = task.state as string;
-  const taskMetadata = task.metadata ? JSON.parse(task.metadata as string) : {};
 
-  // Default tab: Build Log when working, Deliverable when completed with primaryFile
+  // Default tab: Deliverable when primaryFile exists, otherwise Agent Log
   const defaultTab: TabId =
-    taskState === 'completed' && deliverable.primaryFile ? 'deliverable' : 'build-log';
+    deliverable.primaryFile ? 'deliverable' : 'agent-log';
 
   const [activeTab, setActiveTab] = useState<TabId>(defaultTab);
   const [activityLogEntries, setActivityLogEntries] = useState<AgentLogEntry[]>(activityLog as unknown as AgentLogEntry[]);
-  const [buildLogEntries, setBuildLogEntries] = useState<BuildLogEntry[]>([]);
-  const [currentTaskState, setCurrentTaskState] = useState(taskState);
-  const [currentTaskMetadata, setCurrentTaskMetadata] = useState<Record<string, unknown>>(taskMetadata);
   const [transitionCounter, setTransitionCounter] = useState(0);
   const [fileRefreshCounter, setFileRefreshCounter] = useState(0);
   const [fileCount, setFileCount] = useState(0);
@@ -98,17 +78,12 @@ export default function WorkspaceClient({
 
     'task:buildlog': useCallback((data: Record<string, unknown>) => {
       if (data.taskId !== taskId) return;
-      setBuildLogEntries(prev => [...prev, data as unknown as BuildLogEntry]);
       // Files may have been created - bump refresh counter
       setFileRefreshCounter(prev => prev + 1);
     }, [taskId]),
 
     'task:transition': useCallback((data: Record<string, unknown>) => {
       if (data.taskId !== taskId) return;
-      setCurrentTaskState(data.to as string);
-      if (data.metadata) {
-        setCurrentTaskMetadata(data.metadata as Record<string, unknown>);
-      }
       setTransitionCounter(prev => prev + 1);
     }, [taskId]),
 
@@ -148,7 +123,6 @@ export default function WorkspaceClient({
   const tabs: Array<{ id: TabId; label: string }> = [
     { id: 'deliverable', label: 'Deliverable' },
     { id: 'agent-log', label: 'Agent Log' },
-    { id: 'build-log', label: 'Build Log' },
     { id: 'files', label: `Files (${fileCount})` },
   ];
 
@@ -209,17 +183,6 @@ export default function WorkspaceClient({
               metadata: string | null;
               createdAt: string;
             }>} />
-          )}
-
-          {activeTab === 'build-log' && (
-            <BuildLogPanel
-              entries={buildLogEntries}
-              taskId={taskId}
-              taskState={currentTaskState}
-              taskMetadata={currentTaskMetadata}
-              hireRequests={currentHireRequests}
-              onApprovalAction={handleApprovalAction}
-            />
           )}
 
           {activeTab === 'files' && (
