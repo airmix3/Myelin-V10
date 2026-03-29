@@ -35,6 +35,12 @@ export async function POST(
     });
   }
 
+  // If task was completed, transition to working so it shows as active in org graph during follow-up
+  const wasCompleted = task.state === 'completed';
+  if (wasCompleted) {
+    await prisma.task.update({ where: { id: params.taskId }, data: { state: 'working' } });
+  }
+
   // Append CEO message to JSONL
   const chatPath = task.chatFilePath
     || join(DATA_DIR, 'departments', task.department, 'planning-desk', 'chat', `${params.taskId}.jsonl`);
@@ -142,8 +148,13 @@ export async function POST(
     });
   }
 
+  // Restore completed state after follow-up (task stays completed, not re-opened for planning)
+  if (wasCompleted) {
+    await prisma.task.update({ where: { id: params.taskId }, data: { state: 'completed' } });
+  }
+
   return NextResponse.json({
-    state: task.state,
+    state: wasCompleted ? 'completed' : task.state,
     agent_id: agentId,
     turn: {
       turn_type: turn.turn_type,

@@ -44,10 +44,19 @@ export async function POST(
     appendFileSync(task.chatFilePath, JSON.stringify(chatEntry) + '\n', 'utf-8');
   }
 
+  // If task was completed, transition to working so it shows as active in org graph
+  const wasCompleted = task.state === 'completed';
+  if (wasCompleted) {
+    await prisma.task.update({ where: { id: task.id }, data: { state: 'working' } });
+  }
+
   // Route message to currentActorId via orchestrator (free-form, no outputFormat)
   try {
     const agent = orchestrator.getAgent(task.currentActorId);
     if (!agent) {
+      if (wasCompleted) {
+        await prisma.task.update({ where: { id: task.id }, data: { state: 'completed' } });
+      }
       return NextResponse.json({ error: `Agent ${task.currentActorId} not found` }, { status: 404 });
     }
 
@@ -97,8 +106,17 @@ export async function POST(
       appendFileSync(task.chatFilePath, JSON.stringify(agentEntry) + '\n', 'utf-8');
     }
 
+    // Restore completed state after follow-up
+    if (wasCompleted) {
+      await prisma.task.update({ where: { id: task.id }, data: { state: 'completed' } });
+    }
+
     return NextResponse.json({ success: true, response: agentEntry });
   } catch (err) {
+    // Restore completed state even on error
+    if (wasCompleted) {
+      await prisma.task.update({ where: { id: task.id }, data: { state: 'completed' } }).catch(() => {});
+    }
     log.error({ err, deliverableId, taskId: task.id }, 'Chat invocation failed');
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }
