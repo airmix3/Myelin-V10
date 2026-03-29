@@ -197,10 +197,11 @@ None yet.
 | 260329-0r9 | Make dept heads approve all skills by default - permissive approval policy | 2026-03-28 | d90d30e | [260329-0r9-make-dept-heads-approve-all-skills-by-de](./quick/260329-0r9-make-dept-heads-approve-all-skills-by-de/) |
 | 260329-fse | Fix escalation response delivery - agent receives CEO response on resume, stays blocked when re-escalating | 2026-03-29 | 22e0c6d | [260329-fse-fix-escalation-response-delivery-agent-m](./quick/260329-fse-fix-escalation-response-delivery-agent-m/) |
 | 260329-ftr | Show completed tasks with follow-up activity as active in org graph | 2026-03-29 | f22138c | [260329-ftr-show-completed-tasks-with-follow-up-acti](./quick/260329-ftr-show-completed-tasks-with-follow-up-acti/) |
+| 260329-fy1 | Fix follow-up on completed tasks to reuse same conversation thread | 2026-03-29 | b576387 | [260329-fy1-fix-follow-up-on-completed-tasks-to-reus](./quick/260329-fy1-fix-follow-up-on-completed-tasks-to-reus/) |
 
 ## Session Continuity
 
-Last session: 2026-03-29T08:22:05.185Z
-Stopped at: Completed quick/260329-ftr
-Last activity: 2026-03-29 - Completed quick task 260329-ftr: Show completed tasks as active during follow-up
+Last session: 2026-03-29T08:28:51.440Z
+Stopped at: Completed quick/260329-fy1
+Last activity: 2026-03-29 - Completed quick task 260329-fy1: Fix follow-up conversation thread continuity
 Resume file: None
