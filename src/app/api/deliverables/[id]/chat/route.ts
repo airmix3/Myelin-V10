@@ -48,6 +48,8 @@ export async function POST(
   const wasCompleted = task.state === 'completed';
   if (wasCompleted) {
     await prisma.task.update({ where: { id: task.id }, data: { state: 'working' } });
+    // Also reopen the deliverable so it shows as in-progress in the deliverables tab
+    await prisma.deliverable.update({ where: { id: deliverableId }, data: { status: 'in-progress' } });
   }
 
   // Route message to currentActorId via orchestrator (free-form, no outputFormat)
