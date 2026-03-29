@@ -199,10 +199,11 @@ None yet.
 | 260329-fse | Fix escalation response delivery - agent receives CEO response on resume, stays blocked when re-escalating | 2026-03-29 | 22e0c6d | [260329-fse-fix-escalation-response-delivery-agent-m](./quick/260329-fse-fix-escalation-response-delivery-agent-m/) |
 | 260329-ftr | Show completed tasks with follow-up activity as active in org graph | 2026-03-29 | f22138c | [260329-ftr-show-completed-tasks-with-follow-up-acti](./quick/260329-ftr-show-completed-tasks-with-follow-up-acti/) |
 | 260329-fy1 | Fix follow-up on completed tasks to reuse same conversation thread | 2026-03-29 | b576387 | [260329-fy1-fix-follow-up-on-completed-tasks-to-reus](./quick/260329-fy1-fix-follow-up-on-completed-tasks-to-reus/) |
+| 260329-hkk | Add tool/skill detail overlay on gallery click and green selection indicator | 2026-03-29 | 8db8270 | [260329-hkk-add-tool-skill-detail-overlay-on-gallery](./quick/260329-hkk-add-tool-skill-detail-overlay-on-gallery/) |
 
 ## Session Continuity
 
 Last session: 2026-03-29T09:45:30.622Z
 Stopped at: Completed quick/260329-hkk
-Last activity: 2026-03-29 - Completed quick task 260329-fy1: Fix follow-up conversation thread continuity
+Last activity: 2026-03-29 - Completed quick task 260329-hkk: Add tool/skill detail overlay on gallery click and green selection indicator
 Resume file: None
