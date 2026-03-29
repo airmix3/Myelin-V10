@@ -196,10 +196,11 @@ None yet.
 | 260329-0ma | Audit and fix Myelin-to-Cortex rename inconsistencies | 2026-03-29 | a16a27e | [260329-0ma-audit-and-fix-myelin-to-cortex-rename-in](./quick/260329-0ma-audit-and-fix-myelin-to-cortex-rename-in/) |
 | 260329-0r9 | Make dept heads approve all skills by default - permissive approval policy | 2026-03-28 | d90d30e | [260329-0r9-make-dept-heads-approve-all-skills-by-de](./quick/260329-0r9-make-dept-heads-approve-all-skills-by-de/) |
 | 260329-fse | Fix escalation response delivery - agent receives CEO response on resume, stays blocked when re-escalating | 2026-03-29 | 22e0c6d | [260329-fse-fix-escalation-response-delivery-agent-m](./quick/260329-fse-fix-escalation-response-delivery-agent-m/) |
+| 260329-ftr | Show completed tasks with follow-up activity as active in org graph | 2026-03-29 | f22138c | [260329-ftr-show-completed-tasks-with-follow-up-acti](./quick/260329-ftr-show-completed-tasks-with-follow-up-acti/) |
 
 ## Session Continuity
 
 Last session: 2026-03-29T08:22:05.185Z
-Stopped at: Completed quick/260329-fse
-Last activity: 2026-03-29 - Completed quick task 260329-fse: Fix escalation response delivery
+Stopped at: Completed quick/260329-ftr
+Last activity: 2026-03-29 - Completed quick task 260329-ftr: Show completed tasks as active during follow-up
 Resume file: None
