@@ -270,12 +270,40 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       manifestPath = path.join(delivDir, 'deliverable_manifest.json');
     }
 
-    // Build the prompt from task description + plan
-    const prompt = [
-      task.title as string,
-      task.description ? `\n\n${task.description}` : '',
-      task.planMarkdown ? `\n\n## Approved Plan\n\n${task.planMarkdown}` : '',
-    ].join('');
+    // Build the prompt -- check if this is a resume after escalation response
+    const taskMetadata = task.metadata ? JSON.parse(task.metadata as string) : {};
+    let prompt: string;
+
+    if (run.sessionId && taskMetadata.escalationResolved) {
+      // Resuming after CEO responded to escalation -- inject the response as continuation prompt
+      const escalationResponse = taskMetadata.escalationResponse ?? '';
+      const escalationResolution = taskMetadata.escalationResolution ?? 'answered';
+      prompt = [
+        `## CEO Response to Your Escalation`,
+        ``,
+        `**Resolution:** ${escalationResolution}`,
+        `**Response:** ${escalationResponse}`,
+        ``,
+        `The CEO has responded to your escalation. Continue with your task using this information.`,
+        `If you still cannot proceed, escalate again with a specific explanation of what's still missing.`,
+      ].join('\n');
+
+      // Clear escalation metadata so subsequent resumes don't replay it
+      const cleanedMetadata = { ...taskMetadata };
+      delete cleanedMetadata.escalationResolved;
+      delete cleanedMetadata.escalationResponse;
+      delete cleanedMetadata.escalationResolution;
+      delete cleanedMetadata.escalationId;
+      sqlite.prepare('UPDATE tasks SET metadata = ? WHERE id = ?')
+        .run(JSON.stringify(cleanedMetadata), taskId);
+    } else {
+      // Normal first run or non-escalation resume
+      prompt = [
+        task.title as string,
+        task.description ? `\n\n${task.description}` : '',
+        task.planMarkdown ? `\n\n## Approved Plan\n\n${task.planMarkdown}` : '',
+      ].join('');
+    }
 
     // Transition task to working if it's in submitted state
     // Skip if task is already in a terminal state (e.g., extraction run on completed task -- Pitfall 2)
@@ -321,26 +349,35 @@ async function executeRun(run: Record<string, unknown>): Promise<void> {
       WHERE id = ?
     `).run(runId);
 
-    // Update deliverable status + primaryFile from manifest when run completes
-    try {
-      const manifestJson = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf-8')) : null;
-      const primaryFile = manifestJson?.primaryFile ?? null;
-      sqlite.prepare(`
-        UPDATE deliverables SET status = 'completed', primaryFile = COALESCE(?, primaryFile), updatedAt = datetime('now')
-        WHERE taskId = ? AND status = 'in-progress'
-      `).run(primaryFile, taskId);
-    } catch {
-      sqlite.prepare(`
-        UPDATE deliverables SET status = 'completed', updatedAt = datetime('now')
-        WHERE taskId = ? AND status = 'in-progress'
-      `).run(taskId);
+    // Check if agent re-escalated during this run (task moved to input-required)
+    const postRunTask = sqlite.prepare('SELECT state FROM tasks WHERE id = ?').get(taskId) as { state: string } | undefined;
+    if (postRunTask?.state === 'input-required') {
+      // Agent called escalate_to_ceo again -- task stays in input-required, don't complete
+      runLog.info({ runId, taskId }, 'Agent re-escalated during run, task remains input-required');
+      eventBus.emit('agent:escalated', { taskId, runId, agentId, costUsd: result.totalCostUsd });
+    } else {
+      // Normal completion path
+      // Update deliverable status + primaryFile from manifest when run completes
+      try {
+        const manifestJson = existsSync(manifestPath) ? JSON.parse(readFileSync(manifestPath, 'utf-8')) : null;
+        const primaryFile = manifestJson?.primaryFile ?? null;
+        sqlite.prepare(`
+          UPDATE deliverables SET status = 'completed', primaryFile = COALESCE(?, primaryFile), updatedAt = datetime('now')
+          WHERE taskId = ? AND status = 'in-progress'
+        `).run(primaryFile, taskId);
+      } catch {
+        sqlite.prepare(`
+          UPDATE deliverables SET status = 'completed', updatedAt = datetime('now')
+          WHERE taskId = ? AND status = 'in-progress'
+        `).run(taskId);
+      }
+
+      // Transition parent task to completed
+      transitionTask(taskId, 'working', 'completed');
+
+      // Emit completion event
+      eventBus.emit('agent:completed', { taskId, runId, agentId, costUsd: result.totalCostUsd });
     }
-
-    // Transition parent task to completed
-    transitionTask(taskId, 'working', 'completed');
-
-    // Emit completion event
-    eventBus.emit('agent:completed', { taskId, runId, agentId, costUsd: result.totalCostUsd });
 
     runLog.info({ runId, taskId, costUsd: result.totalCostUsd }, 'Run completed');
 
