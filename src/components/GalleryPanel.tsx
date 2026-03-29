@@ -120,6 +120,19 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
     onSelectionChange(selectedTools, selectedSkills, next);
   }
 
+  const [detailItem, setDetailItem] = useState<GalleryItem | null>(null);
+
+  // Escape key handler for overlay
+  useEffect(() => {
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') setDetailItem(null);
+    }
+    if (detailItem) {
+      document.addEventListener('keydown', handleKeyDown);
+      return () => document.removeEventListener('keydown', handleKeyDown);
+    }
+  }, [detailItem]);
+
   const isSelected = (itemId: string) =>
     activeTab === 'tools' ? selectedTools.includes(itemId) : selectedSkills.includes(itemId);
 
@@ -127,6 +140,27 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
     item.department && item.department !== department;
 
   const currentSources = activeTab === 'tools' ? TOOL_SOURCES : SKILL_SOURCES;
+
+  function getSourceUrl(item: GalleryItem): string {
+    if (item.url) return item.url;
+    if (item.source === 'smithery') {
+      const qualifiedName = item.id.replace('smithery-', '');
+      return `https://smithery.ai/servers/${qualifiedName}`;
+    }
+    if (item.source === 'skillssh') {
+      // id format: skillssh-owner/repo@skillName
+      const repoSkill = item.id.replace('skillssh-', '');
+      const repo = repoSkill.split('@')[0];
+      return `https://skills.sh/${repo}`;
+    }
+    return '#';
+  }
+
+  function getSourceLabel(item: GalleryItem): string {
+    if (item.source === 'smithery') return 'Smithery.ai';
+    if (item.source === 'skillssh') return 'Skills.sh';
+    return 'Company';
+  }
 
   // Suppress unused taskId warning — taskId is in props for future use (e.g., persisting selection)
   void taskId;
@@ -234,11 +268,10 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
             <div key={item.id}>
               <div
                 className={`gallery-card${isSelected(item.id) ? ' selected' : ''}${isOtherDept(item) ? ' other-dept' : ''}`}
-                onClick={() => toggleSelection(item)}
+                onClick={() => setDetailItem(item)}
                 style={{
                   padding: '12px',
                   background: 'var(--bg-secondary)',
-                  border: isSelected(item.id) ? '1px solid var(--accent-green)' : '1px solid var(--border)',
                   borderRadius: '6px',
                   cursor: 'pointer',
                   opacity: isOtherDept(item) ? 0.5 : 1,
@@ -306,6 +339,63 @@ export default function GalleryPanel({ taskId, department, onSelectionChange }: 
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Detail Overlay */}
+      {detailItem && (
+        <div className="gallery-overlay-backdrop" onClick={() => setDetailItem(null)}>
+          <div className="gallery-overlay" onClick={(e) => e.stopPropagation()}>
+            <div className="gallery-overlay-header">
+              <div>
+                <div style={{ fontSize: '16px', fontWeight: 700, color: 'var(--text)' }}>{detailItem.name}</div>
+                <span className="badge" style={{ fontSize: '10px', marginTop: '4px', display: 'inline-block' }}>{detailItem.source}</span>
+              </div>
+              <button className="gallery-overlay-close" onClick={() => setDetailItem(null)}>X</button>
+            </div>
+            <div className="gallery-overlay-meta">
+              <div className="gallery-overlay-field">
+                <div>Description</div>
+                <div>{detailItem.description}</div>
+              </div>
+              {detailItem.summary && (
+                <div className="gallery-overlay-field">
+                  <div>Summary</div>
+                  <div>{detailItem.summary}</div>
+                </div>
+              )}
+              {detailItem.stars != null && detailItem.stars > 0 && (
+                <div className="gallery-overlay-field">
+                  <div>{detailItem.source === 'skillssh' ? 'Installs' : 'Stars'}</div>
+                  <div>{detailItem.stars.toLocaleString()}</div>
+                </div>
+              )}
+              {detailItem.department && (
+                <div className="gallery-overlay-field">
+                  <div>Department</div>
+                  <div>{detailItem.department}</div>
+                </div>
+              )}
+              <div className="gallery-overlay-field">
+                <div>Source</div>
+                <a className="gallery-overlay-link" href={getSourceUrl(detailItem)} target="_blank" rel="noopener noreferrer">
+                  View on {getSourceLabel(detailItem)}
+                </a>
+              </div>
+            </div>
+            <button
+              onClick={() => { toggleSelection(detailItem); setDetailItem(null); }}
+              style={{
+                marginTop: '20px', width: '100%', padding: '10px',
+                background: isSelected(detailItem.id) ? 'transparent' : 'var(--green)',
+                color: isSelected(detailItem.id) ? 'var(--text-dim)' : 'var(--bg)',
+                border: isSelected(detailItem.id) ? '1px solid var(--border)' : 'none',
+                borderRadius: '6px', cursor: 'pointer', fontSize: '13px', fontWeight: 600,
+              }}
+            >
+              {isSelected(detailItem.id) ? 'Deselect' : 'Select for Task'}
+            </button>
+          </div>
         </div>
       )}
     </div>
