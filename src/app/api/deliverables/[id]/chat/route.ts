@@ -114,17 +114,8 @@ export async function POST(
       appendFileSync(task.chatFilePath, JSON.stringify(agentEntry) + '\n', 'utf-8');
     }
 
-    // Restore completed state after follow-up
-    if (wasCompleted) {
-      await prisma.task.update({ where: { id: task.id }, data: { state: 'completed' } });
-    }
-
     return NextResponse.json({ success: true, response: agentEntry });
   } catch (err) {
-    // Restore completed state even on error
-    if (wasCompleted) {
-      await prisma.task.update({ where: { id: task.id }, data: { state: 'completed' } }).catch(() => {});
-    }
     log.error({ err, deliverableId, taskId: task.id }, 'Chat invocation failed');
     return NextResponse.json({ error: 'Failed to send message' }, { status: 500 });
   }

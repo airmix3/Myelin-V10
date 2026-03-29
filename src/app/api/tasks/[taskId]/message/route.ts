@@ -162,13 +162,8 @@ export async function POST(
     });
   }
 
-  // Restore completed state after follow-up (task stays completed, not re-opened for planning)
-  if (wasCompleted) {
-    await prisma.task.update({ where: { id: params.taskId }, data: { state: 'completed' } });
-  }
-
   return NextResponse.json({
-    state: wasCompleted ? 'completed' : task.state,
+    state: wasCompleted ? 'working' : task.state,
     agent_id: agentId,
     turn: {
       turn_type: turn.turn_type,
