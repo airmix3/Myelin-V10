@@ -234,7 +234,6 @@ You have MCP tools available during planning. USE THEM to research and inform yo
 
 ### Organization
 - \`get_dept_status\` — Check active tasks and employee counts across departments
-- \`read_inbox\` — Check your notification inbox
 
 ### Other (available but typically used during execution)
 - \`promote_to_deliverable\` — Move files to deliverables (execution phase)
@@ -312,7 +311,6 @@ You have MCP tools available during planning. USE THEM to research and inform yo
 
 ### Organization
 - \`get_dept_status\` — Check active tasks and employee counts across departments
-- \`read_inbox\` — Check your notification inbox
 
 ### Other (available but typically used during execution)
 - \`promote_to_deliverable\` — Move files to deliverables (execution phase)
