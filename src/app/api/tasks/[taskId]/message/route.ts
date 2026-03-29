@@ -63,6 +63,10 @@ export async function POST(
   const tmpManifestPath = join(tmpDelivDir, 'manifest.json');
   writeFileSync(tmpManifestPath, '{}', 'utf-8');
 
+  // Parse task metadata for session continuity
+  const taskMetadata = task.metadata ? JSON.parse(task.metadata as string) : {};
+  const planningSessionId = taskMetadata.planningSessionId as string | undefined;
+
   // Build context-rich prompt for planning turns
   // Include task title + description + chat history so the agent knows what it's planning
   let agentPrompt = message;
@@ -73,8 +77,14 @@ export async function POST(
       `\n## CEO's message\n${message}`,
       `\n## Instructions\nYou are in PLANNING MODE. Do NOT execute the task. Produce a plan the CEO can review and approve. Respond with turn_type "plan_ready" and the full plan in plan_markdown once you have enough information.`,
     ].join('\n');
+  } else if (planningSessionId) {
+    // Resuming existing session — agent already has full context, just send the new message
+    agentPrompt = [
+      `## CEO Message\n${message}`,
+      `\nThis is a continuation of our planning conversation. The CEO's message above is the current request — treat it as ground truth. Continue planning accordingly.`,
+    ].join('\n');
   } else {
-    // Follow-up turn: include chat history + re-state planning instructions
+    // No session to resume — include minimal context for a fresh follow-up
     const chatHistory = existsSync(chatPath)
       ? readFileSync(chatPath, 'utf-8').trim().split('\n').filter(Boolean).slice(-10).map(l => {
           try {
@@ -90,10 +100,6 @@ export async function POST(
       `\n## Instructions\nYou are in PLANNING MODE. Continue the planning conversation. Respond with turn_type "question" to ask another clarifying question, or "plan_ready" with a full plan_markdown if you have enough information to proceed.`,
     ].filter(Boolean).join('\n\n');
   }
-
-  // Resume existing planning session if available (keeps same conversation thread)
-  const taskMetadata = task.metadata ? JSON.parse(task.metadata as string) : {};
-  const planningSessionId = taskMetadata.planningSessionId as string | undefined;
 
   let result;
   try {

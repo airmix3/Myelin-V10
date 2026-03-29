@@ -67,24 +67,35 @@ export async function POST(
       'SELECT workspaceCwd, sessionId FROM task_runs WHERE taskId = ? ORDER BY createdAt DESC LIMIT 1'
     ).get(task.id) as { workspaceCwd: string | null; sessionId: string | null } | undefined;
 
-    // Build context-rich prompt for follow-up chat
-    const chatHistory = task.chatFilePath && existsSync(task.chatFilePath)
-      ? readFileSync(task.chatFilePath, 'utf-8').trim().split('\n').filter(Boolean).slice(-20).map(l => {
-          try {
-            const e = JSON.parse(l) as { role: string; content?: string; planMarkdown?: string; turnType?: string };
-            if (e.planMarkdown) return `${e.role === 'user' ? 'CEO' : 'Agent'}: [plan attached]`;
-            return `${e.role === 'user' ? 'CEO' : 'Agent'}: ${(e.content || '').substring(0, 500)}`;
-          } catch { return ''; }
-        }).filter(Boolean).join('\n')
-      : '';
+    // Build follow-up prompt — slim when resuming existing session
+    let enrichedPrompt: string;
 
-    const enrichedPrompt = [
-      `## Task Context\n**Title:** ${task.title}\n**Description:** ${task.description || task.title}`,
-      task.planMarkdown ? `## Approved Plan\n${task.planMarkdown.substring(0, 2000)}` : '',
-      chatHistory ? `## Conversation History\n${chatHistory}` : '',
-      `## CEO's Latest Message\n${message}`,
-      `\n## Instructions\nYou are in FOLLOW-UP MODE. The task has been planned and executed. The CEO is asking a follow-up question about the deliverable or requesting changes. Answer based on the task context, plan, and conversation history above. Be specific and actionable.`,
-    ].filter(Boolean).join('\n\n');
+    if (latestRun?.sessionId) {
+      // Resuming existing session — agent already has full context from planning + execution
+      enrichedPrompt = [
+        `## CEO Message\n${message}`,
+        `\nThis is a follow-up on the completed task "${task.title}". You have the full context from planning and execution in this conversation. The CEO's message above is the current request — treat it as ground truth. If you need to review what was done, read PLAN.md in your workspace. Be specific and actionable.`,
+      ].join('\n');
+    } else {
+      // No session to resume — include full context for fresh invocation
+      const chatHistory = task.chatFilePath && existsSync(task.chatFilePath)
+        ? readFileSync(task.chatFilePath, 'utf-8').trim().split('\n').filter(Boolean).slice(-20).map(l => {
+            try {
+              const e = JSON.parse(l) as { role: string; content?: string; planMarkdown?: string; turnType?: string };
+              if (e.planMarkdown) return `${e.role === 'user' ? 'CEO' : 'Agent'}: [plan attached]`;
+              return `${e.role === 'user' ? 'CEO' : 'Agent'}: ${(e.content || '').substring(0, 500)}`;
+            } catch { return ''; }
+          }).filter(Boolean).join('\n')
+        : '';
+
+      enrichedPrompt = [
+        `## Task Context\n**Title:** ${task.title}\n**Description:** ${task.description || task.title}`,
+        task.planMarkdown ? `## Approved Plan\n${task.planMarkdown.substring(0, 2000)}` : '',
+        chatHistory ? `## Conversation History\n${chatHistory}` : '',
+        `## CEO's Latest Message\n${message}`,
+        `\n## Instructions\nYou are in FOLLOW-UP MODE. The task has been planned and executed. The CEO is asking a follow-up question about the deliverable or requesting changes. Answer based on the task context, plan, and conversation history above. Be specific and actionable.`,
+      ].filter(Boolean).join('\n\n');
+    }
 
     const deskDir = latestRun?.workspaceCwd ?? '';
     const result = await orchestrator.invoke({
