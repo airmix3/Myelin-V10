@@ -116,13 +116,13 @@ Requirements for initial release. Each maps to roadmap phases.
 
 ### Assets Management System
 
-- [ ] **ASSET-01**: Prisma schema with Asset model (id, title, description, category, maturity, stewardId, returnFactors JSON, annotations JSON, healthStatus, directoryPath, timestamps), AssetEvent model (timestamped events per asset), AssetLocation model (multi-location with canonical marker), AssetDependency model (self-referential dependency graph)
-- [ ] **ASSET-02**: Deliverable model extended with nullable `assetId` column for tracking which deliverables have been promoted to assets
-- [ ] **ASSET-03**: FTS5 virtual table `assets_fts` with porter tokenizer indexing title, description, category columns; sync triggers on INSERT/UPDATE/DELETE; `searchAssets()` function for BM25-ranked search
-- [ ] **ASSET-04**: FTS5 init called in `instrumentation.ts` on server boot alongside existing `initFTS5()`
-- [ ] **ASSET-05**: Asset CRUD API: `GET/POST /api/assets`, `GET/PATCH/DELETE /api/assets/[assetId]`, sub-resource routes for events, annotations, locations, dependencies
-- [ ] **ASSET-06**: Dependency graph API uses recursive CTE (`WITH RECURSIVE ripple`) to calculate ripple effect count when an asset changes
-- [ ] **ASSET-07**: "Assets" sidebar nav item positioned between Deliverables and Org Context
+- [x] **ASSET-01**: Prisma schema with Asset model (id, title, description, category, maturity, stewardId, returnFactors JSON, annotations JSON, healthStatus, directoryPath, timestamps), AssetEvent model (timestamped events per asset), AssetLocation model (multi-location with canonical marker), AssetDependency model (self-referential dependency graph)
+- [x] **ASSET-02**: Deliverable model extended with nullable `assetId` column for tracking which deliverables have been promoted to assets
+- [x] **ASSET-03**: FTS5 virtual table `assets_fts` with porter tokenizer indexing title, description, category columns; sync triggers on INSERT/UPDATE/DELETE; `searchAssets()` function for BM25-ranked search
+- [x] **ASSET-04**: FTS5 init called in `instrumentation.ts` on server boot alongside existing `initFTS5()`
+- [x] **ASSET-05**: Asset CRUD API: `GET/POST /api/assets`, `GET/PATCH/DELETE /api/assets/[assetId]`, sub-resource routes for events, annotations, locations, dependencies
+- [x] **ASSET-06**: Dependency graph API uses recursive CTE (`WITH RECURSIVE ripple`) to calculate ripple effect count when an asset changes
+- [x] **ASSET-07**: "Assets" sidebar nav item positioned between Deliverables and Org Context
 - [ ] **ASSET-08**: Four asset MCP tools registered in MCP server: `suggest_asset_promotion` (all agents), `update_asset_health` (dept heads + Tamir), `add_asset_event` (dept heads + Tamir), `link_asset_dependency` (dept heads + Tamir)
 - [ ] **ASSET-09**: Asset tool access control: `update_asset_health`, `add_asset_event`, `link_asset_dependency` in DEPT_HEAD_ONLY; `suggest_asset_promotion` in TEMP_ALLOWED
 - [ ] **ASSET-10**: SimCity-inspired interactive Canvas city map as primary `/assets` page view; full Canvas 2D rendering following NeuralHero.tsx pattern (useRef, requestAnimationFrame, ResizeObserver)
@@ -259,13 +259,13 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SANDBOX-03 | Phase 6 | Complete |
 | SANDBOX-04 | Phase 6 | Complete |
 | SANDBOX-05 | Phase 6 | Complete |
-| ASSET-01 | Phase 7 | Pending |
-| ASSET-02 | Phase 7 | Pending |
-| ASSET-03 | Phase 7 | Pending |
-| ASSET-04 | Phase 7 | Pending |
-| ASSET-05 | Phase 7 | Pending |
-| ASSET-06 | Phase 7 | Pending |
-| ASSET-07 | Phase 7 | Pending |
+| ASSET-01 | Phase 7 | Complete |
+| ASSET-02 | Phase 7 | Complete |
+| ASSET-03 | Phase 7 | Complete |
+| ASSET-04 | Phase 7 | Complete |
+| ASSET-05 | Phase 7 | Complete |
+| ASSET-06 | Phase 7 | Complete |
+| ASSET-07 | Phase 7 | Complete |
 | ASSET-08 | Phase 7 | Pending |
 | ASSET-09 | Phase 7 | Pending |
 | ASSET-10 | Phase 7 | Pending |

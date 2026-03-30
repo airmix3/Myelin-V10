@@ -163,7 +163,7 @@ Plans:
 **UI hint**: yes
 
 Plans:
-- [ ] 07-01-PLAN.md — Prisma schema + migration + FTS5 + asset API routes + sidebar nav
+- [x] 07-01-PLAN.md — Prisma schema + migration + FTS5 + asset API routes + sidebar nav
 - [ ] 07-02-PLAN.md — Asset MCP tools (suggest_promotion, update_health, add_event, link_dependency) + access control
 - [ ] 07-03-PLAN.md — Canvas city visualization engine (buildings, districts, pan/zoom, effects, hit-test)
 - [ ] 07-04-PLAN.md — Asset detail panel + toolbar + evolution timeline + create asset modal
