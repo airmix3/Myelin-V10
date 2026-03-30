@@ -14,6 +14,15 @@ interface AssetEvent {
   createdAt: string;
 }
 
+interface LinkedTask {
+  id: string;
+  title: string;
+  state: string;
+  department: string;
+  executorAgentId: string | null;
+  createdAt: string;
+}
+
 interface AssetDetail {
   id: string;
   title: string;
@@ -31,6 +40,7 @@ interface AssetDetail {
   locations: { id: string; type: string; value: string; label: string | null; isCanonical: boolean }[];
   dependsOn: { id: string; targetId: string; targetTitle: string; label: string | null }[];
   dependedBy: { id: string; sourceId: string; sourceTitle: string; label: string | null }[];
+  linkedTasks: LinkedTask[];
   rippleCount: number;
 }
 
@@ -49,6 +59,8 @@ interface StewardLogEntry {
 }
 
 /* ── Constants ── */
+
+const MATURITY_LEVELS = ['nascent', 'developing', 'established', 'foundational', 'legacy', 'heritage'] as const;
 
 const EVENT_TYPE_COLORS: Record<string, string> = {
   creation: '#00d68f',
@@ -80,6 +92,15 @@ const AGENT_LABELS: Record<string, string> = {
   tamir: 'Tamir',
 };
 
+const TASK_STATE_COLORS: Record<string, string> = {
+  submitted: '#6496ff',
+  working: '#ffb347',
+  'input-required': '#a855f6',
+  completed: '#00d68f',
+  failed: 'var(--red)',
+  canceled: 'var(--text-dim)',
+};
+
 /* ── Component ── */
 
 export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: AssetDetailPanelProps) {
@@ -89,6 +110,9 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
   const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'steward'; text: string }>>([]);
   const [chatLoading, setChatLoading] = useState(false);
   const [stewardLog, setStewardLog] = useState<StewardLogEntry[]>([]);
+  const [maturityOpen, setMaturityOpen] = useState(false);
+  const [annotationText, setAnnotationText] = useState('');
+  const [submittingAnnotation, setSubmittingAnnotation] = useState(false);
   const chatContainerRef = useRef<HTMLDivElement>(null);
   const logIdRef = useRef(0);
 
@@ -134,11 +158,45 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
     const timestamp = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit' });
     setStewardLog(prev => {
       const next = [...prev, { id, badge, badgeClass, text, timestamp }];
-      return next.slice(-3); // Keep last 3
+      return next.slice(-3);
     });
   };
 
-  /* ── Chat handler ── */
+  /* ── Handlers ── */
+
+  const handleMaturityChange = async (level: string) => {
+    if (!confirm(`Change maturity to ${level}?`)) return;
+    try {
+      const res = await fetch(`/api/assets/${assetId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ maturity: level }),
+      });
+      if (res.ok) {
+        setMaturityOpen(false);
+        await fetchAsset();
+        onAssetUpdated();
+      }
+    } catch { /* silently fail */ }
+  };
+
+  const handleAddAnnotation = async () => {
+    if (!annotationText.trim()) return;
+    setSubmittingAnnotation(true);
+    try {
+      const res = await fetch(`/api/assets/${assetId}/annotations`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ text: annotationText.trim() }),
+      });
+      if (res.ok) {
+        setAnnotationText('');
+        await fetchAsset();
+        onAssetUpdated();
+      }
+    } catch { /* silently fail */ }
+    finally { setSubmittingAnnotation(false); }
+  };
 
   const handleChat = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -148,10 +206,8 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
     setChatMessages(prev => [...prev, { role: 'user', text: msg }]);
     setChatLoading(true);
 
-    // Steward activity log — show steps as they happen
     addLogEntry('SESSION', 'log-type-session', `Invoking ${stewardLabel} for asset context...`);
 
-    // Simulate progressive activity with slight delays
     const toolTimeout = setTimeout(() => {
       addLogEntry('TOOL', 'log-type-tool', 'Reading asset health, events, and dependencies...');
     }, 800);
@@ -170,11 +226,9 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
       clearTimeout(toolTimeout);
       clearTimeout(thinkTimeout);
 
-      // Final log entry — success
       addLogEntry('DONE', 'log-type-success', 'Assessment complete');
       setChatMessages(prev => [...prev, { role: 'steward', text: data.response || 'No response' }]);
 
-      // Refresh asset in case steward modified it
       await fetchAsset();
       onAssetUpdated();
     } catch {
@@ -192,15 +246,13 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
     position: 'fixed',
     right: 0,
     top: 0,
-    width: 360,
+    width: 380,
     height: '100vh',
     background: 'var(--bg-2)',
     borderLeft: '1px solid var(--border)',
     zIndex: 100,
     overflowY: 'auto',
     padding: 16,
-    display: 'flex',
-    flexDirection: 'column',
     animation: 'slideInRight 0.2s ease-out',
   };
 
@@ -236,7 +288,7 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
     marginTop: 20,
   };
 
-  /* ── Shimmer loading ── */
+  /* ── Loading / Error ── */
 
   if (loading) {
     return (
@@ -254,7 +306,7 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
         </div>
         <style>{`
           @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-          @keyframes slideInRight { from { transform: translateX(360px); } to { transform: translateX(0); } }
+          @keyframes slideInRight { from { transform: translateX(380px); } to { transform: translateX(0); } }
         `}</style>
       </div>
     );
@@ -278,15 +330,15 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
   const recentEvents = [...asset.events]
     .sort((a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime())
     .slice(0, 5);
+  const annotations: { text: string; createdAt: string }[] = asset.annotations ? JSON.parse(asset.annotations) : [];
 
   return (
     <div style={panelStyle}>
       <style>{`
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
-        @keyframes slideInRight { from { transform: translateX(360px); } to { transform: translateX(0); } }
+        @keyframes slideInRight { from { transform: translateX(380px); } to { transform: translateX(0); } }
       `}</style>
 
-      {/* Close button */}
       <button style={closeButtonStyle} onClick={onClose}>X</button>
 
       {/* ── Header ── */}
@@ -310,6 +362,39 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
         <span style={badgeStyle(healthInfo.color)}>{asset.healthStatus}</span>
         <span style={{ fontSize: 13, color: 'var(--text-dim)' }}>{healthInfo.text(asset)}</span>
       </div>
+
+      {/* ── Lifecycle (Maturity Change) ── */}
+      <div style={sectionTitleStyle}>Lifecycle</div>
+      <button
+        onClick={() => setMaturityOpen(!maturityOpen)}
+        style={{
+          padding: '6px 12px', fontSize: 13, fontFamily: 'var(--font)',
+          background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4,
+          color: 'var(--text)', cursor: 'pointer', width: '100%', textAlign: 'left',
+        }}
+      >
+        {asset.maturity} {maturityOpen ? '▴' : '▾'}
+      </button>
+      {maturityOpen && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 2, marginTop: 4, padding: 4, background: 'var(--bg)', borderRadius: 4, border: '1px solid var(--border)' }}>
+          {MATURITY_LEVELS.map((level) => (
+            <button
+              key={level}
+              onClick={() => handleMaturityChange(level)}
+              disabled={level === asset.maturity}
+              style={{
+                padding: '4px 8px', fontSize: 13, fontFamily: 'var(--font)',
+                background: level === asset.maturity ? 'var(--border)' : 'transparent',
+                border: 'none', borderRadius: 4,
+                color: level === asset.maturity ? 'var(--text-dim)' : 'var(--text)',
+                cursor: level === asset.maturity ? 'default' : 'pointer', textAlign: 'left',
+              }}
+            >
+              {level}
+            </button>
+          ))}
+        </div>
+      )}
 
       {/* ── Trend ── */}
       <div style={sectionTitleStyle}>Trend</div>
@@ -339,74 +424,139 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
         </div>
       )}
 
-      {/* ── Steward Chat ── */}
-      <div style={{ ...sectionTitleStyle, marginTop: 24 }}>Chat</div>
-      <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
-
-        {/* Steward Activity Log — 3 colorful entries */}
-        {stewardLog.length > 0 && (
-          <div style={{ marginBottom: 10 }}>
-            {stewardLog.map((entry) => (
-              <div key={entry.id} className="log-entry" style={{ marginBottom: 4 }}>
-                <div className="log-entry-header" style={{ padding: '5px 10px', cursor: 'default' }}>
-                  <span className={`badge ${entry.badgeClass}`}>{entry.badge}</span>
-                  <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.text}</span>
-                  <span style={{ color: 'var(--text-dim)', fontSize: 10, flexShrink: 0 }}>{entry.timestamp}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
-
-        {/* Chat messages */}
-        <div ref={chatContainerRef} style={{ flex: 1, overflowY: 'auto', marginBottom: 8, minHeight: 60 }}>
-          {chatMessages.map((msg, i) => (
-            <div key={i} style={{ marginBottom: 10, fontSize: 13 }}>
-              <span style={{ fontWeight: 700, color: msg.role === 'user' ? 'var(--accent)' : 'var(--green)' }}>
-                {msg.role === 'user' ? 'You' : stewardLabel}:
-              </span>{' '}
-              <span style={{ color: 'var(--text)' }}>{msg.text}</span>
+      {/* ── Annotations ── */}
+      <div style={sectionTitleStyle}>Annotations</div>
+      {annotations.length > 0 && (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 8, marginBottom: 8 }}>
+          {annotations.map((ann, i) => (
+            <div key={i} style={{ fontSize: 13, padding: 8, background: 'var(--bg)', borderRadius: 4, border: '1px solid var(--border)' }}>
+              <p style={{ color: 'var(--text)', margin: 0 }}>{ann.text}</p>
+              <span style={{ fontSize: 11, color: 'var(--text-dim)' }}>
+                {new Date(ann.createdAt).toLocaleDateString()}
+              </span>
             </div>
           ))}
-          {chatLoading && chatMessages[chatMessages.length - 1]?.role === 'user' && (
-            <div style={{ fontSize: 13, color: 'var(--text-dim)', fontStyle: 'italic' }}>
-              {stewardLabel} is thinking...
-            </div>
-          )}
         </div>
+      )}
+      <div style={{ display: 'flex', gap: 8 }}>
+        <input
+          type="text"
+          value={annotationText}
+          onChange={(e) => setAnnotationText(e.target.value)}
+          placeholder="Add a note..."
+          onKeyDown={(e) => { if (e.key === 'Enter') handleAddAnnotation(); }}
+          style={{
+            flex: 1, padding: '6px 8px', fontSize: 13, fontFamily: 'var(--font)',
+            background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: 4,
+            color: 'var(--text)', outline: 'none',
+          }}
+        />
+        <button
+          onClick={handleAddAnnotation}
+          disabled={submittingAnnotation || !annotationText.trim()}
+          style={{
+            padding: '6px 12px', fontSize: 13, fontFamily: 'var(--font)',
+            background: 'var(--accent)', color: '#fff', border: 'none', borderRadius: 4,
+            cursor: submittingAnnotation || !annotationText.trim() ? 'not-allowed' : 'pointer',
+            opacity: submittingAnnotation || !annotationText.trim() ? 0.5 : 1,
+          }}
+        >
+          Add
+        </button>
+      </div>
 
-        {/* Chat input */}
-        <form onSubmit={handleChat} style={{ display: 'flex', gap: 8, flexShrink: 0 }}>
-          <input
-            type="text"
-            value={chatInput}
-            onChange={(e) => setChatInput(e.target.value)}
-            placeholder={asset?.stewardId ? `Ask ${stewardLabel}...` : 'No steward assigned'}
-            disabled={chatLoading || !asset?.stewardId}
-            style={{
-              flex: 1, background: 'var(--bg)', border: '1px solid var(--border)',
-              borderRadius: 4, padding: '6px 8px', color: 'var(--text)',
-              fontSize: 13, fontFamily: 'var(--font)', outline: 'none',
-            }}
-          />
-          <button
-            type="submit"
-            disabled={chatLoading || !chatInput.trim()}
-            style={{
-              background: 'var(--accent)', color: '#fff', border: 'none',
-              borderRadius: 4, padding: '6px 12px', fontSize: 13,
-              fontFamily: 'var(--font)',
-              cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
-              opacity: chatLoading || !chatInput.trim() ? 0.5 : 1,
-            }}
-          >
-            Send
-          </button>
-        </form>
-        {!asset?.stewardId && (
-          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>No steward assigned. Assign one to enable chat.</div>
+      {/* ── Linked Tasks ── */}
+      <div style={sectionTitleStyle}>Linked Tasks</div>
+      {(!asset.linkedTasks || asset.linkedTasks.length === 0) ? (
+        <p style={{ color: 'var(--text-dim)', fontSize: 13, fontStyle: 'italic' }}>No linked tasks</p>
+      ) : (
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+          {asset.linkedTasks.map((task) => (
+            <div key={task.id} style={{
+              display: 'flex', alignItems: 'center', gap: 8, fontSize: 13,
+              padding: '6px 8px', background: 'var(--bg)', borderRadius: 4,
+              border: '1px solid var(--border)',
+            }}>
+              <span style={{
+                width: 8, height: 8, borderRadius: '50%', flexShrink: 0,
+                background: TASK_STATE_COLORS[task.state] || 'var(--text-dim)',
+              }} />
+              <span style={{ color: 'var(--text)', flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {task.title}
+              </span>
+              <span style={badgeStyle(TASK_STATE_COLORS[task.state] || 'var(--bg-3)')}>
+                {task.state}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* ── Chat ── */}
+      <div style={{ ...sectionTitleStyle, marginTop: 24 }}>Chat</div>
+
+      {/* Steward Activity Log — 3 colorful entries */}
+      {stewardLog.length > 0 && (
+        <div style={{ marginBottom: 10 }}>
+          {stewardLog.map((entry) => (
+            <div key={entry.id} className="log-entry" style={{ marginBottom: 4 }}>
+              <div className="log-entry-header" style={{ padding: '5px 10px', cursor: 'default' }}>
+                <span className={`badge ${entry.badgeClass}`}>{entry.badge}</span>
+                <span style={{ flex: 1, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>{entry.text}</span>
+                <span style={{ color: 'var(--text-dim)', fontSize: 10, flexShrink: 0 }}>{entry.timestamp}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {/* Chat messages */}
+      <div ref={chatContainerRef} style={{ maxHeight: 200, overflowY: 'auto', marginBottom: 8 }}>
+        {chatMessages.map((msg, i) => (
+          <div key={i} style={{ marginBottom: 10, fontSize: 13 }}>
+            <span style={{ fontWeight: 700, color: msg.role === 'user' ? 'var(--accent)' : 'var(--green)' }}>
+              {msg.role === 'user' ? 'You' : stewardLabel}:
+            </span>{' '}
+            <span style={{ color: 'var(--text)' }}>{msg.text}</span>
+          </div>
+        ))}
+        {chatLoading && chatMessages[chatMessages.length - 1]?.role === 'user' && (
+          <div style={{ fontSize: 13, color: 'var(--text-dim)', fontStyle: 'italic' }}>
+            {stewardLabel} is thinking...
+          </div>
         )}
       </div>
+
+      {/* Chat input */}
+      <form onSubmit={handleChat} style={{ display: 'flex', gap: 8, paddingBottom: 16 }}>
+        <input
+          type="text"
+          value={chatInput}
+          onChange={(e) => setChatInput(e.target.value)}
+          placeholder={asset?.stewardId ? `Ask ${stewardLabel}...` : 'No steward assigned'}
+          disabled={chatLoading || !asset?.stewardId}
+          style={{
+            flex: 1, background: 'var(--bg)', border: '1px solid var(--border)',
+            borderRadius: 4, padding: '6px 8px', color: 'var(--text)',
+            fontSize: 13, fontFamily: 'var(--font)', outline: 'none',
+          }}
+        />
+        <button
+          type="submit"
+          disabled={chatLoading || !chatInput.trim()}
+          style={{
+            background: 'var(--accent)', color: '#fff', border: 'none',
+            borderRadius: 4, padding: '6px 12px', fontSize: 13, fontFamily: 'var(--font)',
+            cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
+            opacity: chatLoading || !chatInput.trim() ? 0.5 : 1,
+          }}
+        >
+          Send
+        </button>
+      </form>
+      {!asset?.stewardId && (
+        <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: -12, paddingBottom: 16 }}>No steward assigned. Assign one to enable chat.</div>
+      )}
     </div>
   );
 }

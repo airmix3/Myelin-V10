@@ -33,10 +33,26 @@ export async function GET(
     'SELECT ad.*, a.title as sourceTitle FROM asset_dependencies ad JOIN assets a ON a.id = ad.sourceId WHERE ad.targetId = ?'
   ).all(assetId);
 
+  // Get linked tasks (steward operations + any task referencing this asset in metadata)
+  const linkedTasks = sqlite.prepare(
+    `SELECT id, title, state, department, "executorAgentId", "createdAt"
+     FROM tasks
+     WHERE metadata LIKE ?
+     ORDER BY "createdAt" DESC
+     LIMIT 10`
+  ).all(`%${assetId}%`) as Array<{ id: string; title: string; state: string; department: string; executorAgentId: string | null; createdAt: string }>;
+
+  // Compute ripple count
+  const rippleRow = sqlite.prepare(
+    'SELECT COUNT(*) as cnt FROM asset_dependencies WHERE sourceId = ?'
+  ).get(assetId) as { cnt: number } | undefined;
+
   return NextResponse.json({
     ...asset,
     dependsOn,
     dependedBy,
+    linkedTasks,
+    rippleCount: rippleRow?.cnt ?? 0,
   });
 }
 
