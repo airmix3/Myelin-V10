@@ -125,10 +125,10 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ASSET-07**: "Assets" sidebar nav item positioned between Deliverables and Org Context
 - [x] **ASSET-08**: Four asset MCP tools registered in MCP server: `suggest_asset_promotion` (all agents), `update_asset_health` (dept heads + Tamir), `add_asset_event` (dept heads + Tamir), `link_asset_dependency` (dept heads + Tamir)
 - [x] **ASSET-09**: Asset tool access control: `update_asset_health`, `add_asset_event`, `link_asset_dependency` in DEPT_HEAD_ONLY; `suggest_asset_promotion` in TEMP_ALLOWED
-- [ ] **ASSET-10**: SimCity-inspired interactive Canvas city map as primary `/assets` page view; full Canvas 2D rendering following NeuralHero.tsx pattern (useRef, requestAnimationFrame, ResizeObserver)
-- [ ] **ASSET-11**: Asset buildings rendered with category-specific visual styles (code=circuit patterns, brand=curves, IP=shield, product=glass, knowledge=book stacks); building height scales with maturity (20px nascent to 72px heritage)
-- [ ] **ASSET-12**: Pan via mouse drag, zoom via mousewheel (0.5x-3x range), double-click to focus on building; viewport coordinate transforms (worldToScreen/screenToWorld)
-- [ ] **ASSET-13**: Return factor glow colors (revenue=gold/#ffb347, moat=blue/#6496ff, core_tech=green/#00d68f, brand_equity=purple/#a855f6); health degradation visuals (stale=desaturated, degraded=cracks, critical=red pulse)
+- [x] **ASSET-10**: SimCity-inspired interactive Canvas city map as primary `/assets` page view; full Canvas 2D rendering following NeuralHero.tsx pattern (useRef, requestAnimationFrame, ResizeObserver)
+- [x] **ASSET-11**: Asset buildings rendered with category-specific visual styles (code=circuit patterns, brand=curves, IP=shield, product=glass, knowledge=book stacks); building height scales with maturity (20px nascent to 72px heritage)
+- [x] **ASSET-12**: Pan via mouse drag, zoom via mousewheel (0.5x-3x range), double-click to focus on building; viewport coordinate transforms (worldToScreen/screenToWorld)
+- [x] **ASSET-13**: Return factor glow colors (revenue=gold/#ffb347, moat=blue/#6496ff, core_tech=green/#00d68f, brand_equity=purple/#a855f6); health degradation visuals (stale=desaturated, degraded=cracks, critical=red pulse)
 - [ ] **ASSET-14**: Asset detail panel (360px, slides in on click): Past/Present/Future tabs; Past shows event timeline, Present shows health/locations/return factors/annotations/dependencies, Future shows planned work placeholder
 - [ ] **ASSET-15**: CEO can add annotations via text input in detail panel Present tab; annotations stored as JSON array in Asset record
 - [ ] **ASSET-16**: CEO can change asset maturity level via dropdown in detail panel; maturity changes create `maturity_change` AssetEvent
@@ -268,10 +268,10 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-07 | Phase 7 | Complete |
 | ASSET-08 | Phase 7 | Complete |
 | ASSET-09 | Phase 7 | Complete |
-| ASSET-10 | Phase 7 | Pending |
-| ASSET-11 | Phase 7 | Pending |
-| ASSET-12 | Phase 7 | Pending |
-| ASSET-13 | Phase 7 | Pending |
+| ASSET-10 | Phase 7 | Complete |
+| ASSET-11 | Phase 7 | Complete |
+| ASSET-12 | Phase 7 | Complete |
+| ASSET-13 | Phase 7 | Complete |
 | ASSET-14 | Phase 7 | Pending |
 | ASSET-15 | Phase 7 | Pending |
 | ASSET-16 | Phase 7 | Pending |
