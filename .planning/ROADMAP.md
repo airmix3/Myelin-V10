@@ -18,6 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Deliverable Workspace + Integration** - Split-pane workspace, supervisor review, skill extraction, and acceptance scenarios
 - [ ] **Phase 5: Langfuse Integration** - Hierarchical trace visualization, cost analytics, observability status badge
 - [ ] **Phase 6: Sandboxing Agents** - Filesystem boundary enforcement, workspace isolation, settingSources cleanup
+- [ ] **Phase 7: Assets Management System** - Asset data model, SimCity city visualization, steward agent mode, promotion flow
 
 ## Phase Details
 
@@ -117,7 +118,7 @@ Plans:
 ## Progress
 
 **Execution Order:**
-Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
+Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 
 | Phase | Plans Complete | Status | Completed |
 |-------|----------------|--------|-----------|
@@ -127,6 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 | 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
 | 5. Langfuse Integration | 1/2 | In Progress|  |
 | 6. Sandboxing Agents | 0/2 | Not started | - |
+| 7. Assets Management System | 0/5 | Not started | - |
 
 ### Phase 6: Sandboxing Agents
 
@@ -144,3 +146,25 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6
 Plans:
 - [x] 06-01-PLAN.md — Filesystem boundary enforcement in canUseTool + settingSources isolation
 - [x] 06-02-PLAN.md — Workspace PLAN.md separation + CLAUDE.md restructure + planning desk CLAUDE.md
+
+### Phase 7: Assets Management System
+
+**Goal:** CEO can create, manage, and develop understanding of company assets through a SimCity-inspired city visualization with steward agent mode, multi-location tracking, dependency graphs, and deliverable-to-asset promotion flow
+**Requirements**: ASSET-01, ASSET-02, ASSET-03, ASSET-04, ASSET-05, ASSET-06, ASSET-07, ASSET-08, ASSET-09, ASSET-10, ASSET-11, ASSET-12, ASSET-13, ASSET-14, ASSET-15, ASSET-16, ASSET-17, ASSET-18, ASSET-19, ASSET-20, ASSET-21, ASSET-22, ASSET-23, ASSET-24, ASSET-25
+**Depends on:** Phase 6
+**Success Criteria** (what must be TRUE):
+  1. Asset data model exists with four Prisma models (Asset, AssetEvent, AssetLocation, AssetDependency) and FTS5 search index
+  2. /assets page renders interactive Canvas city map with category-specific building styles, pan/zoom, and return factor glow colors
+  3. Clicking a building opens detail panel with Past/Present/Future tabs showing event history, health, annotations, dependencies
+  4. CEO can create assets via form modal and promote deliverables to assets (both CEO-initiated and steward-recommended)
+  5. Steward agent mode invokes existing agents (CTO/CMO/COO) with asset-specific context; inline steward chat works in detail panel
+  6. Four asset MCP tools registered with proper role-based access control
+**Plans**: 5 plans
+**UI hint**: yes
+
+Plans:
+- [ ] 07-01-PLAN.md — Prisma schema + migration + FTS5 + asset API routes + sidebar nav
+- [ ] 07-02-PLAN.md — Asset MCP tools (suggest_promotion, update_health, add_event, link_dependency) + access control
+- [ ] 07-03-PLAN.md — Canvas city visualization engine (buildings, districts, pan/zoom, effects, hit-test)
+- [ ] 07-04-PLAN.md — Asset detail panel + toolbar + evolution timeline + create asset modal
+- [ ] 07-05-PLAN.md — Steward agent mode + promotion flow + deliverable page integration

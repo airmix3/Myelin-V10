@@ -114,6 +114,34 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **SANDBOX-04**: `createTaskWorkspace()` writes approved plan to separate `desk/PLAN.md` file; `desk/CLAUDE.md` is a minimal pointer with task context, MCP tool reference, workspace boundary reminder, and pointer to PLAN.md
 - [x] **SANDBOX-05**: Planning desks get their own `CLAUDE.md` with planning mode instructions; combined with `settingSources: []`, agent's entire instruction set comes from workspace CLAUDE.md only per D-07
 
+### Assets Management System
+
+- [ ] **ASSET-01**: Prisma schema with Asset model (id, title, description, category, maturity, stewardId, returnFactors JSON, annotations JSON, healthStatus, directoryPath, timestamps), AssetEvent model (timestamped events per asset), AssetLocation model (multi-location with canonical marker), AssetDependency model (self-referential dependency graph)
+- [ ] **ASSET-02**: Deliverable model extended with nullable `assetId` column for tracking which deliverables have been promoted to assets
+- [ ] **ASSET-03**: FTS5 virtual table `assets_fts` with porter tokenizer indexing title, description, category columns; sync triggers on INSERT/UPDATE/DELETE; `searchAssets()` function for BM25-ranked search
+- [ ] **ASSET-04**: FTS5 init called in `instrumentation.ts` on server boot alongside existing `initFTS5()`
+- [ ] **ASSET-05**: Asset CRUD API: `GET/POST /api/assets`, `GET/PATCH/DELETE /api/assets/[assetId]`, sub-resource routes for events, annotations, locations, dependencies
+- [ ] **ASSET-06**: Dependency graph API uses recursive CTE (`WITH RECURSIVE ripple`) to calculate ripple effect count when an asset changes
+- [ ] **ASSET-07**: "Assets" sidebar nav item positioned between Deliverables and Org Context
+- [ ] **ASSET-08**: Four asset MCP tools registered in MCP server: `suggest_asset_promotion` (all agents), `update_asset_health` (dept heads + Tamir), `add_asset_event` (dept heads + Tamir), `link_asset_dependency` (dept heads + Tamir)
+- [ ] **ASSET-09**: Asset tool access control: `update_asset_health`, `add_asset_event`, `link_asset_dependency` in DEPT_HEAD_ONLY; `suggest_asset_promotion` in TEMP_ALLOWED
+- [ ] **ASSET-10**: SimCity-inspired interactive Canvas city map as primary `/assets` page view; full Canvas 2D rendering following NeuralHero.tsx pattern (useRef, requestAnimationFrame, ResizeObserver)
+- [ ] **ASSET-11**: Asset buildings rendered with category-specific visual styles (code=circuit patterns, brand=curves, IP=shield, product=glass, knowledge=book stacks); building height scales with maturity (20px nascent to 72px heritage)
+- [ ] **ASSET-12**: Pan via mouse drag, zoom via mousewheel (0.5x-3x range), double-click to focus on building; viewport coordinate transforms (worldToScreen/screenToWorld)
+- [ ] **ASSET-13**: Return factor glow colors (revenue=gold/#ffb347, moat=blue/#6496ff, core_tech=green/#00d68f, brand_equity=purple/#a855f6); health degradation visuals (stale=desaturated, degraded=cracks, critical=red pulse)
+- [ ] **ASSET-14**: Asset detail panel (360px, slides in on click): Past/Present/Future tabs; Past shows event timeline, Present shows health/locations/return factors/annotations/dependencies, Future shows planned work placeholder
+- [ ] **ASSET-15**: CEO can add annotations via text input in detail panel Present tab; annotations stored as JSON array in Asset record
+- [ ] **ASSET-16**: CEO can change asset maturity level via dropdown in detail panel; maturity changes create `maturity_change` AssetEvent
+- [ ] **ASSET-17**: Floating toolbar with "Create Asset" button, zoom in/out/reset controls (with aria-labels), and category filter toggles
+- [ ] **ASSET-18**: Create Asset modal form: name, description, category, steward (CTO/CMO/COO), initial maturity, return factors (1-4 checkboxes), optional primary location; creates asset directory at `data/assets/{assetId}/`
+- [ ] **ASSET-19**: Steward agent mode: `invokeSteward()` wraps existing `invokeAgent()` with steward-specific system prompt and asset workspace at `data/assets/{assetId}/steward-desk/`; creates task with `metadata: { stewardOperation: true }` for UI filtering
+- [ ] **ASSET-20**: Steward chat API at `POST /api/assets/[assetId]/chat`: validates message, looks up assigned steward, invokes steward agent, returns response
+- [ ] **ASSET-21**: Inline steward chat in asset detail panel: message history display, input field, loading state, disabled when no steward assigned
+- [ ] **ASSET-22**: Deliverable-to-asset promotion API at `POST /api/deliverables/[id]/promote`: copies files from deliverable workspace to `data/assets/{assetId}/`, creates Asset record + events, supports both new asset creation and absorbing into existing asset (per D-05)
+- [ ] **ASSET-23**: Steward promotion recommendation banner on deliverable page: shows when task metadata contains `promotionRecommendation` (set by `suggest_asset_promotion` MCP tool); "Accept Promotion" / "Dismiss Recommendation" buttons
+- [ ] **ASSET-24**: CEO-initiated promotion modal on deliverable page: steward dropdown, intent textarea, category select, option to add to existing asset; "Confirm Promotion" CTA
+- [ ] **ASSET-25**: Evolution timeline (80px bottom bar): horizontal chronological milestones with colored event type markers; shows selected asset events or recent all-asset activity when nothing selected
+
 ## v2 Requirements
 
 Deferred to next milestone.
@@ -231,12 +259,37 @@ Which phases cover which requirements. Updated during roadmap creation.
 | SANDBOX-03 | Phase 6 | Complete |
 | SANDBOX-04 | Phase 6 | Complete |
 | SANDBOX-05 | Phase 6 | Complete |
+| ASSET-01 | Phase 7 | Pending |
+| ASSET-02 | Phase 7 | Pending |
+| ASSET-03 | Phase 7 | Pending |
+| ASSET-04 | Phase 7 | Pending |
+| ASSET-05 | Phase 7 | Pending |
+| ASSET-06 | Phase 7 | Pending |
+| ASSET-07 | Phase 7 | Pending |
+| ASSET-08 | Phase 7 | Pending |
+| ASSET-09 | Phase 7 | Pending |
+| ASSET-10 | Phase 7 | Pending |
+| ASSET-11 | Phase 7 | Pending |
+| ASSET-12 | Phase 7 | Pending |
+| ASSET-13 | Phase 7 | Pending |
+| ASSET-14 | Phase 7 | Pending |
+| ASSET-15 | Phase 7 | Pending |
+| ASSET-16 | Phase 7 | Pending |
+| ASSET-17 | Phase 7 | Pending |
+| ASSET-18 | Phase 7 | Pending |
+| ASSET-19 | Phase 7 | Pending |
+| ASSET-20 | Phase 7 | Pending |
+| ASSET-21 | Phase 7 | Pending |
+| ASSET-22 | Phase 7 | Pending |
+| ASSET-23 | Phase 7 | Pending |
+| ASSET-24 | Phase 7 | Pending |
+| ASSET-25 | Phase 7 | Pending |
 
 **Coverage:**
-- v1 requirements: 77 total
-- Mapped to phases: 77
+- v1 requirements: 102 total
+- Mapped to phases: 102
 - Unmapped: 0
 
 ---
 *Requirements defined: 2026-03-25*
-*Last updated: 2026-03-27 after Phase 6 planning*
+*Last updated: 2026-03-30 after Phase 7 planning*
