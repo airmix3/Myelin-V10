@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useEffect, useCallback } from 'react';
+import { useRef, useEffect, useCallback, forwardRef, useImperativeHandle } from 'react';
 import {
   DEFAULT_VIEWPORT,
   worldToScreen,
@@ -42,6 +42,12 @@ interface AssetCityCanvasProps {
   onAssetSelect: (id: string | null) => void;
 }
 
+export interface CanvasControls {
+  zoomIn: () => void;
+  zoomOut: () => void;
+  zoomReset: () => void;
+}
+
 function parseReturnFactors(raw: string | null): string[] {
   if (!raw) return [];
   try {
@@ -58,11 +64,11 @@ function getReturnFactorColors(factors: string[]): string[] {
     .filter((c): c is string => !!c);
 }
 
-export default function AssetCityCanvas({
+const AssetCityCanvas = forwardRef<CanvasControls, AssetCityCanvasProps>(function AssetCityCanvas({
   assets,
   selectedAssetId,
   onAssetSelect,
-}: AssetCityCanvasProps) {
+}, ref) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const vpRef = useRef<Viewport>({ ...DEFAULT_VIEWPORT });
   const assetsRef = useRef<AssetRenderData[]>([]);
@@ -78,6 +84,22 @@ export default function AssetCityCanvas({
 
   // Smooth pan target for double-click
   const panTargetRef = useRef<{ x: number; y: number; scale: number } | null>(null);
+
+  // Expose zoom controls to parent via ref
+  useImperativeHandle(ref, () => ({
+    zoomIn: () => {
+      vpRef.current = { ...vpRef.current, scale: Math.min(3.0, vpRef.current.scale * 1.2) };
+      dirtyRef.current = true;
+    },
+    zoomOut: () => {
+      vpRef.current = { ...vpRef.current, scale: Math.max(0.5, vpRef.current.scale * 0.8) };
+      dirtyRef.current = true;
+    },
+    zoomReset: () => {
+      vpRef.current = { ...DEFAULT_VIEWPORT };
+      dirtyRef.current = true;
+    },
+  }));
 
   // Data preparation: convert assets to render data
   useEffect(() => {
@@ -402,4 +424,6 @@ export default function AssetCityCanvas({
       onDoubleClick={handleDoubleClick}
     />
   );
-}
+});
+
+export default AssetCityCanvas;
