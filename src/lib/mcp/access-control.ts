@@ -21,6 +21,9 @@ const DEPT_HEAD_ONLY = [
   'mcp__cortex__request_changes',
   'mcp__cortex__hire_employee',
   'mcp__cortex__file_to_vault',
+  'mcp__cortex__update_asset_health',
+  'mcp__cortex__add_asset_event',
+  'mcp__cortex__link_asset_dependency',
 ];
 
 // Temp employee whitelist — only these tools are allowed for temps
@@ -34,6 +37,7 @@ const TEMP_ALLOWED = [
   'mcp__cortex__submit_for_review',
   'mcp__cortex__install_tool',
   'mcp__cortex__install_skill',
+  'mcp__cortex__suggest_asset_promotion',
 ];
 
 // Built-in Claude Code tools that access the filesystem

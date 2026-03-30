@@ -15,6 +15,7 @@ import { createInboxTools } from './tools/inbox';
 import { createHireTools } from './tools/hire';
 import { createInstallTools } from './tools/install';
 import { createEscalateTools } from './tools/escalate';
+import { createAssetTools } from './tools/asset';
 
 export function buildCortexMcpServer(ctx: ToolContext) {
   const memoryTools = createMemoryTools(ctx);
@@ -27,6 +28,7 @@ export function buildCortexMcpServer(ctx: ToolContext) {
   const hireTools = createHireTools(ctx);
   const installTools = createInstallTools(ctx);
   const escalateTools = createEscalateTools(ctx);
+  const assetTools = createAssetTools(ctx);
 
   return createSdkMcpServer({
     name: 'cortex',
@@ -41,6 +43,7 @@ export function buildCortexMcpServer(ctx: ToolContext) {
       ...hireTools,
       ...installTools,
       ...escalateTools,
+      ...assetTools,
     ],
   });
 }
