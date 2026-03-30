@@ -43,7 +43,6 @@ Declared values (must be multiples of 4):
 
 Exceptions:
 - Canvas hit target for asset buildings: 44px minimum touch/click target for interactive elements
-- Evolution timeline item spacing: 120px horizontal between milestone markers
 - Detail panel width: 360px fixed (consistent with existing overlay patterns)
 
 ---
@@ -53,9 +52,11 @@ Exceptions:
 | Role | Size | Weight | Line Height |
 |------|------|--------|-------------|
 | Body | 13px | 400 (regular) | 1.5 |
-| Label | 11px | 600 (semibold) | 1.4 |
+| Label | 11px | 700 (bold) | 1.4 |
 | Heading | 16px | 700 (bold) | 1.2 |
 | Display | 20px | 700 (bold) | 1.2 |
+
+**Weight rationale:** Two weights only -- 400 (regular) for body text and 700 (bold) for labels, headings, and display text. Labels remain visually subordinate to headings due to smaller size (11px vs 16px/20px) despite sharing the same weight.
 
 **Source:** Existing `cortex.css` -- body is 13px/1.5, h1 is 16px/bold. Display size (20px) added for asset name in detail panel and city district labels.
 
@@ -68,7 +69,7 @@ Exceptions:
 | Dominant (60%) | `#1a1a2e` (`var(--bg)`) | Canvas background, page background |
 | Secondary (30%) | `#16213e` (`var(--bg-2)`) | Detail panel background, evolution timeline bar, sidebar |
 | Accent (10%) | `#e94560` (`var(--accent)`) | Primary CTA buttons, selected asset highlight ring, active nav state |
-| Destructive | `#e94560` (`var(--red)`) | Remove asset confirmation, dependency break warnings |
+| Destructive | `#ff3b5c` (`var(--red)`) | Remove asset confirmation, dependency break warnings |
 
 ### Return Factor Glow Colors (per D-26, D-27)
 
@@ -113,6 +114,7 @@ Add to `cortex.css`:
 --asset-brand:   #a855f6;
 --asset-revenue: var(--amber);
 --asset-tech:    var(--green);
+--red:           #ff3b5c;
 
 /* Asset detail panel */
 --panel-width: 360px;
@@ -129,12 +131,20 @@ Add to `cortex.css`:
 | Zone | Position | Content |
 |------|----------|---------|
 | City Canvas | Full page area | Canvas-rendered interactive city map (pannable, zoomable) |
-| Toolbar | Top-right, floating | "Create Asset" button, zoom controls, filter toggles by category |
+| Toolbar | Top-right, floating | "Create Asset" button, zoom controls (with aria-label tooltips), filter toggles by category |
 | Detail Panel | Right side, 360px, slides in on asset click | Past/Present/Future tabs, steward info, health, linked tasks, inline chat |
 | Evolution Timeline | Bottom, full width, 80px tall | Horizontal timeline with milestone markers; shows selected asset history or recent all-asset activity |
 | District Labels | Overlaid on canvas | Category district names rendered on canvas (not DOM) |
 
 **Canvas Pattern:** Follow `NeuralHero.tsx` architecture -- `useRef<HTMLCanvasElement>`, `requestAnimationFrame` loop, resize observer. Full custom Canvas2D drawing for buildings, districts, particles, and glow effects.
+
+### Zoom Control Accessibility
+
+| Control | aria-label | Tooltip text |
+|---------|-----------|-------------|
+| Zoom in button | "Zoom in" | "Zoom in" |
+| Zoom out button | "Zoom out" | "Zoom out" |
+| Reset zoom button | "Reset zoom to default" | "Reset zoom" |
 
 ### Asset Detail Panel (per D-21, D-22)
 
@@ -166,7 +176,7 @@ Rendered as a modal overlay on the city canvas.
 
 | Element | Position | Content |
 |---------|----------|---------|
-| Promotion Banner | Top of deliverable page, below metadata bar | "Steward recommends promoting to asset: {asset name}" with Accept / Dismiss buttons |
+| Promotion Banner | Top of deliverable page, below metadata bar | "Steward recommends promoting to asset: {asset name}" with "Accept Promotion" / "Dismiss Recommendation" buttons |
 | Promote Button | Action bar | "Promote to Asset" opens modal with steward dropdown + intent textarea |
 
 ---
@@ -238,13 +248,13 @@ Rendered as a modal overlay on the city canvas.
 | Error state (load failure) | "Could not load assets. Check that the server is running and refresh the page." |
 | Error state (create failure) | "Failed to create asset. Please try again." |
 | Promotion banner | "{Steward name} recommends promoting this deliverable to a company asset" |
-| Promotion banner accept | "Accept" |
-| Promotion banner dismiss | "Dismiss" |
+| Promotion banner accept | "Accept Promotion" |
+| Promotion banner dismiss | "Dismiss Recommendation" |
 | Promote button | "Promote to Asset" |
 | Promote modal heading | "Promote Deliverable to Asset" |
 | Promote modal intent label | "How do you see this asset? (optional)" |
 | Promote modal intent placeholder | "Describe your vision for this asset..." |
-| Promote modal CTA | "Promote" |
+| Promote modal CTA | "Confirm Promotion" |
 | Annotation input placeholder | "Add a note about this asset..." |
 | Steward chat placeholder | "Ask the steward about this asset..." |
 | Detail panel empty past | "No history recorded yet" |
@@ -257,6 +267,9 @@ Rendered as a modal overlay on the city canvas.
 | Health: healthy | "Active and maintained" |
 | Canvas tooltip | "{asset name} -- {maturity}" |
 | District labels | "Tech District", "Media District", "IP District", "Product District", "Knowledge District" |
+| Zoom in tooltip | "Zoom in" |
+| Zoom out tooltip | "Zoom out" |
+| Reset zoom tooltip | "Reset zoom" |
 
 ---
 
@@ -288,11 +301,19 @@ Each asset category occupies a distinct district on the canvas. Districts are lo
 
 1. Clear canvas with `var(--bg)` fill
 2. Draw district boundary zones (subtle dashed borders at 0.1 opacity)
-3. Draw district labels (11px semibold, `var(--text-dim)`)
+3. Draw district labels (11px bold, `var(--text-dim)`)
 4. For each asset: draw building shape scaled by maturity, apply return factor glow, apply health degradation if applicable
 5. Draw dependency lines between connected assets (dashed, `var(--border)` color, 0.3 opacity)
 6. Draw hover/selection highlights on top layer
 7. Draw floating particles for recently active assets (similar to NeuralHero firing pattern)
+
+### Canvas Layout Constants
+
+These values are canvas layout constants, not spacing tokens. They are not part of the spacing scale.
+
+| Constant | Value | Justification |
+|----------|-------|---------------|
+| Evolution timeline milestone spacing | 120px horizontal | Canvas layout constant, not a spacing token -- set to 120px to prevent milestone label overlap at default zoom level |
 
 ---
 
