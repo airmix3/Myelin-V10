@@ -33,6 +33,15 @@
   /* Typography */
   --font:       'JetBrains Mono', 'Fira Code', 'Monaco', 'Courier New', monospace;
   --radius:     4px;
+
+  /* Asset system colors */
+  --asset-moat:    #6496ff;
+  --asset-brand:   #a855f6;
+  --asset-revenue: #ffb347;
+  --asset-tech:    #00d68f;
+
+  /* Asset detail panel */
+  --panel-width: 360px;
 }
 
 /* 2. Reset and base styles
