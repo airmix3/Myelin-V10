@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 /* ── Types ── */
 
@@ -110,6 +110,10 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
   const [locationValue, setLocationValue] = useState('');
   const [locationLabel, setLocationLabel] = useState('');
   const [locationCanonical, setLocationCanonical] = useState(false);
+  const [chatInput, setChatInput] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ role: 'user' | 'steward'; text: string }>>([]);
+  const [chatLoading, setChatLoading] = useState(false);
+  const chatContainerRef = useRef<HTMLDivElement>(null);
 
   /* ── Data fetching ── */
 
@@ -141,6 +145,14 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
     window.addEventListener('keydown', handleKey);
     return () => window.removeEventListener('keydown', handleKey);
   }, [onClose]);
+
+  /* ── Auto-scroll chat ── */
+
+  useEffect(() => {
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
+    }
+  }, [chatMessages.length]);
 
   /* ── Handlers ── */
 
@@ -668,7 +680,7 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
         {activeTab === 'future' && renderFutureTab()}
       </div>
 
-      {/* Steward chat stub */}
+      {/* Steward chat */}
       <div style={{
         position: 'sticky',
         bottom: 0,
@@ -678,28 +690,80 @@ export default function AssetDetailPanel({ assetId, onClose, onAssetUpdated }: A
         background: 'var(--bg-2)',
         borderTop: '1px solid var(--border)',
       }}>
-        <input
-          type="text"
-          placeholder="Ask the steward about this asset..."
-          onKeyDown={(e) => {
-            if (e.key === 'Enter') {
-              e.preventDefault();
-              // Steward chat stub - will be wired in Plan 05
-              (e.target as HTMLInputElement).value = '';
-            }
-          }}
-          style={{
-            width: '100%',
-            padding: '8px 12px',
-            fontSize: 13,
-            fontFamily: 'var(--font)',
-            background: 'var(--bg)',
-            border: '1px solid var(--border)',
-            borderRadius: 4,
-            color: 'var(--text)',
-            outline: 'none',
-          }}
-        />
+        {chatMessages.length > 0 && (
+          <div ref={chatContainerRef} style={{ maxHeight: 200, overflowY: 'auto', marginBottom: 8 }}>
+            {chatMessages.map((msg, i) => (
+              <div key={i} style={{ marginBottom: 8, fontSize: 13 }}>
+                <span style={{ fontWeight: 700, color: msg.role === 'user' ? 'var(--accent)' : 'var(--green)' }}>
+                  {msg.role === 'user' ? 'You' : 'Steward'}:
+                </span>{' '}
+                {msg.text}
+              </div>
+            ))}
+            {chatLoading && (
+              <div style={{ fontSize: 13, color: 'var(--text-dim)', fontStyle: 'italic' }}>Steward is thinking...</div>
+            )}
+          </div>
+        )}
+        <form onSubmit={async (e) => {
+          e.preventDefault();
+          if (!chatInput.trim() || chatLoading) return;
+          const msg = chatInput.trim();
+          setChatInput('');
+          setChatMessages(prev => [...prev, { role: 'user', text: msg }]);
+          setChatLoading(true);
+          try {
+            const res = await fetch(`/api/assets/${assetId}/chat`, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ message: msg }),
+            });
+            const data = await res.json();
+            setChatMessages(prev => [...prev, { role: 'steward', text: data.response || 'No response' }]);
+          } catch {
+            setChatMessages(prev => [...prev, { role: 'steward', text: 'Failed to reach steward.' }]);
+          }
+          setChatLoading(false);
+        }} style={{ display: 'flex', gap: 8 }}>
+          <input
+            type="text"
+            value={chatInput}
+            onChange={(e) => setChatInput(e.target.value)}
+            placeholder="Ask the steward about this asset..."
+            disabled={chatLoading || !asset?.stewardId}
+            style={{
+              flex: 1,
+              background: 'var(--bg)',
+              border: '1px solid var(--border)',
+              borderRadius: 4,
+              padding: '6px 8px',
+              color: 'var(--text)',
+              fontSize: 13,
+              fontFamily: 'var(--font)',
+              outline: 'none',
+            }}
+          />
+          <button
+            type="submit"
+            disabled={chatLoading || !chatInput.trim()}
+            style={{
+              background: 'var(--accent)',
+              color: '#fff',
+              border: 'none',
+              borderRadius: 4,
+              padding: '6px 12px',
+              fontSize: 13,
+              fontFamily: 'var(--font)',
+              cursor: chatLoading || !chatInput.trim() ? 'not-allowed' : 'pointer',
+              opacity: chatLoading || !chatInput.trim() ? 0.5 : 1,
+            }}
+          >
+            Send
+          </button>
+        </form>
+        {!asset?.stewardId && (
+          <div style={{ fontSize: 11, color: 'var(--text-dim)', marginTop: 4 }}>No steward assigned. Assign one to enable chat.</div>
+        )}
       </div>
     </div>
   );

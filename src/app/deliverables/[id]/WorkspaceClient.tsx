@@ -7,6 +7,8 @@ import MetadataBar from '@/components/MetadataBar';
 import DeliverablePanel from '@/components/DeliverablePanel';
 import AgentLogPanel from '@/components/AgentLogPanel';
 import FilesPanel from '@/components/FilesPanel';
+import PromotionBanner from '../PromotionBanner';
+import PromoteToAssetModal from '../PromoteToAssetModal';
 
 interface WorkspaceClientProps {
   deliverable: Record<string, unknown>;
@@ -53,6 +55,8 @@ export default function WorkspaceClient({
   const [fileRefreshCounter, setFileRefreshCounter] = useState(0);
   const [fileCount, setFileCount] = useState(0);
   const [currentHireRequests, setCurrentHireRequests] = useState(initialHireRequests);
+  const [promoteModalOpen, setPromoteModalOpen] = useState(false);
+  const [promotionDone, setPromotionDone] = useState(false);
 
   // Fetch file count on mount
   useEffect(() => {
@@ -141,6 +145,17 @@ export default function WorkspaceClient({
 
       {/* Right: Workspace */}
       <div className="ws-split-workspace">
+        {/* Promotion banner (shows when steward recommends promotion) */}
+        {!promotionDone && (
+          <PromotionBanner
+            taskMetadata={task.metadata as string | null}
+            taskId={taskId}
+            deliverableId={deliverable.id as string}
+            deliverableTitle={deliverable.title as string}
+            onPromoted={() => setPromotionDone(true)}
+          />
+        )}
+
         <MetadataBar
           deliverableId={deliverable.id as string}
           creatorId={deliverable.creatorId as string | null}
@@ -151,7 +166,7 @@ export default function WorkspaceClient({
         />
 
         {/* Tab bar */}
-        <div className="tab-bar">
+        <div className="tab-bar" style={{ display: 'flex', alignItems: 'center' }}>
           {tabs.map(tab => (
             <button
               key={tab.id}
@@ -161,6 +176,24 @@ export default function WorkspaceClient({
               {tab.label}
             </button>
           ))}
+          {!promotionDone && !(deliverable as Record<string, unknown>).assetId && (
+            <button
+              onClick={() => setPromoteModalOpen(true)}
+              style={{
+                marginLeft: 'auto',
+                padding: '4px 10px',
+                fontSize: 12,
+                fontFamily: 'var(--font)',
+                background: 'transparent',
+                color: 'var(--accent)',
+                border: '1px solid var(--accent)',
+                borderRadius: 4,
+                cursor: 'pointer',
+              }}
+            >
+              Promote to Asset
+            </button>
+          )}
         </div>
 
         {/* Tab content */}
@@ -194,6 +227,15 @@ export default function WorkspaceClient({
           )}
         </div>
       </div>
+
+      {/* Promote to Asset modal */}
+      <PromoteToAssetModal
+        isOpen={promoteModalOpen}
+        onClose={() => setPromoteModalOpen(false)}
+        deliverableId={deliverable.id as string}
+        deliverableTitle={deliverable.title as string || 'Untitled'}
+        onPromoted={() => setPromotionDone(true)}
+      />
     </div>
   );
 }
