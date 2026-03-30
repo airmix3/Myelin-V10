@@ -8,6 +8,7 @@ const NAV_ITEMS = [
   { href: '/escalations', label: 'Escalations', icon: '\u26A0' },
   { href: '/tamir', label: 'Tamir', icon: '\u25D0' },
   { href: '/deliverables', label: 'Deliverables', icon: '\u25CE' },
+  { href: '/assets', label: 'Assets', icon: '\u25A8' },
   { href: '/org-context', label: 'Org Context', icon: '\u25C6' },
   { href: '/org-graph', label: 'Org Graph', icon: '\u2B2A' },
   { href: '/vault', label: 'Vault', icon: '\u2B21' },
