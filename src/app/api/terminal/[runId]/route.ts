@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { existsSync } from 'fs';
 import { sqlite } from '@/lib/db';
 import {
   spawnTerminal,
@@ -21,6 +22,7 @@ export async function GET(
   { params }: { params: { runId: string } },
 ) {
   const { runId } = params;
+  console.log('[terminal] GET request for runId:', runId);
 
   // Look up the task_run
   const run = sqlite.prepare(
@@ -34,23 +36,36 @@ export async function GET(
   } | undefined;
 
   if (!run) {
+    console.error('[terminal] Run not found:', runId);
     return NextResponse.json({ error: 'Run not found' }, { status: 404 });
   }
 
+  console.log('[terminal] Run found:', { id: run.id, status: run.status, sessionId: run.sessionId?.slice(0, 8), workspaceCwd: run.workspaceCwd });
+
   if (!run.sessionId) {
-    return NextResponse.json({ error: 'No session to resume' }, { status: 400 });
+    console.error('[terminal] No sessionId for run:', runId);
+    return NextResponse.json({ error: `No session to resume (run status: ${run.status})` }, { status: 400 });
   }
 
   if (!run.workspaceCwd) {
-    return NextResponse.json({ error: 'No workspace directory' }, { status: 400 });
+    console.error('[terminal] No workspaceCwd for run:', runId);
+    return NextResponse.json({ error: `No workspace directory (run status: ${run.status})` }, { status: 400 });
+  }
+
+  // Verify workspace directory exists
+  if (!existsSync(run.workspaceCwd)) {
+    console.error('[terminal] Workspace directory missing:', run.workspaceCwd);
+    return NextResponse.json({ error: `Workspace directory not found: ${run.workspaceCwd}` }, { status: 400 });
   }
 
   // Pause the SDK agent if it's running
   if (run.status === 'executing') {
     try {
+      console.log('[terminal] Pausing executing run:', runId);
       await pauseRun(runId);
     } catch (err) {
-      console.error('Failed to pause run:', err);
+      console.error('[terminal] Failed to pause run:', err);
+      // Continue anyway — the run may have already completed
     }
   }
 
@@ -66,17 +81,17 @@ export async function GET(
     }
   }
 
-  // Attach buffer listener BEFORE spawning PTY to catch all output
+  // Spawn PTY if not already active
   if (!isTerminalActive(runId)) {
-    // Pre-register the buffer listener on the pty-manager for this runId
-    // (addListener is a no-op until spawn creates the entry, so we spawn first
-    //  but with a data handler already wired into the PTY via the spawn itself)
     try {
-      spawnTerminal(runId, run.sessionId, run.workspaceCwd);
+      console.log('[terminal] Spawning PTY for run:', runId, 'session:', run.sessionId!.slice(0, 8), 'cwd:', run.workspaceCwd);
+      spawnTerminal(runId, run.sessionId!, run.workspaceCwd);
     } catch (err) {
-      console.error('Failed to spawn PTY:', err);
-      return NextResponse.json({ error: 'Failed to spawn terminal' }, { status: 500 });
+      console.error('[terminal] Failed to spawn PTY:', err);
+      return NextResponse.json({ error: 'Failed to spawn terminal', detail: String(err) }, { status: 500 });
     }
+  } else {
+    console.log('[terminal] PTY already active for run:', runId);
   }
 
   // Immediately attach the buffer listener
@@ -106,22 +121,26 @@ export async function GET(
       addListener(runId, onData);
       sseListener = onData;
 
+      let exited = false;
       function onTerminalExit(event: unknown) {
         const evt = event as { type: string; data: { runId: string } };
-        if (evt.data?.runId === runId) {
+        if (evt.data?.runId === runId && !exited) {
+          exited = true;
+          console.log('[terminal] PTY exited for run:', runId);
+          // Clean up listeners FIRST to prevent re-entry from resumeRun's eventBus emit
+          cleanup();
           try {
             controller.enqueue(encoder.encode(`event: exit\ndata: {}\n\n`));
             controller.close();
           } catch {
             // Already closed
           }
-          // Resume the SDK agent
+          // Resume the SDK agent (after cleanup to avoid infinite loop)
           resumeRun(runId).catch(() => {});
-          cleanup();
         }
       }
 
-      // Listen for terminal exit via eventBus (uses top-level import, not require)
+      // Listen for terminal exit via eventBus
       eventBus.on('event', onTerminalExit);
 
       function cleanup() {
@@ -131,6 +150,7 @@ export async function GET(
 
       // Handle client disconnect
       _req.signal.addEventListener('abort', () => {
+        console.log('[terminal] Client disconnected for run:', runId);
         cleanup();
       });
     },
@@ -181,6 +201,7 @@ export async function DELETE(
   { params }: { params: { runId: string } },
 ) {
   const { runId } = params;
+  console.log('[terminal] DELETE request for run:', runId);
 
   if (isTerminalActive(runId)) {
     killTerminal(runId);

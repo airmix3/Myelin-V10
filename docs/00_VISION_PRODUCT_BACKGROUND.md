@@ -297,5 +297,7 @@ Quick-reference for the developer. When you need to implement a specific feature
 | **Configuration, secrets, deployment** | **Doc 10** | -- |
 | **Build plan, phases, acceptance tests** | **Doc 11** | -- |
 | **Visual guidelines, CSS, colors, fonts, components** | **Doc 12** | Doc 05, Doc 06, Doc 07 |
+| **Assets system, asset philosophy, promotion, stewardship lifecycle** | **Doc 13** | added in later phase and currently standalone|
+
 
 When concepts appear in multiple docs, the **canonical doc** (bold) has the full spec. Others reference it.

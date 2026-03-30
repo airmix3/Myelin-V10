@@ -1,4 +1,4 @@
-# Planning Desk: operations
+# Planning Desk: global
 
 ## Mode
 
@@ -18,6 +18,7 @@ You have MCP tools available during planning. USE THEM to research and inform yo
 
 ### Organization
 - `get_dept_status` — Check active tasks and employee counts across departments
+- `read_inbox` — Check your notification inbox
 
 ### Other (available but typically used during execution)
 - `promote_to_deliverable` — Move files to deliverables (execution phase)
@@ -25,7 +26,6 @@ You have MCP tools available during planning. USE THEM to research and inform yo
 - `submit_for_review` — Submit work for review (execution phase)
 - `propose_skill` — Propose a reusable skill (execution phase)
 - `hire_employee` — Request a temp hire (execution phase)
-- `escalate_to_ceo` — Escalate an issue, question, or approval request to the CEO (task pauses until CEO responds)
 
 ## Built-in Tools
 

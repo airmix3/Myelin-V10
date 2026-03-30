@@ -59,8 +59,14 @@ export default function TerminalOverlay({ runId, agentName, onClose }: TerminalO
       es.addEventListener('data', (event) => {
         if (!mounted) return;
         try {
-          const decoded = atob(event.data);
-          terminal.write(decoded);
+          // Decode base64 → raw bytes → Uint8Array for xterm
+          // (atob returns Latin-1 which mangles multi-byte UTF-8 chars like █ ▐ ▛)
+          const binaryStr = atob(event.data);
+          const bytes = new Uint8Array(binaryStr.length);
+          for (let i = 0; i < binaryStr.length; i++) {
+            bytes[i] = binaryStr.charCodeAt(i);
+          }
+          terminal.write(bytes);
           setStatus('active');
         } catch {
           // skip

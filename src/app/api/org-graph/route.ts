@@ -32,9 +32,14 @@ interface OrgEdge {
   to: string;
 }
 
-function isDeptHead(emp: { role: string; agentId: string | null }): boolean {
+function isDeptHead(emp: { role: string; agentId: string | null; department: string }): boolean {
+  if (emp.agentId === 'tamir') return false;
   const role = emp.role.trim().toLowerCase();
-  return (role === 'department head' || role === 'dept_head') && emp.agentId !== 'tamir';
+  // Permanent dept heads have role 'executive' (CTO, CMO, COO)
+  // Hired dept heads may have 'department head' or 'dept_head'
+  if (role === 'department head' || role === 'dept_head') return true;
+  if (role === 'executive' && emp.department !== 'cos') return true;
+  return false;
 }
 
 const DEPT_COLORS: Record<string, string> = {
@@ -47,7 +52,8 @@ const DEPT_COLORS: Record<string, string> = {
 export async function GET() {
   try {
     // Fetch all employees
-    const employees = sqlite.prepare('SELECT * FROM employees ORDER BY department, name').all() as Array<{
+    // Only show active employees in the org tree (exclude terminated)
+    const employees = sqlite.prepare("SELECT * FROM employees WHERE status = 'active' ORDER BY department, name").all() as Array<{
       id: string;
       name: string;
       role: string;

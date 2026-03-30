@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "skills": {
+    "aws-ec2-setup": {
+      "source": "aj-geddes/useful-ai-prompts",
+      "sourceType": "github",
+      "computedHash": "4b58c48601c3be0eacfe5996d8261e551f732cee5219bc996d37249ef20d57e6"
+    }
+  }
+}

@@ -173,7 +173,7 @@ export default function NeuralHero({ title, subtitle, stats }: NeuralHeroProps) 
     >
       <canvas ref={canvasRef} />
       <div className="dashboard-hero-overlay">
-        <div className="dashboard-hero-title">{title}</div>
+        <div className="dashboard-hero-title" dangerouslySetInnerHTML={{ __html: title }} />
         {subtitle && <div className="dashboard-hero-subtitle">{subtitle}</div>}
         <div className="dashboard-hero-stats">
           {stats.map((s) => (
