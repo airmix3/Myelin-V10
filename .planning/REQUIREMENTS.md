@@ -129,11 +129,11 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ASSET-11**: Asset buildings rendered with category-specific visual styles (code=circuit patterns, brand=curves, IP=shield, product=glass, knowledge=book stacks); building height scales with maturity (20px nascent to 72px heritage)
 - [x] **ASSET-12**: Pan via mouse drag, zoom via mousewheel (0.5x-3x range), double-click to focus on building; viewport coordinate transforms (worldToScreen/screenToWorld)
 - [x] **ASSET-13**: Return factor glow colors (revenue=gold/#ffb347, moat=blue/#6496ff, core_tech=green/#00d68f, brand_equity=purple/#a855f6); health degradation visuals (stale=desaturated, degraded=cracks, critical=red pulse)
-- [ ] **ASSET-14**: Asset detail panel (360px, slides in on click): Past/Present/Future tabs; Past shows event timeline, Present shows health/locations/return factors/annotations/dependencies, Future shows planned work placeholder
-- [ ] **ASSET-15**: CEO can add annotations via text input in detail panel Present tab; annotations stored as JSON array in Asset record
-- [ ] **ASSET-16**: CEO can change asset maturity level via dropdown in detail panel; maturity changes create `maturity_change` AssetEvent
-- [ ] **ASSET-17**: Floating toolbar with "Create Asset" button, zoom in/out/reset controls (with aria-labels), and category filter toggles
-- [ ] **ASSET-18**: Create Asset modal form: name, description, category, steward (CTO/CMO/COO), initial maturity, return factors (1-4 checkboxes), optional primary location; creates asset directory at `data/assets/{assetId}/`
+- [x] **ASSET-14**: Asset detail panel (360px, slides in on click): Past/Present/Future tabs; Past shows event timeline, Present shows health/locations/return factors/annotations/dependencies, Future shows planned work placeholder
+- [x] **ASSET-15**: CEO can add annotations via text input in detail panel Present tab; annotations stored as JSON array in Asset record
+- [x] **ASSET-16**: CEO can change asset maturity level via dropdown in detail panel; maturity changes create `maturity_change` AssetEvent
+- [x] **ASSET-17**: Floating toolbar with "Create Asset" button, zoom in/out/reset controls (with aria-labels), and category filter toggles
+- [x] **ASSET-18**: Create Asset modal form: name, description, category, steward (CTO/CMO/COO), initial maturity, return factors (1-4 checkboxes), optional primary location; creates asset directory at `data/assets/{assetId}/`
 - [ ] **ASSET-19**: Steward agent mode: `invokeSteward()` wraps existing `invokeAgent()` with steward-specific system prompt and asset workspace at `data/assets/{assetId}/steward-desk/`; creates task with `metadata: { stewardOperation: true }` for UI filtering
 - [ ] **ASSET-20**: Steward chat API at `POST /api/assets/[assetId]/chat`: validates message, looks up assigned steward, invokes steward agent, returns response
 - [ ] **ASSET-21**: Inline steward chat in asset detail panel: message history display, input field, loading state, disabled when no steward assigned
@@ -272,11 +272,11 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-11 | Phase 7 | Complete |
 | ASSET-12 | Phase 7 | Complete |
 | ASSET-13 | Phase 7 | Complete |
-| ASSET-14 | Phase 7 | Pending |
-| ASSET-15 | Phase 7 | Pending |
-| ASSET-16 | Phase 7 | Pending |
-| ASSET-17 | Phase 7 | Pending |
-| ASSET-18 | Phase 7 | Pending |
+| ASSET-14 | Phase 7 | Complete |
+| ASSET-15 | Phase 7 | Complete |
+| ASSET-16 | Phase 7 | Complete |
+| ASSET-17 | Phase 7 | Complete |
+| ASSET-18 | Phase 7 | Complete |
 | ASSET-19 | Phase 7 | Pending |
 | ASSET-20 | Phase 7 | Pending |
 | ASSET-21 | Phase 7 | Pending |
