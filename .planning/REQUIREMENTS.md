@@ -140,7 +140,7 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ASSET-22**: Deliverable-to-asset promotion API at `POST /api/deliverables/[id]/promote`: copies files from deliverable workspace to `data/assets/{assetId}/`, creates Asset record + events, supports both new asset creation and absorbing into existing asset (per D-05)
 - [x] **ASSET-23**: Steward promotion recommendation banner on deliverable page: shows when task metadata contains `promotionRecommendation` (set by `suggest_asset_promotion` MCP tool); "Accept Promotion" / "Dismiss Recommendation" buttons
 - [x] **ASSET-24**: CEO-initiated promotion modal on deliverable page: steward dropdown, intent textarea, category select, option to add to existing asset; "Confirm Promotion" CTA
-- [ ] **ASSET-25**: Evolution timeline (80px bottom bar): horizontal chronological milestones with colored event type markers; shows selected asset events or recent all-asset activity when nothing selected
+- [x] **ASSET-25**: Evolution timeline (80px bottom bar): horizontal chronological milestones with colored event type markers; shows selected asset events or recent all-asset activity when nothing selected
 
 ## v2 Requirements
 
@@ -283,7 +283,7 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-22 | Phase 7 | Complete |
 | ASSET-23 | Phase 7 | Complete |
 | ASSET-24 | Phase 7 | Complete |
-| ASSET-25 | Phase 7 | Pending |
+| ASSET-25 | Phase 7 | Complete |
 
 **Coverage:**
 - v1 requirements: 102 total
