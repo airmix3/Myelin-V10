@@ -123,8 +123,8 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ASSET-05**: Asset CRUD API: `GET/POST /api/assets`, `GET/PATCH/DELETE /api/assets/[assetId]`, sub-resource routes for events, annotations, locations, dependencies
 - [x] **ASSET-06**: Dependency graph API uses recursive CTE (`WITH RECURSIVE ripple`) to calculate ripple effect count when an asset changes
 - [x] **ASSET-07**: "Assets" sidebar nav item positioned between Deliverables and Org Context
-- [ ] **ASSET-08**: Four asset MCP tools registered in MCP server: `suggest_asset_promotion` (all agents), `update_asset_health` (dept heads + Tamir), `add_asset_event` (dept heads + Tamir), `link_asset_dependency` (dept heads + Tamir)
-- [ ] **ASSET-09**: Asset tool access control: `update_asset_health`, `add_asset_event`, `link_asset_dependency` in DEPT_HEAD_ONLY; `suggest_asset_promotion` in TEMP_ALLOWED
+- [x] **ASSET-08**: Four asset MCP tools registered in MCP server: `suggest_asset_promotion` (all agents), `update_asset_health` (dept heads + Tamir), `add_asset_event` (dept heads + Tamir), `link_asset_dependency` (dept heads + Tamir)
+- [x] **ASSET-09**: Asset tool access control: `update_asset_health`, `add_asset_event`, `link_asset_dependency` in DEPT_HEAD_ONLY; `suggest_asset_promotion` in TEMP_ALLOWED
 - [ ] **ASSET-10**: SimCity-inspired interactive Canvas city map as primary `/assets` page view; full Canvas 2D rendering following NeuralHero.tsx pattern (useRef, requestAnimationFrame, ResizeObserver)
 - [ ] **ASSET-11**: Asset buildings rendered with category-specific visual styles (code=circuit patterns, brand=curves, IP=shield, product=glass, knowledge=book stacks); building height scales with maturity (20px nascent to 72px heritage)
 - [ ] **ASSET-12**: Pan via mouse drag, zoom via mousewheel (0.5x-3x range), double-click to focus on building; viewport coordinate transforms (worldToScreen/screenToWorld)
@@ -266,8 +266,8 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-05 | Phase 7 | Complete |
 | ASSET-06 | Phase 7 | Complete |
 | ASSET-07 | Phase 7 | Complete |
-| ASSET-08 | Phase 7 | Pending |
-| ASSET-09 | Phase 7 | Pending |
+| ASSET-08 | Phase 7 | Complete |
+| ASSET-09 | Phase 7 | Complete |
 | ASSET-10 | Phase 7 | Pending |
 | ASSET-11 | Phase 7 | Pending |
 | ASSET-12 | Phase 7 | Pending |
