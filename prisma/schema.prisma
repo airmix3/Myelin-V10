@@ -90,6 +90,8 @@ model Deliverable {
   createdAt     DateTime @default(now())
   updatedAt     DateTime @updatedAt
 
+  assetId       String?                      // ID of asset this deliverable was promoted to
+
   task          Task     @relation(fields: [taskId], references: [id])
 
   @@map("deliverables")
@@ -196,4 +198,60 @@ model ActivityLog {
   createdAt   DateTime @default(now())
 
   @@map("activity_log")
+}
+
+model Asset {
+  id            String   @id
+  title         String
+  description   String?
+  category      String            // code|brand|IP|digital-product|knowledge
+  maturity      String   @default("nascent") // nascent|developing|established|foundational|legacy|heritage
+  stewardId     String?           // agentId of assigned steward: cto/cmo/coo
+  returnFactors String?           // JSON array: ["revenue","moat","core_tech","brand_equity"]
+  annotations   String?           // JSON array of {text, createdAt} objects
+  healthStatus  String   @default("healthy") // healthy|stale|degraded|critical
+  directoryPath String?           // data/assets/{assetId}/
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  events        AssetEvent[]
+  locations     AssetLocation[]
+
+  @@map("assets")
+}
+
+model AssetEvent {
+  id        String   @id
+  assetId   String
+  type      String   // creation|promotion|annotation|maturity_change|steward_assessment|deliverable_absorbed|dependency_added|location_added|health_change
+  summary   String
+  metadata  String?  // JSON
+  agentId   String?
+  createdAt DateTime @default(now())
+
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  @@map("asset_events")
+}
+
+model AssetLocation {
+  id          String   @id
+  assetId     String
+  type        String   // local_path|github_url|platform_url|custom
+  value       String   // The actual path/URL
+  label       String?  // Human-readable label
+  isCanonical Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  asset       Asset    @relation(fields: [assetId], references: [id])
+  @@map("asset_locations")
+}
+
+model AssetDependency {
+  id          String   @id
+  sourceId    String   // The asset that depends on...
+  targetId    String   // ...this asset
+  label       String?  // Relationship description
+  createdAt   DateTime @default(now())
+
+  @@map("asset_dependencies")
 }

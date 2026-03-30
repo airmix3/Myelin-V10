@@ -37,6 +37,15 @@ export async function register() {
       log.error({ err }, 'FTS5 initialization failed');
     }
 
+    // 1.5. Initialize Assets FTS5
+    try {
+      const { initAssetsFTS5 } = await import('./lib/asset-fts');
+      initAssetsFTS5();
+      log.info('Asset FTS5 initialized');
+    } catch (err) {
+      log.error({ err }, 'Asset FTS5 initialization failed');
+    }
+
     // 2. Ensure planning desk directories (FOUND-11)
     try {
       ensurePlanningDesks();
