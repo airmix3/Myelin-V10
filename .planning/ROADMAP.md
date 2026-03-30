@@ -18,7 +18,7 @@ Decimal phases appear between their surrounding integers in numeric order.
 - [ ] **Phase 4: Deliverable Workspace + Integration** - Split-pane workspace, supervisor review, skill extraction, and acceptance scenarios
 - [ ] **Phase 5: Langfuse Integration** - Hierarchical trace visualization, cost analytics, observability status badge
 - [ ] **Phase 6: Sandboxing Agents** - Filesystem boundary enforcement, workspace isolation, settingSources cleanup
-- [ ] **Phase 7: Assets Management System** - Asset data model, SimCity city visualization, steward agent mode, promotion flow
+- [x] **Phase 7: Assets Management System** - Asset data model, SimCity city visualization, steward agent mode, promotion flow (completed 2026-03-30)
 
 ## Phase Details
 
@@ -128,7 +128,7 @@ Phases execute in numeric order: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> 7
 | 4. Deliverable Workspace + Integration | 0/4 | Not started | - |
 | 5. Langfuse Integration | 1/2 | In Progress|  |
 | 6. Sandboxing Agents | 0/2 | Not started | - |
-| 7. Assets Management System | 4/5 | In Progress|  |
+| 7. Assets Management System | 5/5 | Complete   | 2026-03-30 |
 
 ### Phase 6: Sandboxing Agents
 
@@ -167,4 +167,4 @@ Plans:
 - [x] 07-02-PLAN.md — Asset MCP tools (suggest_promotion, update_health, add_event, link_dependency) + access control
 - [x] 07-03-PLAN.md — Canvas city visualization engine (buildings, districts, pan/zoom, effects, hit-test)
 - [x] 07-04-PLAN.md — Asset detail panel + toolbar + evolution timeline + create asset modal
-- [ ] 07-05-PLAN.md — Steward agent mode + promotion flow + deliverable page integration
+- [x] 07-05-PLAN.md — Steward agent mode + promotion flow + deliverable page integration

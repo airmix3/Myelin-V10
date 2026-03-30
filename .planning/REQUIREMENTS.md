@@ -134,12 +134,12 @@ Requirements for initial release. Each maps to roadmap phases.
 - [x] **ASSET-16**: CEO can change asset maturity level via dropdown in detail panel; maturity changes create `maturity_change` AssetEvent
 - [x] **ASSET-17**: Floating toolbar with "Create Asset" button, zoom in/out/reset controls (with aria-labels), and category filter toggles
 - [x] **ASSET-18**: Create Asset modal form: name, description, category, steward (CTO/CMO/COO), initial maturity, return factors (1-4 checkboxes), optional primary location; creates asset directory at `data/assets/{assetId}/`
-- [ ] **ASSET-19**: Steward agent mode: `invokeSteward()` wraps existing `invokeAgent()` with steward-specific system prompt and asset workspace at `data/assets/{assetId}/steward-desk/`; creates task with `metadata: { stewardOperation: true }` for UI filtering
-- [ ] **ASSET-20**: Steward chat API at `POST /api/assets/[assetId]/chat`: validates message, looks up assigned steward, invokes steward agent, returns response
-- [ ] **ASSET-21**: Inline steward chat in asset detail panel: message history display, input field, loading state, disabled when no steward assigned
-- [ ] **ASSET-22**: Deliverable-to-asset promotion API at `POST /api/deliverables/[id]/promote`: copies files from deliverable workspace to `data/assets/{assetId}/`, creates Asset record + events, supports both new asset creation and absorbing into existing asset (per D-05)
-- [ ] **ASSET-23**: Steward promotion recommendation banner on deliverable page: shows when task metadata contains `promotionRecommendation` (set by `suggest_asset_promotion` MCP tool); "Accept Promotion" / "Dismiss Recommendation" buttons
-- [ ] **ASSET-24**: CEO-initiated promotion modal on deliverable page: steward dropdown, intent textarea, category select, option to add to existing asset; "Confirm Promotion" CTA
+- [x] **ASSET-19**: Steward agent mode: `invokeSteward()` wraps existing `invokeAgent()` with steward-specific system prompt and asset workspace at `data/assets/{assetId}/steward-desk/`; creates task with `metadata: { stewardOperation: true }` for UI filtering
+- [x] **ASSET-20**: Steward chat API at `POST /api/assets/[assetId]/chat`: validates message, looks up assigned steward, invokes steward agent, returns response
+- [x] **ASSET-21**: Inline steward chat in asset detail panel: message history display, input field, loading state, disabled when no steward assigned
+- [x] **ASSET-22**: Deliverable-to-asset promotion API at `POST /api/deliverables/[id]/promote`: copies files from deliverable workspace to `data/assets/{assetId}/`, creates Asset record + events, supports both new asset creation and absorbing into existing asset (per D-05)
+- [x] **ASSET-23**: Steward promotion recommendation banner on deliverable page: shows when task metadata contains `promotionRecommendation` (set by `suggest_asset_promotion` MCP tool); "Accept Promotion" / "Dismiss Recommendation" buttons
+- [x] **ASSET-24**: CEO-initiated promotion modal on deliverable page: steward dropdown, intent textarea, category select, option to add to existing asset; "Confirm Promotion" CTA
 - [ ] **ASSET-25**: Evolution timeline (80px bottom bar): horizontal chronological milestones with colored event type markers; shows selected asset events or recent all-asset activity when nothing selected
 
 ## v2 Requirements
@@ -277,12 +277,12 @@ Which phases cover which requirements. Updated during roadmap creation.
 | ASSET-16 | Phase 7 | Complete |
 | ASSET-17 | Phase 7 | Complete |
 | ASSET-18 | Phase 7 | Complete |
-| ASSET-19 | Phase 7 | Pending |
-| ASSET-20 | Phase 7 | Pending |
-| ASSET-21 | Phase 7 | Pending |
-| ASSET-22 | Phase 7 | Pending |
-| ASSET-23 | Phase 7 | Pending |
-| ASSET-24 | Phase 7 | Pending |
+| ASSET-19 | Phase 7 | Complete |
+| ASSET-20 | Phase 7 | Complete |
+| ASSET-21 | Phase 7 | Complete |
+| ASSET-22 | Phase 7 | Complete |
+| ASSET-23 | Phase 7 | Complete |
+| ASSET-24 | Phase 7 | Complete |
 | ASSET-25 | Phase 7 | Pending |
 
 **Coverage:**
