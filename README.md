@@ -1,4 +1,4 @@
-# Myelin v10 -- The Cortex
+# Cortex -- AI Company Operating System
 
 A TypeScript/Next.js operating system for running a one-person company with autonomous AI agents. Agents (Chief of Staff, CTO, CMO, COO, and dynamically hired temps) execute real business tasks end-to-end: research, code, deployment, content, analysis. The CEO interacts through The Cortex -- a web dashboard -- and the agents do the work.
 
@@ -57,7 +57,7 @@ Run the setup script from the repo root:
 ./setup.sh
 ```
 
-This will check prerequisites, install dependencies, configure `.env`, initialize the database, and create runtime directories.
+This will check prerequisites, install dependencies, configure `.env`, initialize the database, create runtime directories, and set up your company DNA template.
 
 ### Manual setup
 
@@ -74,13 +74,31 @@ cp .env.example .env
 # 3. Initialize database
 npx prisma migrate deploy
 
-# 4. Start
+# 4. Set up company DNA
+cp config/company-dna.template.md data/vault/company-dna.md
+# Edit data/vault/company-dna.md with your company details
+
+# 5. Start
 pnpm dev
 ```
 
-The Cortex dashboard will be available at `http://localhost:3000`.
+## Quick Start
+
+After setup, start the dev server:
+
+```bash
+pnpm dev
+```
+
+Visit `http://localhost:3000` to open The Cortex dashboard.
 
 On first startup, the server seeds agent employees (Tamir, CTO, CMO, COO), creates planning desks, and starts the background worker loop.
+
+## Company DNA
+
+Edit `data/vault/company-dna.md` to describe your company. The setup script copies a template -- fill it in with your company name, mission, target customers, and context. This is what your AI agents will know about your business.
+
+The template is at `config/company-dna.template.md`. You can re-copy it at any time to start fresh.
 
 ## Project Structure
 
@@ -91,10 +109,10 @@ src/
   lib/             Core libraries (worker, orchestrator, state machine, MCP tools)
   a2a/             A2A protocol types
   components/      React components (dashboard, workspace, gallery)
-data/
-  vault/           Company knowledge vault (persisted)
+data/              Runtime data (gitignored -- created by setup.sh)
+  vault/           Company knowledge vault
   departments/     Department desks, skills, tools
-  workspaces/      Task execution workspaces (gitignored, created at runtime)
+  workspaces/      Task execution workspaces
 config/
   company-dna.template.md   Company DNA template
 prisma/

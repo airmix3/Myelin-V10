@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
-# Myelin v10 -- Setup Script
+# Cortex -- Setup Script
 # Works on Linux, macOS, and WSL2.
 
 RED='\033[0;31m'
@@ -14,8 +14,7 @@ warn()  { echo -e "${YELLOW}[!!]${NC} $1"; }
 fail()  { echo -e "${RED}[ERR]${NC} $1"; exit 1; }
 
 echo ""
-echo "  Myelin v10 -- The Cortex"
-echo "  Setup"
+echo "  Cortex -- Setup"
 echo "  ─────────────────────────"
 echo ""
 
@@ -117,6 +116,18 @@ for dept in tech marketing operations global; do
   mkdir -p "data/departments/$dept/planning-desk/chat"
 done
 info "Runtime directories created"
+
+echo ""
+
+# ── 6. Initialize company DNA ───────────────────────
+
+if [ ! -f data/vault/company-dna.md ]; then
+  cp config/company-dna.template.md data/vault/company-dna.md
+  info "Created data/vault/company-dna.md from template"
+  warn "Edit data/vault/company-dna.md with your company details."
+else
+  info "data/vault/company-dna.md already exists, skipping"
+fi
 
 echo ""
 
