@@ -1830,3 +1830,144 @@ input[type="checkbox"] {
 .esc-response-input:focus {
   border-color: #00bcd4;
 }
+
+/* ==========================================================================
+   Chat Sidebar (Tamir multi-chat)
+   ========================================================================== */
+
+.chat-sidebar-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 99;
+  background: rgba(0, 0, 0, 0.5);
+}
+
+.chat-sidebar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 320px;
+  height: 100vh;
+  z-index: 100;
+  background: var(--bg);
+  border-right: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  transform: translateX(-100%);
+  transition: transform 0.25s ease;
+}
+
+.chat-sidebar--open {
+  transform: translateX(0);
+}
+
+.chat-sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 16px;
+  border-bottom: 1px solid var(--border);
+}
+
+.chat-sidebar-close {
+  background: none;
+  border: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 0 4px;
+  line-height: 1;
+}
+
+.chat-sidebar-close:hover {
+  color: var(--text);
+}
+
+.chat-sidebar-new {
+  display: flex;
+  align-items: center;
+  width: calc(100% - 24px);
+  margin: 12px;
+  padding: 10px 12px;
+  background: var(--bg-2);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text);
+  font-family: var(--font);
+  font-size: 13px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.chat-sidebar-new:hover {
+  background: var(--bg-3);
+}
+
+.chat-sidebar-list {
+  flex: 1;
+  overflow-y: auto;
+}
+
+.chat-item {
+  padding: 12px 16px;
+  cursor: pointer;
+  border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+
+.chat-item:hover {
+  background: var(--bg-2);
+}
+
+.chat-item.active {
+  background: var(--bg-2);
+  border-left: 2px solid var(--accent);
+}
+
+.chat-item-title {
+  font-size: 13px;
+  color: var(--text);
+  margin-bottom: 4px;
+  line-height: 1.4;
+}
+
+.chat-item-meta {
+  display: flex;
+  justify-content: space-between;
+  font-size: 11px;
+}
+
+.chat-item-dept {
+  text-transform: capitalize;
+}
+
+.chat-item-time {
+  color: var(--text-dim);
+}
+
+.hamburger-btn {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 4px;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+}
+
+.hamburger-btn span {
+  display: block;
+  width: 20px;
+  height: 2px;
+  background: var(--text-dim);
+  border-radius: 1px;
+  transition: background 0.15s;
+}
+
+.hamburger-btn:hover span {
+  background: var(--text);
+}
