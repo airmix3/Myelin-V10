@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import ChatPanel, { ChatMessage, RoutingButton } from '@/components/ChatPanel';
 import CanvasPanel from '@/components/CanvasPanel';
+import ChatSidebar from '@/components/ChatSidebar';
 
 function formatToolName(toolName: string): string {
   const toolLabels: Record<string, string> = {
@@ -32,6 +33,7 @@ export default function TamirPage() {
   const [cancelPending, setCancelPending] = useState(false);
   const cancelTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [activityText, setActivityText] = useState<string | null>(null);
+  const [sidebarOpen, setSidebarOpen] = useState(false);
 
   // SSE connection for live activity indicators during planning waits
   useEffect(() => {
@@ -59,51 +61,57 @@ export default function TamirPage() {
     return () => es.close();
   }, [isLoading, taskId]);
 
+  // Reusable function to load a chat by task ID
+  const loadChat = useCallback(async (id: string) => {
+    try {
+      // Load chat history
+      const chatRes = await fetch(`/api/tasks/${id}/chat`);
+      if (!chatRes.ok) return false;
+      const { messages: history } = await chatRes.json();
+      if (!history || history.length === 0) return false;
+
+      setTaskId(id);
+      setMessages(history);
+      localStorage.setItem('tamir_active_task', id);
+
+      // Check if task has a plan artifact
+      const taskRes = await fetch(`/api/tasks/${id}`);
+      if (taskRes.ok) {
+        const taskData = await taskRes.json();
+        if (taskData.planMarkdown) {
+          setPlanMarkdown(taskData.planMarkdown);
+          setShowCanvas(true);
+          setIsNewPlan(false);
+        } else {
+          setPlanMarkdown(null);
+          setShowCanvas(false);
+        }
+        if (taskData.currentActorId) {
+          setChosenAgentId(taskData.currentActorId);
+        } else {
+          setChosenAgentId(null);
+        }
+        if (taskData.department) {
+          setDepartment(taskData.department);
+        } else {
+          setDepartment('');
+        }
+      }
+      return true;
+    } catch {
+      return false;
+    }
+  }, []);
+
   // Page rehydration (D-16, D-17)
   useEffect(() => {
     const storedTaskId = localStorage.getItem('tamir_active_task');
     if (!storedTaskId) return;
 
-    const rehydrate = async () => {
-      try {
-        // Load chat history
-        const chatRes = await fetch(`/api/tasks/${storedTaskId}/chat`);
-        if (!chatRes.ok) {
-          localStorage.removeItem('tamir_active_task');
-          return;
-        }
-        const { messages: history } = await chatRes.json();
-        if (!history || history.length === 0) {
-          localStorage.removeItem('tamir_active_task');
-          return;
-        }
-
-        setTaskId(storedTaskId);
-        setMessages(history);
-
-        // Check if task has a plan artifact -- render canvas immediately (no typewriter)
-        const taskRes = await fetch(`/api/tasks/${storedTaskId}`);
-        if (taskRes.ok) {
-          const taskData = await taskRes.json();
-          if (taskData.planMarkdown) {
-            setPlanMarkdown(taskData.planMarkdown);
-            setShowCanvas(true);
-            setIsNewPlan(false); // Render immediately, no typewriter replay
-          }
-          if (taskData.currentActorId) {
-            setChosenAgentId(taskData.currentActorId);
-          }
-          if (taskData.department) {
-            setDepartment(taskData.department);
-          }
-        }
-      } catch {
-        localStorage.removeItem('tamir_active_task');
-      }
-    };
-
-    rehydrate();
-  }, []);
+    loadChat(storedTaskId).then((ok) => {
+      if (!ok) localStorage.removeItem('tamir_active_task');
+    });
+  }, [loadChat]);
 
   // Process agent turn response
   const processTurn = useCallback(
@@ -367,10 +375,54 @@ export default function TamirPage() {
     }
   }, [taskId]);
 
+  // Sidebar: select a past chat
+  const handleSelectChat = useCallback(async (selectedTaskId: string) => {
+    // Clear current state
+    setMessages([]);
+    setShowCanvas(false);
+    setPlanMarkdown(null);
+    setRoutingButtons(null);
+    setChosenAgentId(null);
+    setDepartment('');
+    // Load the selected chat
+    await loadChat(selectedTaskId);
+  }, [loadChat]);
+
+  // Sidebar: start new chat
+  const handleNewChat = useCallback(() => {
+    localStorage.removeItem('tamir_active_task');
+    setTaskId(null);
+    setMessages([]);
+    setShowCanvas(false);
+    setPlanMarkdown(null);
+    setRoutingButtons(null);
+    setChosenAgentId(null);
+    setDepartment('');
+  }, []);
+
   return (
     <div>
+      <ChatSidebar
+        isOpen={sidebarOpen}
+        activeTaskId={taskId}
+        onSelectChat={handleSelectChat}
+        onNewChat={handleNewChat}
+        onClose={() => setSidebarOpen(false)}
+      />
+
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h1>Tamir</h1>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <button
+            className="hamburger-btn"
+            onClick={() => setSidebarOpen(true)}
+            aria-label="Open chat history"
+          >
+            <span></span>
+            <span></span>
+            <span></span>
+          </button>
+          <h1>Tamir</h1>
+        </div>
         {taskId && (
           <button
             className={`btn btn-sm ${cancelPending ? 'btn-cancel' : ''}`}
