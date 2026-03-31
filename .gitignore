@@ -15,6 +15,12 @@ data/workspaces/
 data/departments/*/planning-desk/chat/
 data/tmp/
 
+# Vault documents (user-specific, regenerated from templates)
+data/vault/*.md
+
+# Agent runtime memory (regenerated on use)
+data/agents/*/MEMORY.md
+
 # Environment
 .env
 .env.local
