@@ -39,3 +39,6 @@ Thumbs.db
 # TypeScript
 *.tsbuildinfo
 next-env.d.ts
+
+# Personal founding documents
+Founding/
