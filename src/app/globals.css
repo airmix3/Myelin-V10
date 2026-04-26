@@ -1,0 +1,558 @@
+@import "tailwindcss";
+
+@theme inline {
+  --color-navy-950: #060a13;
+  --color-navy-900: #0a1020;
+  --color-navy-800: #0f1829;
+  --color-navy-700: #141f35;
+  --color-navy-600: #1a2844;
+  --color-navy-500: #243656;
+  --color-navy-400: #374d6e;
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+  /* Container max-width tokens (Tailwind 4 requires explicit definition) */
+  --container-3xs: 16rem;
+  --container-2xs: 18rem;
+  --container-xs: 20rem;
+  --container-sm: 24rem;
+  --container-md: 28rem;
+  --container-lg: 32rem;
+  --container-xl: 36rem;
+  --container-2xl: 42rem;
+  --container-3xl: 48rem;
+  --container-4xl: 56rem;
+  --container-5xl: 64rem;
+  --container-6xl: 72rem;
+  --container-7xl: 80rem;
+}
+
+:root {
+  --bg-base: #060a13;
+  --bg-panel: #0a1020;
+  --bg-card: #0e1525;
+  --bg-elevated: #141f35;
+  --border-subtle: rgba(255, 255, 255, 0.06);
+  --border-medium: rgba(255, 255, 255, 0.10);
+  --border-strong: rgba(255, 255, 255, 0.15);
+
+  /* === DARK GLASS TOKENS === */
+  --glass-surface:   rgba(10, 18, 40, 0.52);
+  --glass-elevated:  rgba(14, 24, 58, 0.48);
+  --glass-accent:    rgba(8,  16, 36, 0.60);
+
+  --glass-blur-sm:   blur(12px) saturate(140%) brightness(1.05);
+  --glass-blur-md:   blur(18px) saturate(150%) brightness(1.08);
+  --glass-blur-lg:   blur(28px) saturate(160%) brightness(1.12);
+
+  --glass-border:         1px solid rgba(255, 255, 255, 0.12);
+  --glass-border-bright:  1px solid rgba(255, 255, 255, 0.20);
+  --glass-specular-top:   linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0) 100%);
+  --glass-inset-glow:     inset 0 1px 0 rgba(255,255,255,0.14), inset 0 -1px 0 rgba(0,0,0,0.20);
+  --glass-shadow-sm:      0 4px 16px rgba(0,0,0,0.35), 0 1px 4px rgba(0,0,0,0.25);
+  --glass-shadow-md:      0 8px 32px rgba(0,0,0,0.45), 0 2px 8px rgba(0,0,0,0.30);
+  --glass-shadow-lg:      0 16px 48px rgba(0,0,0,0.55), 0 4px 16px rgba(0,0,0,0.35);
+}
+
+body {
+  background: var(--bg-base);
+  color: #e2e8f0;
+  font-family: var(--font-geist-sans), system-ui, -apple-system, sans-serif;
+  transform: translateZ(0);
+}
+
+/* === GLASS UTILITY CLASSES === */
+
+/* Base glass panel */
+.glass-panel {
+  background: var(--glass-surface);
+  backdrop-filter: blur(18px) saturate(150%) brightness(1.08);
+  -webkit-backdrop-filter: blur(18px) saturate(150%) brightness(1.08);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-md), var(--glass-inset-glow);
+  position: relative;
+  isolation: isolate;
+}
+.glass-panel::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--glass-specular-top);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Card glass -- floats above panels */
+.glass-card {
+  background: var(--glass-elevated);
+  backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm), var(--glass-inset-glow);
+  position: relative;
+  isolation: isolate;
+}
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--glass-specular-top);
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 1;
+}
+
+/* Deep glass -- nav/dock layer */
+.glass-deep {
+  background: var(--glass-accent);
+  backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+  box-shadow: var(--glass-shadow-lg), var(--glass-inset-glow);
+  will-change: backdrop-filter;
+  transform: translateZ(0);
+  position: relative;
+  isolation: isolate;
+}
+.glass-deep::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1px;
+  background: var(--glass-specular-top);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Pill glass -- StatusBar metrics */
+.glass-pill {
+  background: var(--glass-elevated);
+  backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  border: var(--glass-border);
+  box-shadow: var(--glass-shadow-sm), inset 0 1px 0 rgba(255,255,255,0.10);
+}
+
+/* Hover upgrades */
+.glass-card:hover, .glass-panel:hover {
+  backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  box-shadow: var(--glass-shadow-lg), var(--glass-inset-glow), 0 0 0 1px rgba(56,189,248,0.08);
+  transition: backdrop-filter 0.4s ease, box-shadow 0.3s ease;
+}
+
+/* Liquid surface shimmer */
+@keyframes liquidShimmer {
+  0%, 100% { background-position: -300% 0; opacity: 0.6; }
+  50%       { background-position: 300% 0; opacity: 1; }
+}
+.glass-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.glass-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(105deg, transparent 20%, rgba(255,255,255,0.04) 40%, rgba(255,255,255,0.10) 50%, rgba(255,255,255,0.04) 60%, transparent 80%);
+  background-size: 300% 100%;
+  animation: liquidShimmer 6s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+  z-index: 2;
+}
+
+/* === BACKDROP FILTER SUPPORT ===
+   Declared in @supports to prevent Tailwind's PostCSS from stripping backdrop-filter values */
+@supports (backdrop-filter: blur(1px)) {
+  .glass-panel {
+    backdrop-filter: blur(18px) saturate(150%) brightness(1.08);
+    -webkit-backdrop-filter: blur(18px) saturate(150%) brightness(1.08);
+  }
+  .glass-card {
+    backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  }
+  .glass-deep {
+    backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  }
+  .glass-pill {
+    backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+    -webkit-backdrop-filter: blur(12px) saturate(140%) brightness(1.05);
+  }
+  .glass-panel:hover, .glass-card:hover {
+    backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+    -webkit-backdrop-filter: blur(28px) saturate(160%) brightness(1.12);
+  }
+}
+
+/* Reduced motion fallback */
+@media (prefers-reduced-motion: reduce) {
+  .glass-panel, .glass-card, .glass-deep, .glass-pill,
+  .glass-panel:hover, .glass-card:hover {
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    background: var(--bg-panel);
+    border: 1px solid var(--border-medium);
+  }
+  .glass-shimmer::after {
+    animation: none;
+  }
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 4px; height: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 2px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(255,255,255,0.2); }
+
+/* Card depth */
+.card-depth {
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.4), 0 1px 3px rgba(0, 0, 0, 0.3), inset 0 1px 0 rgba(255, 255, 255, 0.03);
+  transition: box-shadow 0.3s ease, border-color 0.3s ease;
+}
+.card-depth:hover {
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.06), 0 4px 16px rgba(0,0,0,0.5), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+}
+
+/* Intervention glow -- glass-aware */
+@keyframes glassInterventionPulse {
+  0%, 100% { box-shadow: inset 0 1px 0 rgba(255,255,255,0.10), 0 0 20px rgba(245,158,11,0.08); }
+  50%       { box-shadow: inset 0 1px 0 rgba(255,255,255,0.18), 0 0 32px rgba(245,158,11,0.18); }
+}
+.intervention-glow {
+  animation: glassInterventionPulse 2.5s ease-in-out infinite;
+}
+
+/* Health borders */
+.health-good { border-left: 3px solid #10b981; }
+.health-warning { border-left: 3px solid #eab308; }
+.health-critical { border-left: 3px solid #f43f5e; }
+
+/* === ADVANCED ANIMATIONS === */
+
+/* Pulse bars - breathing animation for activity indicators */
+@keyframes barPulse {
+  0%, 100% { opacity: 0.5; transform: scaleY(1); }
+  50% { opacity: 0.85; transform: scaleY(1.2); }
+}
+.pulse-bar {
+  animation: barPulse 2s ease-in-out infinite;
+  transform-origin: bottom;
+}
+.pulse-bar:nth-child(2n) { animation-delay: 0.3s; }
+.pulse-bar:nth-child(3n) { animation-delay: 0.6s; }
+.pulse-bar:nth-child(4n) { animation-delay: 0.9s; }
+
+/* Ambient background gradient orbs */
+.ambient-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.ambient-bg::before {
+  content: '';
+  position: absolute;
+  width: 600px;
+  height: 600px;
+  top: -200px;
+  left: -100px;
+  background: radial-gradient(circle, rgba(56,189,248,0.07) 0%, transparent 70%);
+  animation: ambientFloat 20s ease-in-out infinite;
+}
+.ambient-bg::after {
+  content: '';
+  position: absolute;
+  width: 500px;
+  height: 500px;
+  bottom: -150px;
+  right: -100px;
+  background: radial-gradient(circle, rgba(168,85,247,0.05) 0%, transparent 70%);
+  animation: ambientFloat 25s ease-in-out infinite reverse;
+}
+@keyframes ambientFloat {
+  0%, 100% { transform: translate(0, 0); }
+  33% { transform: translate(30px, -20px); }
+  66% { transform: translate(-20px, 15px); }
+}
+
+/* Directive bar shimmer */
+@keyframes shimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+.directive-shimmer {
+  position: relative;
+  overflow: hidden;
+}
+.directive-shimmer::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(245,158,11,0.06) 50%, transparent 100%);
+  background-size: 200% 100%;
+  animation: shimmer 4s ease-in-out infinite;
+  pointer-events: none;
+  border-radius: inherit;
+}
+
+/* Directive button glow */
+.directive-btn {
+  transition: box-shadow 0.3s ease, transform 0.15s ease;
+}
+.directive-btn:hover {
+  box-shadow: 0 0 24px rgba(245, 158, 11, 0.35);
+}
+
+/* Network graph node float */
+@keyframes nodeFloat {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(2px, -3px); }
+}
+.network-node {
+  animation: nodeFloat 4s ease-in-out infinite;
+}
+.network-node:nth-child(2n) { animation-delay: 1s; animation-duration: 5s; }
+.network-node:nth-child(3n) { animation-delay: 2s; animation-duration: 6s; }
+.network-node:nth-child(5n) { animation-delay: 0.5s; animation-duration: 4.5s; }
+
+/* === LIVE MAP ANIMATIONS === */
+
+/* Particle flow along connection lines */
+@keyframes particleFlow {
+  0% { stroke-dashoffset: 24; }
+  100% { stroke-dashoffset: 0; }
+}
+.connection-line {
+  stroke-dasharray: 4 20;
+  animation: particleFlow 2s linear infinite;
+}
+.connection-line-reverse {
+  stroke-dasharray: 4 20;
+  animation: particleFlow 2.5s linear infinite reverse;
+}
+
+/* Agent node pulse ring */
+@keyframes nodePulse {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.6); opacity: 0; }
+}
+.node-pulse-ring {
+  animation: nodePulse 2.5s ease-out infinite;
+}
+
+/* Orbit breathing */
+@keyframes orbitBreath {
+  0%, 100% { opacity: 0.08; transform: scale(1); }
+  50% { opacity: 0.15; transform: scale(1.02); }
+}
+.orbit-ring {
+  animation: orbitBreath 4s ease-in-out infinite;
+  transform-origin: center;
+}
+
+/* Data burst on connection */
+@keyframes dataBurst {
+  0% { r: 2; opacity: 1; }
+  100% { r: 6; opacity: 0; }
+}
+
+/* === TERMINAL ANIMATIONS === */
+
+/* Blinking cursor */
+@keyframes cursorBlink {
+  0%, 50% { opacity: 1; }
+  51%, 100% { opacity: 0; }
+}
+.terminal-cursor {
+  animation: cursorBlink 1s step-end infinite;
+}
+
+/* Scanline effect */
+@keyframes scanline {
+  0% { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
+}
+.terminal-scanline {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 0%, rgba(56,189,248,0.02) 50%, transparent 100%);
+  height: 30%;
+  pointer-events: none;
+  animation: scanline 8s linear infinite;
+}
+
+/* Terminal text fade-in */
+@keyframes terminalType {
+  from { opacity: 0; transform: translateX(-4px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.terminal-line {
+  animation: terminalType 0.15s ease-out forwards;
+}
+
+/* Terminal header glow */
+.terminal-panel {
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.terminal-panel:hover {
+  border-color: rgba(56, 189, 248, 0.2);
+  box-shadow: 0 0 20px rgba(56, 189, 248, 0.05);
+}
+.terminal-panel.expanded {
+  border-color: rgba(56, 189, 248, 0.3);
+  box-shadow: 0 0 30px rgba(56, 189, 248, 0.08);
+}
+
+/* === COLLABORATION ANIMATIONS === */
+
+@keyframes collabEdgePulse {
+  0%, 100% { stroke-opacity: 0.3; }
+  50% { stroke-opacity: 0.5; }
+}
+.collab-edge {
+  animation: collabEdgePulse 3s ease-in-out infinite;
+}
+
+/* === EVALUATION ANIMATIONS === */
+
+@keyframes ratingFill {
+  from { width: 0; }
+  to { width: var(--rating-width); }
+}
+.rating-bar-fill {
+  animation: ratingFill 0.6s ease-out forwards;
+}
+
+@keyframes escalationGlow {
+  0%, 100% { box-shadow: 0 0 8px rgba(244, 63, 94, 0.08); }
+  50% { box-shadow: 0 0 20px rgba(244, 63, 94, 0.15); }
+}
+.escalation-glow {
+  animation: escalationGlow 3s ease-in-out infinite;
+}
+
+/* === CONTROL CENTER ANIMATIONS === */
+
+@keyframes livePulse {
+  0%, 100% { opacity: 1; transform: scale(1); }
+  50% { opacity: 0.4; transform: scale(0.85); }
+}
+.live-dot {
+  animation: livePulse 2s ease-in-out infinite;
+}
+.priority-pulse {
+  animation: livePulse 2s ease-in-out infinite;
+}
+
+@keyframes commandAccent {
+  0%, 100% { border-left-color: rgba(56, 189, 248, 0.15); }
+  50% { border-left-color: rgba(56, 189, 248, 0.4); }
+}
+.command-card {
+  border-left: 2px solid rgba(56, 189, 248, 0.15);
+  animation: commandAccent 4s ease-in-out infinite;
+}
+
+/* === SKILL NEXUS ANIMATIONS === */
+
+@keyframes coreBreath {
+  0%, 100% { transform: scale(1); opacity: 0.6; }
+  50% { transform: scale(1.04); opacity: 0.85; }
+}
+
+@keyframes nodeFlash {
+  0% { transform: scale(1); filter: brightness(1); }
+  40% { transform: scale(1.5); filter: brightness(2.5); }
+  100% { transform: scale(1); filter: brightness(1); }
+}
+
+/* === GALLERY OVERLAY === */
+
+.gallery-overlay-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(8px);
+}
+
+.gallery-overlay {
+  background: var(--glass-elevated);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 16px;
+  padding: 24px;
+  max-width: 480px;
+  width: 90%;
+  max-height: 80vh;
+  overflow-y: auto;
+  box-shadow: 0 25px 50px rgba(0, 0, 0, 0.5);
+}
+
+.gallery-overlay-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  margin-bottom: 16px;
+}
+
+.gallery-overlay-close {
+  background: transparent;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--text-secondary, #94a3b8);
+  width: 28px;
+  height: 28px;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.gallery-overlay-close:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.gallery-overlay-meta {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.gallery-overlay-field > div:first-child {
+  font-size: 11px;
+  text-transform: uppercase;
+  color: var(--text-secondary, #94a3b8);
+  margin-bottom: 4px;
+}
+
+.gallery-overlay-field > div:last-child,
+.gallery-overlay-field > a {
+  font-size: 13px;
+  color: var(--text-primary, #e2e8f0);
+}
+
+.gallery-overlay-link {
+  color: rgb(56, 189, 248);
+  text-decoration: none;
+}
+
+.gallery-overlay-link:hover {
+  text-decoration: underline;
+}
+

@@ -1,0 +1,403 @@
+import { mkdirSync, writeFileSync, symlinkSync, existsSync, readdirSync } from 'fs';
+import { join, resolve } from 'path';
+import { logger } from '@/lib/logger';
+import { DATA_ROOT as DATA_DIR } from '@/lib/paths';
+import { createAssetBranch } from '@/lib/asset-repo';
+import { sqlite } from '@/lib/db';
+import { getAllDepartments } from '@/lib/departments';
+
+/** Department is now a dynamic string -- no longer a narrow union. */
+export type Department = string;
+
+/**
+ * Get the list of all departments (including 'cos') from DB.
+ * Replaces the former hardcoded DEPARTMENTS const.
+ */
+export async function getDepartmentList(): Promise<string[]> {
+  return getAllDepartments();
+}
+
+/**
+ * @deprecated Use getDepartmentList() or getActiveDepartments() from @/lib/departments.
+ * Kept for backwards compatibility during migration. Returns a static fallback.
+ */
+export const DEPARTMENTS = ['tech', 'marketing', 'operations', 'cos'] as const;
+
+export interface WorkspaceResult {
+  baseDir: string;
+  deskDir: string;
+  delivDir: string;
+  manifestPath: string;
+  assetDir?: string;
+}
+
+export interface CeoHints {
+  selectedTools?: string[];
+  selectedSkills?: string[];
+  toolHints?: Record<string, string>;
+}
+
+export function createTaskWorkspace(
+  taskId: string,
+  department: Department,
+  plan?: string,
+  constraints?: string,
+  ceoHints?: CeoHints,
+  targetAssetId?: string,
+): WorkspaceResult {
+  const log = logger.child({ module: 'workspace', taskId });
+  const baseDir = join(DATA_DIR, 'workspaces', taskId);
+  const deskDir = join(baseDir, 'desk');
+  const delivDir = join(baseDir, 'deliverables');
+  const skillsDir = join(deskDir, '.claude', 'skills');
+
+  mkdirSync(skillsDir, { recursive: true });
+  mkdirSync(delivDir, { recursive: true });
+
+  // Write desk-level settings.json to anchor project boundary at desk/
+  // This prevents the agent subprocess from walking up to data/ or repo root
+  const settingsPath = join(deskDir, '.claude', 'settings.json');
+  writeFileSync(settingsPath, JSON.stringify({
+    permissions: {
+      allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
+      deny: [],
+    },
+  }, null, 2), 'utf-8');
+
+  // Symlink individual skills into desk/.claude/skills/<skill-name>/
+  // Claude Code discovers skills at .claude/skills/*/SKILL.md — each skill needs
+  // its own directory directly under .claude/skills/, not nested in a subdirectory.
+  const skillSources = [
+    join(DATA_DIR, 'departments', department, 'skills'),
+    join(DATA_DIR, 'departments', 'global', 'skills'),
+  ];
+  for (const source of skillSources) {
+    if (!existsSync(source)) continue;
+    try {
+      const entries = readdirSync(source, { withFileTypes: true });
+      for (const entry of entries) {
+        if (!entry.isDirectory()) continue;
+        const target = join(skillsDir, entry.name);
+        if (existsSync(target)) continue; // dept skill takes precedence over global
+        try { symlinkSync(join(source, entry.name), target, 'junction'); }
+        catch (err) { log.warn({ err, skill: entry.name }, 'Failed to symlink skill'); }
+      }
+    } catch (err) {
+      log.warn({ err, source }, 'Failed to read skills directory');
+    }
+  }
+
+  // Symlink department sharedlib into desk/sharedlib/ for native filesystem access
+  const sharedlibSource = join(DATA_DIR, 'departments', department, 'sharedlib');
+  const sharedlibTarget = join(deskDir, 'sharedlib');
+  if (existsSync(sharedlibSource) && !existsSync(sharedlibTarget)) {
+    try { symlinkSync(sharedlibSource, sharedlibTarget, 'junction'); }
+    catch (err) { log.warn({ err, source: sharedlibSource }, 'Failed to symlink dept sharedlib'); }
+  }
+
+  // Link target asset into workspace and create task branch
+  let linkedAssetDir: string | undefined;
+  if (targetAssetId) {
+    try {
+      const assetRow = sqlite.prepare('SELECT directoryPath FROM assets WHERE id = ?').get(targetAssetId) as { directoryPath: string | null } | undefined;
+      if (assetRow?.directoryPath && existsSync(assetRow.directoryPath)) {
+        createAssetBranch(assetRow.directoryPath, taskId);
+        const assetLink = join(deskDir, 'asset');
+        if (!existsSync(assetLink)) {
+          symlinkSync(assetRow.directoryPath, assetLink, 'junction');
+        }
+        linkedAssetDir = assetRow.directoryPath;
+        log.info({ targetAssetId, assetLink }, 'Asset linked to workspace');
+      } else {
+        log.warn({ targetAssetId }, 'Target asset directory not found, skipping asset link');
+      }
+    } catch (err) {
+      log.warn({ err, targetAssetId }, 'Failed to link asset to workspace (non-blocking)');
+    }
+  }
+
+  // Write plan to separate PLAN.md (per D-06)
+  if (plan) {
+    writeFileSync(join(deskDir, 'PLAN.md'), plan, 'utf-8');
+  }
+
+  // Build CEO hints section for CLAUDE.md (when CEO selected tools/skills during planning)
+  let hintsSection = '';
+  if (ceoHints?.selectedTools?.length || ceoHints?.selectedSkills?.length) {
+    hintsSection += '\n## CEO-Selected Tools & Skills\n\n';
+    hintsSection += 'The CEO has selected these for this task. Install them FIRST before reading PLAN.md.\n\n';
+
+    if (ceoHints.selectedTools?.length) {
+      hintsSection += '### Tools to Install\n';
+      for (const tool of ceoHints.selectedTools) {
+        const hint = ceoHints.toolHints?.[tool] || '';
+        hintsSection += `- \`${tool}\`${hint ? ` — ${hint}` : ''}\n`;
+        hintsSection += `  -> Run: \`install_tool\` MCP tool with package="${tool}"\n`;
+      }
+      hintsSection += '\n';
+    }
+
+    if (ceoHints.selectedSkills?.length) {
+      hintsSection += '### Skills to Install\n';
+      for (const skill of ceoHints.selectedSkills) {
+        hintsSection += `- \`${skill}\`\n`;
+        hintsSection += `  -> Run: \`install_skill\` MCP tool with skill_id="${skill}"\n`;
+      }
+      hintsSection += '\n';
+    }
+  }
+
+  // Write minimal CLAUDE.md as pointer file
+  const constraintsSection = constraints ? `\n## Constraints\n\n${constraints}\n` : '';
+  const hasHints = hintsSection.length > 0;
+  const planInstruction = hasHints
+    ? 'After installing CEO-selected tools/skills above, read `PLAN.md` in this directory for your full task plan.'
+    : 'Your complete task plan is in `PLAN.md` in this directory. Read it first before doing anything else.';
+  const claudeMd = `# Task: ${taskId}
+
+## Department: ${department}
+${hintsSection}
+## Instructions
+
+${planInstruction}
+
+You have access to MCP tools for shared resources:
+- \`memory\` (add/replace/remove) — Your bounded personal memory (already injected into your prompt as a snapshot)
+- \`read_knowledge\` / \`search_knowledge\` — Department knowledge base
+- \`promote_to_deliverable\` — Move files to deliverables
+- \`file_to_vault\` — Save important files to the company vault (see \`search_knowledge\` to find existing vault docs)
+- \`submit_for_review\` — Submit work for supervisor review
+- \`escalate_to_ceo\` — Escalate an issue, question, or approval request to the CEO (task pauses until CEO responds)
+
+If \`sharedlib/DATA_CATALOG.md\` exists in this directory, read it first to see what department data is available.
+
+If the \`asset/\` directory exists, it contains the company asset you are working on. Make your changes there.
+
+All your work must stay within this directory. Do not try to access files outside your workspace.
+${constraintsSection}`;
+  writeFileSync(join(deskDir, 'CLAUDE.md'), claudeMd, 'utf-8');
+
+  // Stub deliverable_manifest.json
+  const manifestPath = join(delivDir, 'deliverable_manifest.json');
+  writeFileSync(manifestPath, JSON.stringify({
+    taskId, files: [], primaryFile: null, createdAt: new Date().toISOString(),
+  }, null, 2), 'utf-8');
+
+  log.info({ baseDir, department }, 'Task workspace created');
+  return { baseDir, deskDir, delivDir, manifestPath, assetDir: linkedAssetDir };
+}
+
+export async function ensureManagerDesks(): Promise<void> {
+  const log = logger.child({ module: 'workspace' });
+  const departments = await getAllDepartments();
+  for (const dept of departments) {
+    // Department tools directory
+    const toolsDir = join(DATA_DIR, 'departments', dept, 'tools');
+    mkdirSync(toolsDir, { recursive: true });
+
+    // Department skills directory
+    const skillsDir = join(DATA_DIR, 'departments', dept, 'skills');
+    mkdirSync(skillsDir, { recursive: true });
+
+    // Tamir lives flat in cos/ -- no manager-desk subdirectory needed
+    if (dept === 'cos') continue;
+
+    // Manager desk directory
+    const managerDesk = join(DATA_DIR, 'departments', dept, 'manager-desk');
+    const settingsDir = join(managerDesk, '.claude');
+    const mgrSkillsDir = join(managerDesk, '.claude', 'skills');
+    mkdirSync(mgrSkillsDir, { recursive: true });
+
+    // Write settings.json for project boundary
+    const settingsPath = join(settingsDir, 'settings.json');
+    writeFileSync(settingsPath, JSON.stringify({
+      permissions: {
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
+        deny: [],
+      },
+    }, null, 2), 'utf-8');
+
+    // Symlink global skills into manager desk so approval policies are discoverable
+    const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+    const globalSkillsTarget = join(mgrSkillsDir, 'global');
+    if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+      try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+      catch { /* already exists or race */ }
+    }
+
+    // Write CLAUDE.md for manager desk
+    writeFileSync(join(managerDesk, 'CLAUDE.md'), `# Manager Desk: ${dept}
+
+## Role
+
+You are a department head. This workspace is used when you are invoked for management tasks such as approval reviews.
+
+Check your skills (.claude/skills/) for relevant policies before making decisions.
+`, 'utf-8');
+  }
+  log.info('Manager desks and dept tool/skill directories ensured for all departments');
+}
+
+export async function ensurePlanningDesks(): Promise<void> {
+  const log = logger.child({ module: 'workspace' });
+  const departments = await getAllDepartments();
+  for (const dept of departments) {
+    // Tamir lives flat in cos/ -- no planning-desk subdirectory
+    if (dept === 'cos') {
+      const cosDir = join(DATA_DIR, 'departments', 'cos');
+      const skillsDir = join(cosDir, '.claude', 'skills');
+      const chatDir = join(cosDir, 'chat');
+      mkdirSync(skillsDir, { recursive: true });
+      mkdirSync(chatDir, { recursive: true });
+
+      // Symlink cos/skills into Tamir's .claude/skills/cos for Tamir-specific skills (installer)
+      const cosSkillsSource = join(DATA_DIR, 'departments', 'cos', 'skills');
+      const cosSkillsTarget = join(skillsDir, 'cos');
+      if (existsSync(cosSkillsSource) && !existsSync(cosSkillsTarget)) {
+        try { symlinkSync(cosSkillsSource, cosSkillsTarget, 'junction'); }
+        catch (err) { log.warn({ err }, 'Failed to symlink cos skills to Tamir desk'); }
+      }
+
+      // Symlink global/skills into Tamir's .claude/skills/global for shared skills
+      const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+      const globalSkillsTarget = join(skillsDir, 'global');
+      if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+        try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+        catch (err) { log.warn({ err }, 'Failed to symlink global skills to Tamir desk'); }
+      }
+
+      const settingsPath = join(cosDir, '.claude', 'settings.json');
+      writeFileSync(settingsPath, JSON.stringify({
+        permissions: {
+          allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
+          deny: [],
+        },
+      }, null, 2), 'utf-8');
+
+      writeFileSync(join(cosDir, 'CLAUDE.md'), `# Tamir — Chief of Staff (cos)
+
+## Mode
+
+You are in PLANNING MODE. Help the CEO plan a task. Do NOT execute anything.
+Ask clarifying questions, gather information using your tools, then produce a detailed plan when ready.
+
+## Available Tools
+
+You have MCP tools available during planning. USE THEM to research and inform your plans:
+
+### Research & Memory
+- \`read_memory\` — Read your persistent memory (past projects, conventions, notes)
+- \`write_memory\` — Save important context to your memory for future reference
+- \`read_knowledge\` — Read department knowledge base files
+- \`write_knowledge\` — Add to department knowledge base
+- \`search_knowledge\` — Full-text search across department knowledge
+
+### Organization
+- \`get_dept_status\` — Check active tasks and employee counts across departments
+
+### Other (available but typically used during execution)
+- \`promote_to_deliverable\` — Move files to deliverables (execution phase)
+- \`file_to_vault\` — Save files to company vault (execution phase)
+- \`submit_for_review\` — Submit work for review (execution phase)
+- \`propose_skill\` — Propose a reusable skill (execution phase)
+- \`hire_employee\` — Request a temp hire (execution phase)
+
+## Built-in Tools
+
+You have full access to Claude's built-in tools (Read, Write, Bash, Edit, Glob, Grep, WebSearch, etc.).
+Use these tools to research the codebase before planning.
+
+Do NOT use built-in tools to modify production code during planning. Planning mode is for research and plan creation only.
+
+## Planning Guidelines
+
+- Use built-in tools (Read, Glob, Grep) and \`read_memory\` to research the codebase before planning
+- Use \`search_knowledge\` to find relevant department knowledge
+- Use \`get_dept_status\` to understand current workload before scoping
+- Ask the CEO clarifying questions when requirements are ambiguous
+- Produce a detailed plan with clear steps when you have enough information
+`, 'utf-8');
+      continue;
+    }
+
+    const planningDesk = join(DATA_DIR, 'departments', dept, 'planning-desk');
+    const skillsDir = join(planningDesk, '.claude', 'skills');
+    const chatDir = join(planningDesk, 'chat');
+    mkdirSync(skillsDir, { recursive: true });
+    mkdirSync(chatDir, { recursive: true });
+
+    // Write desk-level settings.json to anchor project boundary at planning desk
+    const settingsPath = join(planningDesk, '.claude', 'settings.json');
+    writeFileSync(settingsPath, JSON.stringify({
+      permissions: {
+        allow: ['Bash(*)', 'Read(*)', 'Write(*)', 'Edit(*)', 'mcp__cortex__*'],
+        deny: [],
+      },
+    }, null, 2), 'utf-8');
+
+    const globalSkillsSource = join(DATA_DIR, 'departments', 'global', 'skills');
+    const globalSkillsTarget = join(skillsDir, 'global');
+    if (existsSync(globalSkillsSource) && !existsSync(globalSkillsTarget)) {
+      try { symlinkSync(globalSkillsSource, globalSkillsTarget, 'junction'); }
+      catch (err) { log.warn({ err, dept }, 'Failed to symlink global skills to planning desk'); }
+    }
+
+    const deptSkillsSource = join(DATA_DIR, 'departments', dept, 'skills');
+    const deptSkillsTarget = join(skillsDir, dept);
+    if (existsSync(deptSkillsSource) && !existsSync(deptSkillsTarget)) {
+      try { symlinkSync(deptSkillsSource, deptSkillsTarget, 'junction'); }
+      catch (err) { log.warn({ err, dept }, 'Failed to symlink dept skills to planning desk'); }
+    }
+
+    // Write comprehensive CLAUDE.md for planning desk (always overwrite to keep current)
+    const planningClaudeMd = join(planningDesk, 'CLAUDE.md');
+    writeFileSync(planningClaudeMd, `# Planning Desk: ${dept}
+
+## Mode
+
+You are in PLANNING MODE. Help the CEO plan a task. Do NOT execute anything.
+Ask clarifying questions, gather information using your tools, then produce a detailed plan when ready.
+
+## Available Tools
+
+You have MCP tools available during planning. USE THEM to research and inform your plans:
+
+### Research & Memory
+- \`read_memory\` — Read your persistent memory (past projects, conventions, notes)
+- \`write_memory\` — Save important context to your memory for future reference
+- \`read_knowledge\` — Read department knowledge base files
+- \`write_knowledge\` — Add to department knowledge base
+- \`search_knowledge\` — Full-text search across department knowledge
+
+### Organization
+- \`get_dept_status\` — Check active tasks and employee counts across departments
+
+### Other (available but typically used during execution)
+- \`promote_to_deliverable\` — Move files to deliverables (execution phase)
+- \`file_to_vault\` — Save files to company vault (execution phase)
+- \`submit_for_review\` — Submit work for review (execution phase)
+- \`propose_skill\` — Propose a reusable skill (execution phase)
+- \`hire_employee\` — Request a temp hire (execution phase)
+- \`escalate_to_ceo\` — Escalate an issue, question, or approval request to the CEO (task pauses until CEO responds)
+
+## Built-in Tools
+
+You have full access to Claude's built-in tools (Read, Write, Bash, Edit, Glob, Grep, WebSearch, etc.).
+Your filesystem access is sandboxed to this planning desk directory. Use these tools to:
+- Read source files to understand the codebase before planning
+- Search for patterns with Glob/Grep to inform your recommendations
+- Check existing implementations to avoid redundant work
+
+Do NOT use built-in tools to modify production code during planning. Planning mode is for research and plan creation only.
+
+## Planning Guidelines
+
+- Use built-in tools (Read, Glob, Grep) and \`read_memory\` to research the codebase before planning
+- Use \`search_knowledge\` to find relevant department knowledge
+- Use \`get_dept_status\` to understand current workload before scoping
+- Ask the CEO clarifying questions when requirements are ambiguous
+- Produce a detailed plan with clear steps when you have enough information
+`, 'utf-8');
+  }
+  log.info('Planning desks ensured for all departments');
+}

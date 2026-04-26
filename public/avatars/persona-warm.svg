@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" width="80" height="80">
+  <!-- Background circle -->
+  <circle cx="40" cy="40" r="40" fill="#3b1f3f"/>
+  <!-- Head -->
+  <circle cx="40" cy="28" r="11" fill="#dcc5a0"/>
+  <!-- Longer hair -->
+  <path d="M27 30 Q27 14 40 13 Q53 14 53 30 L53 36 Q52 32 50 30 L50 24 Q49 17 40 16 Q31 17 30 24 L30 30 Q28 32 27 36Z" fill="#8b6f4e"/>
+  <!-- Eyes -->
+  <circle cx="36" cy="27" r="1.5" fill="#3b1f3f"/>
+  <circle cx="44" cy="27" r="1.5" fill="#3b1f3f"/>
+  <!-- Warm smile -->
+  <path d="M35 33 Q40 37 45 33" fill="none" stroke="#3b1f3f" stroke-width="1.5" stroke-linecap="round"/>
+  <!-- Body/shoulders - open stance -->
+  <path d="M22 58 Q22 44 40 42 Q58 44 58 58 L58 65 L22 65Z" fill="#a07850"/>
+  <!-- Collar detail -->
+  <path d="M34 42 Q40 50 46 42" fill="none" stroke="#dcc5a0" stroke-width="1.2"/>
+</svg>

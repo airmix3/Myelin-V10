@@ -1,0 +1,10 @@
+{
+  "agentId": "coo",
+  "name": "COO",
+  "department": "operations",
+  "role": "executive",
+  "description": "Chief Operating Officer. Owns systems, processes, analytics, and operational efficiency.",
+  "tools": ["read_memory", "write_memory", "read_knowledge", "write_knowledge", "search_knowledge", "promote_to_deliverable", "submit_for_review", "approve_deliverable", "request_changes", "file_to_vault", "propose_skill", "hire_employee"],
+  "skills": ["memory-management", "skill-extractor"],
+  "avatarColor": "#44CC88"
+}

@@ -1,0 +1,382 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+}
+
+model Employee {
+  id            String   @id
+  name          String
+  role          String                // executive | temp | permanent
+  department    String                // tech | marketing | operations | global
+  agentId       String?  @unique      // e.g., "cto", "cmo", "coo", "tamir"
+  status        String   @default("active")  // active | terminated | pending
+  budgetLimit   Float    @default(10.0)
+  budgetSpent   Float    @default(0.0)
+  capabilities  String?               // JSON: { specialty, outputTypes, description } for list_my_employees
+  toolWhitelist String?  @map("tool_whitelist")  // JSON: default tools for this employee type
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  tasks       Task[]   @relation("creator")
+  taskRuns    TaskRun[]
+
+  @@map("employees")
+}
+
+model Task {
+  id                 String   @id
+  title              String
+  description        String?
+  department         String
+  state              String   @default("submitted")  // submitted|working|input-required|completed|failed|canceled
+  metadata           String?                         // JSON string for extensible data (inputType, etc.)
+  planningAgentId    String?
+  executorAgentId    String?
+  supervisorAgentId  String?
+  currentActorId     String?
+  contextId          String?                         // groups related chat turns
+  chatFilePath       String?                         // path to JSONL chat file
+  planMarkdown       String?                         // the approved plan
+  goalId             String?                         // FK to goals table (strategic layer)
+  reviewFeedback     String?
+  reviewRound        Int      @default(0)
+  createdById        String?
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+  completedAt        DateTime?
+
+  creator            Employee?     @relation("creator", fields: [createdById], references: [id])
+  taskRuns           TaskRun[]
+  deliverables       Deliverable[]
+  costEvents         CostEvent[]
+  hireRequests       HireRequest[]
+  escalations        Escalation[]
+
+  @@map("tasks")
+}
+
+model TaskRun {
+  id                 String   @id
+  taskId             String
+  employeeId         String
+  status             String   @default("queued")  // queued|executing|completed|failed|paused|canceled
+  claimedAt          DateTime?
+  heartbeatAt        DateTime?
+  completedAt        DateTime?
+  failedAt           DateTime?
+  failureReason      String?
+  sessionId          String?                      // SDK session ID for resume
+  workspaceCwd       String?                      // absolute path to desk directory
+  agents             String?                      // JSON: subagent definitions from hire approval
+  parentRunId        String?  @map("parent_run_id")       // FK to parent TaskRun (NULL for top-level)
+  subtaskId          String?  @map("subtask_id")           // e.g. "st_abc123"
+  subtaskDescription String?  @map("subtask_description")  // What the employee should do
+  onComplete         String?  @map("on_complete")          // JSON: { action: "resume_parent", parentRunId, subtaskId }
+  createdAt          DateTime @default(now())
+
+  task          Task     @relation(fields: [taskId], references: [id])
+  employee      Employee @relation(fields: [employeeId], references: [id])
+
+  @@index([parentRunId])
+  @@map("task_runs")
+}
+
+model Deliverable {
+  id            String   @id
+  taskId        String
+  title         String
+  type          String?                      // video|document|code|analysis|report
+  status        String   @default("in-progress")  // in-progress|completed|reviewed
+  department    String
+  creatorId     String?
+  workspacePath String?                      // absolute path to workspace directory
+  manifestPath  String?                      // path to deliverable_manifest.json
+  primaryFile   String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  assetId       String?                      // ID of asset this deliverable was promoted to
+
+  task          Task     @relation(fields: [taskId], references: [id])
+
+  @@map("deliverables")
+}
+
+model HireRequest {
+  id            String   @id
+  taskId        String
+  requestedBy   String                       // agent ID of dept head
+  employeeName  String
+  employeeRole  String
+  justification String?
+  status        String   @default("pending")  // pending|approved|rejected
+  createdAt     DateTime @default(now())
+  resolvedAt    DateTime?
+
+  task          Task     @relation(fields: [taskId], references: [id])
+
+  @@map("hire_requests")
+}
+
+model CostEvent {
+  id           String   @id
+  taskId       String
+  agentId      String
+  inputTokens  Int      @default(0)
+  outputTokens Int      @default(0)
+  costUsd      Float    @default(0.0)
+  model        String?
+  runId        String?  @map("run_id")       // Specific task_run
+  subtaskId    String?  @map("subtask_id")   // Sub-task identifier for cost breakdown
+  createdAt    DateTime @default(now())
+
+  task        Task     @relation(fields: [taskId], references: [id])
+
+  @@map("cost_events")
+}
+
+model Escalation {
+  id          String   @id
+  taskId      String
+  agentId     String
+  type        String                       // clarification | hire_approval | budget_increase | custom
+  urgency     String   @default("normal")  // low | normal | high | critical
+  status      String   @default("pending") // pending | responded | resolved | dismissed
+  summary     String
+  reason      String?
+  context     String?                      // JSON: type-specific fields
+  response    String?
+  resolution  String?                      // approved | declined | answered | custom
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  resolvedAt  DateTime?
+  task        Task     @relation(fields: [taskId], references: [id])
+
+  @@map("escalations")
+}
+
+model Skill {
+  id          String   @id
+  name        String
+  department  String
+  description String?
+  status      String   @default("pending")   // pending|approved|active|dismissed
+  filePath    String?                        // path to SKILL.md
+  proposedBy  String?                        // agent ID
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("skills")
+}
+
+model McpServer {
+  id          String   @id
+  name        String   @unique
+  description String?
+  url         String?
+  status      String   @default("active")
+  toolCount   Int      @default(0)
+  createdAt   DateTime @default(now())
+
+  @@map("mcp_servers")
+}
+
+model Routine {
+  id            String   @id
+  name          String
+  description   String?
+  cronExpr      String
+  agentId       String
+  department    String
+  taskPlan      String
+  status        String   @default("active")
+  lastRunAt     DateTime?
+  lastTaskId    String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("routines")
+}
+
+model Document {
+  id          String   @id
+  title       String
+  content     String
+  source      String                         // vault|knowledge|deliverable
+  department  String?
+  filedBy     String?                        // agent ID
+  filePath    String?                        // filesystem path to original
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@map("documents")
+}
+
+model ActivityLog {
+  id          String   @id
+  taskId      String?
+  agentId     String?
+  actionType  String                         // SDK_SESSION_INIT|SDK_ASSISTANT|SDK_TOOL_PROGRESS|SDK_TOOL_SUMMARY|SDK_RESULT_SUCCESS|SDK_RESULT_ERROR|TASK_TRANSITION|WORKER_CLAIM|etc.
+  description String?
+  metadata    String?                        // JSON string
+  createdAt   DateTime @default(now())
+
+  @@map("activity_log")
+}
+
+model Asset {
+  id            String   @id
+  title         String
+  description   String?
+  category      String            // code|brand|IP|digital-product|knowledge
+  maturity      String   @default("nascent") // nascent|developing|established|foundational|legacy|heritage
+  stewardId     String?           // agentId of assigned steward: cto/cmo/coo
+  returnFactors String?           // JSON array: ["revenue","moat","core_tech","brand_equity"]
+  annotations   String?           // JSON array of {text, createdAt} objects
+  healthStatus  String   @default("healthy") // healthy|stale|degraded|critical
+  directoryPath String?           // data/assets/{assetId}/
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  events        AssetEvent[]
+  locations     AssetLocation[]
+
+  @@map("assets")
+}
+
+model AssetEvent {
+  id        String   @id
+  assetId   String
+  type      String   // creation|promotion|annotation|maturity_change|steward_assessment|deliverable_absorbed|dependency_added|location_added|health_change
+  summary   String
+  metadata  String?  // JSON
+  agentId   String?
+  createdAt DateTime @default(now())
+
+  asset     Asset    @relation(fields: [assetId], references: [id])
+  @@map("asset_events")
+}
+
+model AssetLocation {
+  id          String   @id
+  assetId     String
+  type        String   // local_path|github_url|platform_url|custom
+  value       String   // The actual path/URL
+  label       String?  // Human-readable label
+  isCanonical Boolean  @default(false)
+  createdAt   DateTime @default(now())
+
+  asset       Asset    @relation(fields: [assetId], references: [id])
+  @@map("asset_locations")
+}
+
+model AssetDependency {
+  id          String   @id
+  sourceId    String   // The asset that depends on...
+  targetId    String   // ...this asset
+  label       String?  // Relationship description
+  createdAt   DateTime @default(now())
+
+  @@map("asset_dependencies")
+}
+
+model Conversation {
+  id            String   @id
+  title         String?           // Auto-generated from first message or null
+  chatFilePath  String            // JSONL file path in data/departments/cos/chat/
+  linkedTaskId  String?           // If conversation spawned a task, link it here
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  @@map("conversations")
+}
+
+// ─── Strategic Layer Models (Phase 13) ───────────────────────────────
+
+model CanvasChat {
+  id              String   @id
+  title           String
+  chatFilePath    String?
+  canvasFilePath  String?
+  lastOpenedAt    String?
+  createdAt       String   @default("datetime('now')")
+  updatedAt       String   @default("datetime('now')")
+
+  decisionRecords DecisionRecord[]
+
+  @@map("canvas_chats")
+}
+
+model DecisionRecord {
+  id                String   @id
+  canvasChatId      String
+  summary           String
+  conversationRef   String?
+  canvasSnapshotRef String?
+  constraints       String?
+  alternatives      String?
+  challengeHighlights String?
+  createdAt         String   @default("datetime('now')")
+
+  canvasChat        CanvasChat @relation(fields: [canvasChatId], references: [id])
+
+  @@map("decision_records")
+}
+
+model Direction {
+  id        String   @id
+  title     String
+  rationale String?
+  status    String   @default("active")   // active|paused|completed|abandoned
+  priority  String   @default("active")   // focus|active|background
+  createdAt String   @default("datetime('now')")
+  updatedAt String   @default("datetime('now')")
+
+  @@map("directions")
+}
+
+model Goal {
+  id               String   @id
+  title            String
+  definitionOfDone String?
+  status           String   @default("planned")   // planned|active|at-risk|completed|abandoned
+  createdAt        String   @default("datetime('now')")
+  updatedAt        String   @default("datetime('now')")
+
+  seeds            TaskSeed[]
+
+  @@map("goals")
+}
+
+model TaskSeed {
+  id                  String   @id
+  goalId              String
+  title               String
+  description         String?
+  suggestedDepartment String?
+  roughScope          String?
+  dependencies        String?   // JSON array of seed IDs
+  strategicContext     String?
+  status              String   @default("planned")   // planned|activated|discarded
+  taskId              String?
+  createdAt           String   @default("datetime('now')")
+  updatedAt           String   @default("datetime('now')")
+
+  goal                Goal     @relation(fields: [goalId], references: [id])
+
+  @@map("task_seeds")
+}
+
+model PrioritySet {
+  id          String   @id
+  name        String
+  description String?
+  color       String?
+  createdAt   String   @default("datetime('now')")
+  updatedAt   String   @default("datetime('now')")
+
+  @@map("priority_sets")
+}
