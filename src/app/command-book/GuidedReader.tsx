@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import {
   ArrowLeft,
   ArrowRight,
@@ -50,6 +50,8 @@ function clamp(value: number, min: number, max: number) {
 }
 
 export default function GuidedReader({ chapters, sections }: ReaderProps) {
+  const pageRef = useRef<HTMLElement | null>(null);
+  const readerRef = useRef<HTMLElement | null>(null);
   const [activeIndex, setActiveIndex] = useState(0);
   const [fontScale, setFontScale] = useState(1);
   const [chapterMenuOpen, setChapterMenuOpen] = useState(false);
@@ -84,8 +86,12 @@ export default function GuidedReader({ chapters, sections }: ReaderProps) {
   }, [activeIndex]);
 
   useEffect(() => {
-    const reader = document.getElementById('guided-reader-page');
-    reader?.scrollTo({ top: 0, behavior: 'smooth' });
+    if (!readerRef.current || !pageRef.current) return;
+
+    readerRef.current.scrollTo({
+      top: Math.max(pageRef.current.offsetTop - 18, 0),
+      behavior: 'smooth',
+    });
   }, [activeIndex]);
 
   function goTo(index: number) {
@@ -145,7 +151,7 @@ export default function GuidedReader({ chapters, sections }: ReaderProps) {
         </nav>
       </aside>
 
-      <main id="guided-reader-page" className={styles.reader}>
+      <main id="guided-reader-page" ref={readerRef} className={styles.reader}>
         <div className={styles.topbar}>
           <button
             type="button"
@@ -212,7 +218,11 @@ export default function GuidedReader({ chapters, sections }: ReaderProps) {
           </p>
         </section>
 
-        <article className={styles.page} style={{ ['--reader-scale' as string]: fontScale }}>
+        <article
+          ref={pageRef}
+          className={styles.page}
+          style={{ ['--reader-scale' as string]: fontScale }}
+        >
           <div className={styles.pageMeta}>
             <div>
               <span>{activeChapter.part}</span>
