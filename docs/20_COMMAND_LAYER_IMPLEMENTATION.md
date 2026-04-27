@@ -274,6 +274,102 @@ This requirement is met when:
 
 ---
 
+## Requirement 2A: Real Resource Layer
+
+### Concept
+
+The Command Layer should expose real company resources, not fake engagement scores.
+
+Resources are the constraints that make strategy real: money, time, attention, capacity, trust, model budget, relationships, decision latency, confidence, and execution momentum.
+
+The goal is not gamification. The goal is to make the real operating constraints of the company visible enough to affect decisions.
+
+### Capability Required
+
+Cortex should track and display resource state across the company.
+
+Initial resources:
+
+- cash runway
+- mission budget
+- model and tool spend
+- CEO attention budget
+- agent execution capacity
+- human review capacity
+- decision debt
+- relationship health
+- execution momentum
+- confidence level by theater
+- strategic windows
+- trust in autonomy
+
+Each resource should answer:
+
+- current state
+- trend
+- source of truth
+- confidence level
+- evidence freshness
+- which missions or theaters it affects
+- what decision it should influence
+
+### UX Implications
+
+The CEO should see resources as operating facts, not decorative metrics.
+
+Examples:
+
+- "CEO attention: 2 high-judgment slots left today"
+- "Model budget: 68% of weekly cap used"
+- "Sales confidence: low, CRM not connected"
+- "Review capacity: overloaded, 7 agent outputs waiting"
+- "Decision debt: 5 unresolved calls older than 72 hours"
+- "Runway: 8.5 months, deteriorating if hiring plan proceeds"
+
+The command surface should show a resource only when it changes priority, timing, risk, confidence, allocation, or escalation.
+
+### Backend and Logic Implications
+
+Resources should be first-class objects.
+
+Each resource should include:
+
+- type
+- current value
+- unit
+- trend
+- source references
+- confidence
+- freshness
+- affected theaters
+- affected missions
+- thresholds
+- recommended action when constrained
+
+Resource constraints should be available to mission generation, campaign planning, attention filtering, and decision cards.
+
+For example, a mission may become higher priority because budget is being consumed faster than expected, review capacity is overloaded, or a strategic window is closing.
+
+### Acceptance Signals
+
+This requirement is met when:
+
+- the CEO can see the real constraints behind company decisions
+- resource changes affect mission ranking and decision recommendations
+- low-confidence resources are labeled as uncertain or dark
+- resource metrics cite their source of truth
+- the interface does not show decorative numbers that do not change decisions
+
+### Non-Negotiable Rule
+
+```text
+Measure only what changes decisions.
+```
+
+If a number does not affect what the CEO should do, it should not appear on the command surface.
+
+---
+
 ## Requirement 3: Generated Command Missions
 
 ### Concept
