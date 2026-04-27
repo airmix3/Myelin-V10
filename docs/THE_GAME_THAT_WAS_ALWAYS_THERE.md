@@ -394,6 +394,56 @@ Cortex should make scarcity visible instead of pretending it does not exist.
 
 **Trust In Autonomy.** Every autonomous action either increases or decreases the CEO's willingness to delegate more next time.
 
+### Real Resources, Not Game Points
+
+Cortex should make resources visible, but it should never invent fake points.
+
+The company already has resources. They are real, scarce, and consequential:
+
+- money
+- time
+- attention
+- trust
+- capacity
+- data
+- momentum
+- relationships
+- model and tool budget
+- strategic windows
+
+Most business software hides these resources across dashboards, spreadsheets, calendars, and people's heads. Cortex should bring them into the command layer.
+
+This is not gamification.
+
+A strategy game is compelling because resources matter. You cannot build everything. You cannot defend every front. You cannot spend the same unit twice. Good decisions require seeing what is scarce.
+
+A company works the same way.
+
+The CEO should see real constraints:
+
+- how much runway remains
+- how much agent capacity is available
+- how much CEO attention is left today
+- which missions are consuming budget
+- which relationships are warming or decaying
+- which decisions are aging
+- where execution momentum is increasing or slowing
+- where confidence is low because the map is dark
+
+These are not scores. They are operating facts.
+
+The principle is simple:
+
+```text
+Measure only what changes decisions.
+```
+
+If a number does not affect what the CEO should do, it does not belong on the command surface. If it changes priority, timing, risk, confidence, allocation, or escalation, it should be visible.
+
+The goal is not to make work feel like a game.
+
+The goal is to make the real game of the company visible.
+
 ### The Collision
 
 Scarcity becomes real when two good options compete for the same resource.
